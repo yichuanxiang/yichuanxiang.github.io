@@ -1,0 +1,56 @@
+{{- $posts := where site.RegularPages "Section" "posts" -}}
+<section class="cappu-home-shell" aria-labelledby="cappu-home-title">
+  <article class="cappu-profile">
+    <figure class="cappu-profile__portrait">
+      <img src="{{ "images/scene-18.jpg" | relURL }}" alt="紫发少女坐在钢琴旁的插画" width="720" height="720" fetchpriority="high">
+      <figcaption>Evening notes · 2026</figcaption>
+    </figure>
+    <div class="cappu-profile__body">
+      <span class="cappu-eyebrow">Personal notes · 写给此刻</span>
+      <h1 id="cappu-home-title">{{ .Site.Params.homeInfoParams.Title | markdownify }}</h1>
+      <p>{{ .Site.Params.homeInfoParams.Content | markdownify }}</p>
+      <div class="cappu-profile__actions">
+        <a class="cappu-action cappu-action--primary" href="{{ "posts/" | relURL }}">阅读手记</a>
+        <a class="cappu-action" href="{{ "about/" | relURL }}">认识这里 <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="cappu-profile__status" aria-label="站点状态">
+        <span><i aria-hidden="true"></i> 正在书写</span>
+        <span>生活 · 灵感 · 喜欢的事</span>
+      </div>
+    </div>
+  </article>
+
+  <article class="cappu-feature">
+    <figure class="cappu-feature__art">
+      <img src="{{ "images/banner-collage.jpg" | relURL }}" alt="角色们与温泉旅店的拼贴插画" width="1600" height="450">
+      <figcaption>写喜欢的，也写真实的。</figcaption>
+    </figure>
+    <div class="cappu-feature__body">
+      <span class="cappu-eyebrow">A place for notes and small joys</span>
+      <h2>把喜欢的事，慢慢写成自己的世界。</h2>
+      <p>这里收集生活片段、灵感随想、作品与偶尔的技术折腾。没有固定主题，只留下值得再次翻看的东西。</p>
+      <dl class="cappu-stats">
+        <div><dt>{{ len $posts }}</dt><dd>公开手记</dd></div>
+        <div><dt>{{ len site.Taxonomies.tags }}</dt><dd>写作主题</dd></div>
+        <div><dt>2026</dt><dd>开始记录</dd></div>
+        <div><dt>∞</dt><dd>还会继续</dd></div>
+      </dl>
+    </div>
+  </article>
+</section>
+
+<nav class="cappu-topics" aria-label="浏览主题">
+  <span>浏览主题</span>
+  <a href="{{ "tags/随笔/" | relURL }}">随笔</a>
+  <a href="{{ "tags/博客/" | relURL }}">博客</a>
+  <a href="{{ "tags/折腾/" | relURL }}">折腾</a>
+  <a href="{{ "tags/网络/" | relURL }}">网络</a>
+</nav>
+
+<header class="cappu-stream-heading">
+  <div>
+    <span class="cappu-eyebrow">Recent notes</span>
+    <h2>最近手记</h2>
+  </div>
+  <a href="{{ "archives/" | relURL }}">查看全部归档 <span aria-hidden="true">→</span></a>
+</header>

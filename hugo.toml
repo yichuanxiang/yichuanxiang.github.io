@@ -1,0 +1,52 @@
+baseURL = "https://yichuanxiang.github.io/"
+languageCode = "zh-CN"
+defaultContentLanguage = "zh"
+title = "Cappu 手记"
+theme = "PaperMod"
+enableRobotsTXT = true
+
+[params]
+  description = "记录生活、灵感、技术与喜欢的事。"
+  defaultTheme = "auto"
+  mainSections = ["posts"]
+  DateFormat = "2006年1月2日"
+  ShowReadingTime = true
+  ShowBreadCrumbs = true
+  ShowCodeCopyButtons = true
+  ShowShareButtons = false
+  ShowPostNavLinks = true
+
+[params.assets]
+  favicon = "/favicon.svg"
+  favicon16x16 = "/favicon.svg"
+  favicon32x32 = "/favicon.svg"
+  apple_touch_icon = "/favicon.svg"
+  safari_pinned_tab = "/favicon.svg"
+
+[params.homeInfoParams]
+  Title = "Cappu 手记"
+  Content = "写下生活里的小事，也记录偶尔认真的思考。技术只是其中一章，这里更像一本慢慢长大的私人手记。"
+
+[[menu.main]]
+  identifier = "home"
+  name = "首页"
+  url = "/"
+  weight = 1
+
+[[menu.main]]
+  identifier = "archive"
+  name = "归档"
+  url = "/archives/"
+  weight = 2
+
+[[menu.main]]
+  identifier = "about"
+  name = "关于"
+  url = "/about/"
+  weight = 3
+
+[[menu.main]]
+  identifier = "github"
+  name = "GitHub"
+  url = "https://github.com/yichuanxiang/"
+  weight = 4

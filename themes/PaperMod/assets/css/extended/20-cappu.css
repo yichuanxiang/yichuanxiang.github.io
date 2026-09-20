@@ -1,0 +1,412 @@
+/* Cappu 手记 ·「个人手记」v10 · 人物侧栏 + 图文阅读 */
+:root {
+  --theme: var(--paper);
+  --entry: var(--paper-raised);
+  --primary: var(--ink);
+  --secondary: var(--ink-soft);
+  --tertiary: var(--paper-warm);
+  --content: var(--ink);
+  --hljs-bg: #2b2419;
+  --code-bg: var(--paper-warm);
+  --border: var(--line);
+  --main-width: 74rem;
+  --nav-width: 74rem;
+  --gap: var(--space-lg);
+}
+
+html { scroll-behavior: smooth; }
+html, body { overflow-x: clip; }
+body {
+  background:
+    radial-gradient(70rem 34rem at 94% -8%, var(--dusk-soft) 0%, transparent 58%),
+    radial-gradient(58rem 30rem at -8% 4%, var(--wine-soft) 0%, transparent 56%),
+    var(--paper);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(circle at center, color-mix(in srgb, var(--ink) 8%, transparent) 0.6px, transparent 0.8px);
+  background-size: 6px 6px;
+  content: "";
+  opacity: 0.18;
+  pointer-events: none;
+}
+h1, h2, h3, .logo a, .entry-header h2 { font-family: var(--font-display); font-style: normal; }
+::selection { background: var(--wine-soft); color: var(--wine-deep); }
+
+/* 报头 */
+.header {
+  border-bottom: var(--rule-hairline) solid color-mix(in srgb, var(--line) 76%, transparent);
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  backdrop-filter: blur(16px) saturate(1.1);
+}
+.nav { min-height: 4.5rem; align-items: center !important; gap: var(--space-md); }
+.logo { display: inline-flex; align-items: baseline; gap: 0.6rem; }
+.logo a { color: var(--primary); font-size: 1.35rem; font-weight: 700; letter-spacing: 0.05em; }
+.logo a::before {
+  display: inline-grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  margin-inline-end: 0.55rem;
+  place-items: center;
+  border: 1.5px solid var(--wine);
+  border-radius: 50%;
+  color: var(--wine);
+  content: "酌";
+  font-size: 0.95rem;
+  vertical-align: 0.18em;
+}
+#menu { margin: 0 !important; align-items: center; }
+#menu a {
+  position: relative;
+  padding-block: 0.35rem;
+  color: var(--secondary);
+  font-size: var(--text-sm);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+#menu a::after {
+  position: absolute;
+  right: 0.1rem;
+  bottom: -0.1rem;
+  left: 0.1rem;
+  height: 2px;
+  background: var(--wine);
+  content: "";
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+#menu a:hover::after, #menu a:focus-visible::after { transform: scaleX(1); }
+#theme-toggle { color: var(--secondary); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+.main { padding-top: var(--space-2xl); }
+
+/* 首页：人物侧栏 + 旅店信息 */
+.main:has(.cappu-home-shell) {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-lg);
+  counter-reset: cappu-note;
+}
+.cappu-home-shell {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(18rem, 0.82fr) minmax(0, 1.55fr);
+  gap: var(--space-lg);
+  margin-bottom: var(--space-xl);
+}
+.cappu-profile, .cappu-feature {
+  min-width: 0;
+  overflow: hidden;
+  border: var(--rule-hairline) solid var(--line-soft);
+  border-radius: var(--radius-xl);
+  background: color-mix(in srgb, var(--paper-raised) 95%, transparent);
+  box-shadow: 0 1.25rem 3.75rem var(--shadow);
+}
+.cappu-profile { display: flex; flex-direction: column; }
+.cappu-profile__portrait { position: relative; height: 18rem; margin: 0; overflow: hidden; background: var(--paper-warm); }
+.cappu-profile__portrait::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 42%;
+  background: linear-gradient(transparent, color-mix(in srgb, var(--ink) 52%, transparent));
+  content: "";
+  pointer-events: none;
+}
+.cappu-profile__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% 28%;
+  transition: transform 700ms var(--ease-out);
+}
+.cappu-profile:hover .cappu-profile__portrait img { transform: scale(1.025); }
+.cappu-profile__portrait figcaption {
+  position: absolute;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  z-index: 1;
+  color: #fffdf7;
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.cappu-profile__body { display: flex; flex: 1; flex-direction: column; padding: clamp(1.5rem, 3vw, 2.4rem); }
+.cappu-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--wine);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.cappu-eyebrow::before { width: 1.75rem; height: 2px; background: currentColor; content: ""; }
+.cappu-profile h1 {
+  margin: 0.7rem 0 0.85rem;
+  color: var(--ink);
+  font-size: clamp(2.3rem, 5vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+}
+.cappu-profile__body > p { margin: 0; color: var(--ink-soft); line-height: 1.9; }
+.cappu-profile__actions { display: flex; flex-wrap: wrap; gap: var(--space-sm); margin-top: var(--space-xl); }
+.cappu-action {
+  display: inline-flex;
+  min-height: 2.85rem;
+  padding: var(--space-sm) 1.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: var(--rule-hairline) solid var(--wine);
+  border-radius: var(--radius-pill);
+  color: var(--wine);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.cappu-action--primary {
+  border-color: var(--wine-deep);
+  background: linear-gradient(180deg, var(--wine) 0%, var(--wine-deep) 100%);
+  box-shadow: 0 0.55rem 1.4rem color-mix(in srgb, var(--wine-deep) 28%, transparent);
+  color: #fffaf1;
+}
+.cappu-action:hover { transform: translateY(-2px); }
+.cappu-action:active { transform: translateY(1px); }
+.cappu-profile__status {
+  display: flex;
+  margin-top: auto;
+  padding-top: var(--space-xl);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+}
+.cappu-profile__status span { display: inline-flex; align-items: center; gap: 0.4rem; }
+.cappu-profile__status i {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: var(--moss);
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--moss) 16%, transparent);
+}
+.cappu-feature { display: grid; grid-template-rows: minmax(15rem, 0.9fr) auto; }
+.cappu-feature__art { position: relative; min-height: 0; margin: 0; overflow: hidden; background: var(--sky-soft); }
+.cappu-feature__art img { width: 100%; height: 100%; object-fit: cover; object-position: 48% center; }
+.cappu-feature__art figcaption {
+  position: absolute;
+  right: var(--space-md);
+  bottom: var(--space-md);
+  padding: 0.45rem 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.52);
+  border-radius: var(--radius-pill);
+  background: rgba(46, 38, 30, 0.46);
+  backdrop-filter: blur(8px);
+  color: #fffdf7;
+  font-size: var(--text-xs);
+  letter-spacing: 0.06em;
+}
+.cappu-feature__body { padding: clamp(1.5rem, 3vw, 2.5rem); }
+.cappu-feature h2 {
+  max-width: 16ch;
+  margin: 0.7rem 0 0.7rem;
+  color: var(--ink);
+  font-size: clamp(1.75rem, 3.4vw, 2.75rem);
+  line-height: 1.34;
+  letter-spacing: 0.015em;
+}
+.cappu-feature__body > p { max-width: 44rem; margin: 0; color: var(--ink-soft); line-height: 1.85; }
+.cappu-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: var(--space-xl) 0 0;
+  padding-top: var(--space-lg);
+  border-top: 1px dashed var(--line);
+}
+.cappu-stats div { min-width: 0; padding-inline: var(--space-md); border-inline-start: 1px solid var(--line-soft); }
+.cappu-stats div:first-child { padding-inline-start: 0; border-inline-start: 0; }
+.cappu-stats dt { color: var(--wine); font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; white-space: nowrap; }
+.cappu-stats dd { margin: 0.15rem 0 0; color: var(--muted); font-size: 0.7rem; letter-spacing: 0.06em; white-space: nowrap; }
+.cappu-stream-heading {
+  display: flex;
+  grid-column: 1 / -1;
+  margin-top: var(--space-md);
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+.cappu-stream-heading h2 { margin: 0.35rem 0 0; color: var(--ink); font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.cappu-stream-heading > a { padding-bottom: 0.25rem; color: var(--wine); font-size: var(--text-sm); font-weight: 700; }
+.cappu-stream-heading > a span { display: inline-block; transition: transform var(--dur-fast) var(--ease-out); }
+.cappu-stream-heading > a:hover span { transform: translateX(0.25rem); }
+.cappu-topics {
+  display: flex;
+  grid-column: 1 / -1;
+  margin-top: calc(-1 * var(--space-md));
+  padding: 0.9rem 1.15rem;
+  align-items: center;
+  gap: var(--space-sm);
+  overflow-x: auto;
+  border-block: 1px solid var(--line-soft);
+  color: var(--muted);
+  scrollbar-width: none;
+}
+.cappu-topics::-webkit-scrollbar { display: none; }
+.cappu-topics > span { margin-inline-end: auto; font-family: var(--font-display); font-weight: 700; white-space: nowrap; }
+.cappu-topics a {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--paper-raised) 84%, transparent);
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+.cappu-topics a:hover { border-color: var(--wine); color: var(--wine); transform: translateY(-1px); }
+
+/* 首页文章卡 */
+.main:has(.cappu-home-shell) > .post-entry { grid-column: span 6; min-height: 15rem; margin: 0; }
+.main:has(.cappu-home-shell) > .post-entry:has(.entry-cover) { min-height: 25rem; padding-top: 12rem; }
+.main:has(.cappu-home-shell) > .post-entry .entry-cover {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 10rem;
+  margin: 0;
+  overflow: hidden;
+  border-radius: 0;
+}
+.main:has(.cappu-home-shell) > .post-entry .entry-cover img {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+  object-fit: cover;
+  object-position: center 32%;
+  transition: transform 650ms var(--ease-out);
+}
+.main:has(.cappu-home-shell) > .post-entry:hover .entry-cover img { transform: scale(1.035); }
+.post-entry {
+  position: relative;
+  min-height: 0;
+  margin-bottom: var(--space-lg);
+  padding: var(--space-xl) clamp(1.5rem, 4vw, 3rem);
+  overflow: hidden;
+  border: var(--rule-hairline) solid var(--line-soft);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--entry) 96%, transparent);
+  box-shadow: 0 0.65rem 2rem var(--shadow);
+  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.main:has(.cappu-home-shell) > .post-entry { counter-increment: cappu-note; }
+.main:has(.cappu-home-shell) > .post-entry::before {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.35rem;
+  color: color-mix(in srgb, var(--wine) 18%, transparent);
+  content: "0" counter(cappu-note);
+  font-family: var(--font-display);
+  font-size: 3.6rem;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}
+.post-entry:hover { border-color: color-mix(in srgb, var(--wine) 52%, var(--line)); box-shadow: 0 1rem 2.6rem var(--shadow-lg); transform: translateY(-4px); }
+.post-entry .entry-meta, .entry-meta { color: var(--muted); font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.06em; }
+.entry-header h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 80%;
+  margin-block: var(--space-xs) var(--space-sm);
+  color: var(--primary);
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+.entry-header h2 a { transition: color var(--dur-fast) var(--ease-out); }
+.post-entry:hover .entry-header h2 a { color: var(--wine); }
+.entry-content { position: relative; z-index: 1; color: var(--secondary); line-height: 1.85; }
+.entry-footer { position: relative; z-index: 1; color: var(--muted); font-size: var(--text-xs); letter-spacing: 0.04em; }
+.entry-cover img, .post-entry img { border-radius: var(--radius-sm); }
+
+/* 单篇文章 */
+.post-single, .page-header { max-width: 48rem; margin-inline: auto; }
+.post-title { color: var(--primary); font-size: clamp(2rem, 6vw, 3.4rem); font-weight: 700; line-height: 1.2; letter-spacing: 0.02em; overflow-wrap: anywhere; }
+.post-meta { color: var(--muted); font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: 0.08em; }
+.post-content { color: var(--content); font-size: 1.06rem; line-height: 2.05; letter-spacing: 0.015em; }
+.post-content h2 { margin-top: var(--space-2xl); padding-bottom: var(--space-xs); border-bottom: 2px solid var(--wine); font-size: 1.55rem; }
+.post-content h3 { margin-top: var(--space-xl); font-size: 1.25rem; }
+.post-content a { color: var(--wine); text-decoration-color: color-mix(in srgb, var(--wine) 42%, transparent); text-underline-offset: 0.2em; }
+.post-content a:hover { color: var(--wine-deep); }
+.post-content blockquote { margin-inline: 0; padding: var(--space-md) var(--space-lg); border-left: 4px solid var(--wine); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; background: var(--paper-warm); color: var(--ink-soft); }
+.post-content code { font-family: var(--font-mono); font-size: 0.92em; }
+.post-content img { display: block; width: 100%; max-height: 31rem; object-fit: cover; object-position: center 30%; border-radius: var(--radius-lg); box-shadow: 0 1rem 2.5rem var(--shadow); }
+.post-content hr { margin-block: var(--space-2xl); border: 0; border-top: 1px dashed var(--line); }
+.post-footer .post-tags a, .post-tags a { border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--paper-raised); color: var(--ink-soft); font-size: var(--text-xs); }
+.post-tags a:hover { border-color: var(--wine); color: var(--wine); }
+.post-nav-link { border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--entry); transition: border-color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+.post-nav-link:hover { border-color: var(--wine); transform: translateY(-2px); }
+
+/* 归档与页脚 */
+.archive-year { color: var(--wine); font-family: var(--font-display); }
+.archive-month { color: var(--muted); }
+.archive-post { border-bottom: 1px dashed var(--line); }
+.footer { border-top: var(--rule-hairline) solid var(--line); color: var(--muted); font-size: var(--text-xs); letter-spacing: 0.05em; }
+.footer a { color: var(--wine); }
+#top-link { color: var(--muted); }
+
+/* 响应式 */
+@media (max-width: 900px) {
+  .cappu-home-shell { grid-template-columns: minmax(16rem, 0.9fr) minmax(0, 1.1fr); }
+  .cappu-profile__portrait { height: 15rem; }
+  .cappu-feature { grid-template-rows: minmax(12rem, 0.8fr) auto; }
+  .cappu-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-md); }
+  .cappu-stats div:nth-child(3) { padding-inline-start: 0; border-inline-start: 0; }
+}
+@media (max-width: 700px) {
+  .main { padding-top: var(--space-lg); }
+  .main:has(.cappu-home-shell) { display: block; }
+  .nav { min-height: 4rem; }
+  .logo a { font-size: 1.15rem; }
+  .cappu-home-shell { grid-template-columns: minmax(0, 1fr); margin-bottom: var(--space-2xl); }
+  .cappu-profile, .cappu-feature { border-radius: var(--radius-lg); }
+  .cappu-profile__portrait { height: clamp(15rem, 72vw, 21rem); }
+  .cappu-profile__body { padding: var(--space-xl) var(--space-lg); }
+  .cappu-profile__actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cappu-profile__status { align-items: flex-start; flex-direction: column; }
+  .cappu-feature { grid-template-rows: auto auto; }
+  .cappu-feature__art { aspect-ratio: 16 / 7; }
+  .cappu-feature__body { padding: var(--space-xl) var(--space-lg); }
+  .cappu-feature h2 { max-width: none; }
+  .cappu-stream-heading { margin: 0 0 var(--space-lg); align-items: center; }
+  .cappu-topics { margin: calc(-1 * var(--space-md)) 0 var(--space-xl); }
+  .cappu-stream-heading > a { font-size: var(--text-xs); }
+  .main:has(.cappu-home-shell) > .post-entry { min-height: 0; margin-bottom: var(--space-lg); }
+  .main:has(.cappu-home-shell) > .post-entry:has(.entry-cover) { min-height: 24rem; }
+  .post-entry { padding: var(--space-lg); }
+  .post-entry:hover { transform: none; }
+}
+@media (max-width: 390px) {
+  .cappu-profile__actions { grid-template-columns: minmax(0, 1fr); }
+  .cappu-stats dt { font-size: 1.15rem; }
+  .cappu-stream-heading { align-items: flex-start; flex-direction: column; gap: var(--space-xs); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
