@@ -49,5 +49,8 @@ exit /b 0
 echo.
 echo [失败] 上面有报错信息，把它截图或复制给 AI 看看。
 echo.
+echo [提示] 若报错里出现 127.0.0.1 或 Failed to connect，
+echo        说明代理软件（v2ray / clash 等）没开，打开后再运行一次。
+echo.
 pause
 exit /b 1
