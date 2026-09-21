@@ -1,0 +1,59 @@
+{{- /* 文章图片点击放大：无依赖的轻量查看层（配合 assets/css/extended/30-cappu-images.css） */ -}}
+<script>
+    (function () {
+        var SELECTOR = ".post-content img, .md-content img";
+        var box = null;
+
+        function closeBox() {
+            if (!box) return;
+            box.classList.remove("is-open");
+            document.documentElement.style.overflow = "";
+            document.body.style.overflow = "";
+        }
+
+        function buildBox() {
+            box = document.createElement("div");
+            box.className = "cappu-lightbox";
+            box.setAttribute("role", "dialog");
+            box.setAttribute("aria-label", "放大查看图片");
+            box.innerHTML =
+                '<button type="button" class="cappu-lightbox__close" aria-label="关闭">&times;</button>' +
+                '<img alt="">' +
+                '<a class="cappu-lightbox__raw" target="_blank" rel="noopener">查看原图</a>';
+
+            box.addEventListener("click", function (event) {
+                if (event.target === box || event.target.classList.contains("cappu-lightbox__close")) {
+                    closeBox();
+                }
+            });
+
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" || event.keyCode === 27) closeBox();
+            });
+
+            document.body.appendChild(box);
+        }
+
+        function openBox(source) {
+            if (!box) buildBox();
+            var full = source.currentSrc || source.src;
+            var image = box.querySelector("img");
+            image.src = full;
+            image.alt = source.alt || "";
+            box.querySelector(".cappu-lightbox__raw").href = full;
+            box.classList.add("is-open");
+            document.documentElement.style.overflow = "hidden";
+            document.body.style.overflow = "hidden";
+        }
+
+        document.addEventListener("click", function (event) {
+            var target = event.target;
+            if (!target || !target.closest) return;
+            if (target.closest(".cappu-lightbox")) return;
+            var image = target.closest(SELECTOR);
+            if (!image) return;
+            event.preventDefault();
+            openBox(image);
+        });
+    })();
+</script>

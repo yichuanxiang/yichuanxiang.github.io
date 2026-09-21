@@ -1,0 +1,97 @@
+/* ------------------------------------------------------------------
+   文章内图片：完整显示（不再被裁切）+ 点击放大
+   覆盖主题 20-cappu.css 里 .post-content img 的
+   max-height: 31rem / object-fit: cover（会把图片裁掉一部分）
+   ------------------------------------------------------------------ */
+
+.post-content img,
+.md-content img {
+    cursor: zoom-in;
+}
+
+/* 用更高优先级覆盖（主题的 extended CSS 在本文件之后拼接，同优先级会被它赢掉） */
+.post-content img,
+.md-content img,
+.post-single .post-content img,
+.post-single .md-content img {
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+    object-position: center;
+}
+
+/* 点击后的全屏查看层 */
+.cappu-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2vh 2vw;
+    background: rgba(22, 18, 16, 0.94);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+}
+
+.cappu-lightbox.is-open {
+    display: flex;
+}
+
+.cappu-lightbox img {
+    width: auto;
+    height: auto;
+    max-width: 96vw;
+    max-height: 92vh;
+    margin: 0;
+    border-radius: 8px;
+    box-shadow: 0 1.5rem 4rem rgba(0, 0, 0, 0.45);
+    object-fit: contain;
+    cursor: default;
+}
+
+.cappu-lightbox__close {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.cappu-lightbox__close:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.cappu-lightbox__raw {
+    position: absolute;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+
+.cappu-lightbox__raw:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 30rem) {
+    .cappu-lightbox {
+        padding: 1vh 1vw;
+    }
+
+    .cappu-lightbox img {
+        max-width: 98vw;
+        max-height: 88vh;
+    }
+}
