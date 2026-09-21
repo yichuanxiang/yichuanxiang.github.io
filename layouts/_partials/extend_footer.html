@@ -3,6 +3,7 @@
     (function () {
         var SELECTOR = ".post-content img, .md-content img";
         var box = null;
+        var rotation = 0;
 
         function closeBox() {
             if (!box) return;
@@ -19,7 +20,14 @@
             box.innerHTML =
                 '<button type="button" class="cappu-lightbox__close" aria-label="关闭">&times;</button>' +
                 '<img alt="">' +
+                '<button type="button" class="cappu-lightbox__rotate" aria-label="旋转 90 度">&#8635; 旋转</button>' +
                 '<a class="cappu-lightbox__raw" target="_blank" rel="noopener">查看原图</a>';
+
+            box.querySelector(".cappu-lightbox__rotate").addEventListener("click", function () {
+                rotation = (rotation + 90) % 360;
+                var image = box.querySelector("img");
+                image.className = rotation === 0 ? "" : "rot-" + rotation;
+            });
 
             box.addEventListener("click", function (event) {
                 if (event.target === box || event.target.classList.contains("cappu-lightbox__close")) {
@@ -38,6 +46,8 @@
             if (!box) buildBox();
             var full = source.currentSrc || source.src;
             var image = box.querySelector("img");
+            rotation = 0;
+            image.className = "";
             image.src = full;
             image.alt = source.alt || "";
             box.querySelector(".cappu-lightbox__raw").href = full;

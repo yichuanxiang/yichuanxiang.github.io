@@ -85,6 +85,48 @@
     background: rgba(255, 255, 255, 0.28);
 }
 
+/* 放大层里的旋转按钮：按 90° 循环旋转当前图片 */
+.cappu-lightbox__rotate {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    padding: 0.45rem 0.9rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+    font-size: 0.85rem;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.cappu-lightbox__rotate:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.cappu-lightbox img {
+    transition: transform 220ms var(--ease-out, ease);
+}
+
+.cappu-lightbox img.rot-90 {
+    transform: rotate(90deg);
+}
+
+.cappu-lightbox img.rot-180 {
+    transform: rotate(180deg);
+}
+
+.cappu-lightbox img.rot-270 {
+    transform: rotate(270deg);
+}
+
+/* 旋转 90/270 度后可视宽高互换，重新限制尺寸避免超出屏幕 */
+.cappu-lightbox img.rot-90,
+.cappu-lightbox img.rot-270 {
+    max-width: 92vh;
+    max-height: 96vw;
+}
+
 @media (max-width: 30rem) {
     .cappu-lightbox {
         padding: 1vh 1vw;
