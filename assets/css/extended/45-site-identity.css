@@ -1,0 +1,14 @@
+/* 站名旁使用个人头像。 */
+.header .logo { align-items: center; }
+.header .logo a::before { display: none; }
+.header .logo a img {
+  display: block;
+  width: 2.75rem;
+  height: 2.75rem;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+@media (max-width: 700px) {
+  .header .logo a img { width: 2.25rem; height: 2.25rem; }
+}

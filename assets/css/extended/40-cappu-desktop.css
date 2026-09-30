@@ -1,0 +1,21 @@
+/* 装饰图片融进原有首页；桌面使用宽屏布局，文章保持阅读宽度。 */
+.cappu-home-shell .cappu-profile h1 { font-size: clamp(2.3rem, 4vw, 3.25rem); text-wrap: balance; }
+.cappu-home-shell .cappu-profile__portrait img { object-position: 62% 28%; }
+.cappu-home-shell .cappu-feature__art img {
+  position: absolute; inset: 0; display: block;
+  object-position: 48% center;
+}
+.cappu-home-shell img.cappu-cover-next {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: 0; pointer-events: none;
+  transition: opacity 700ms ease;
+}
+.cappu-home-shell img.cappu-cover-next.is-visible { opacity: 1; }
+@media (min-width: 1280px) {
+  html:root { --main-width: 84rem; --nav-width: 84rem; }
+  body .main:has(.cappu-home-shell) > .post-entry { grid-column: span 4; }
+  body .main:has(.cappu-home-shell) > .post-entry .entry-header h2 { max-width: 100%; font-size: 1.55rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cappu-home-shell img.cappu-cover-next { transition: none; }
+}

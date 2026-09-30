@@ -1,6 +1,6 @@
-# Cappu 手记
+# 仪传祥的个人博客
 
-这是 [Cappu 手记](https://yichuanxiang.github.io/) 的 Hugo 源码。
+这是 [仪传祥的个人博客](https://yichuanxiang.github.io/) 的 Hugo 源码。
 
 - 静态站点生成器：Hugo Extended
 - 主题：PaperMod（保留原项目许可证）
@@ -8,4 +8,3 @@
 - 内容与个性化样式：© yichuanxiang
 
 向 `main` 分支推送后，GitHub Actions 会自动构建并发布站点。
-

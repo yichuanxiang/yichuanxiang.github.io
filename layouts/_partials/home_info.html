@@ -2,7 +2,7 @@
 <section class="cappu-home-shell" aria-labelledby="cappu-home-title">
   <article class="cappu-profile">
     <figure class="cappu-profile__portrait">
-      <img src="{{ "images/scene-18.jpg" | relURL }}" alt="紫发少女坐在钢琴旁的插画" width="720" height="720" fetchpriority="high">
+      <img id="cappu-portrait" src="{{ "images/scene-18.jpg" | relURL }}" alt="《上伊那牡丹》的角色坐在钢琴旁" width="720" height="729" fetchpriority="high">
       <figcaption>Evening notes · 2026</figcaption>
     </figure>
     <div class="cappu-profile__body">
@@ -22,8 +22,7 @@
 
   <article class="cappu-feature">
     <figure class="cappu-feature__art">
-      <img src="{{ "images/banner-collage.jpg" | relURL }}" alt="角色们与温泉旅店的拼贴插画" width="1600" height="450">
-      <figcaption>写喜欢的，也写真实的。</figcaption>
+      <img id="cappu-cover" src="{{ "images/banner-collage.jpg" | relURL }}" alt="《上伊那牡丹》的角色们与温泉旅店的拼贴插画" width="1600" height="450" fetchpriority="high">
     </figure>
     <div class="cappu-feature__body">
       <span class="cappu-eyebrow">A place for notes and small joys</span>
@@ -54,3 +53,4 @@
   </div>
   <a href="{{ "archives/" | relURL }}">查看全部归档 <span aria-hidden="true">→</span></a>
 </header>
+{{- partial "decorative_covers.html" . -}}

@@ -1,7 +1,7 @@
 baseURL = "https://yichuanxiang.github.io/"
 languageCode = "zh-CN"
 defaultContentLanguage = "zh"
-title = "Cappu 手记"
+title = "仪传祥的个人博客"
 theme = "PaperMod"
 enableRobotsTXT = true
 
@@ -16,6 +16,10 @@ enableRobotsTXT = true
   ShowShareButtons = false
   ShowPostNavLinks = true
 
+[params.label]
+  icon = "/images/avatar-yichuanxiang.jpg"
+  iconHeight = 44
+
 [params.assets]
   favicon = "/favicon.svg"
   favicon16x16 = "/favicon.svg"
@@ -24,7 +28,7 @@ enableRobotsTXT = true
   safari_pinned_tab = "/favicon.svg"
 
 [params.homeInfoParams]
-  Title = "Cappu 手记"
+  Title = "仪传祥的个人博客"
   Content = "写下生活里的小事，也记录偶尔认真的思考。技术只是其中一章，这里更像一本慢慢长大的私人手记。"
 
 [[menu.main]]

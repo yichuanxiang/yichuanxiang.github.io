@@ -1,0 +1,83 @@
+{{- $presets := slice
+  (dict "heroURL" "images/banner-collage.jpg" "portraitURL" "images/scene-18.jpg" "alt" "《上伊那牡丹》的角色们与温泉旅店的拼贴插画" "portraitAlt" "《上伊那牡丹》的角色坐在钢琴旁" "position" "48% center" "portraitPosition" "62% 28%")
+  (dict "hero" "saber-1q3k63" "portrait" "tsuki-x1lqeo" "alt" "阿尔托利亚站在湖畔与繁花之间" "portraitAlt" "樱小路露娜坐在书桌旁" "position" "55% 0%" "portraitPosition" "65% 38%")
+  (dict "hero" "megumin-j89655" "portrait" "tsuki-official-36" "alt" "夕阳里的惠惠" "portraitAlt" "小仓朝日与朋友们" "position" "50% 55%" "portraitPosition" "50% 35%")
+  (dict "hero" "yagakimi-6qk89w" "portrait" "tsuki-x1lqeo" "alt" "小糸侑与七海灯子走在树荫下" "portraitAlt" "樱小路露娜坐在书桌旁" "position" "50% 0%" "portraitPosition" "65% 38%")
+  (dict "hero" "tsuki-01vv29" "portrait" "tsuki-official-36" "alt" "花与星光中的樱小路露娜" "portraitAlt" "小仓朝日与朋友们" "position" "55% 0%" "portraitPosition" "50% 35%")
+  (dict "hero" "yagakimi-ymvkdk" "portrait" "tsuki-x1lqeo" "alt" "小糸侑与七海灯子坐在蓝色天空下" "portraitAlt" "樱小路露娜坐在书桌旁" "position" "45% 0%" "portraitPosition" "65% 38%")
+  (dict "hero" "saber-73zrk9" "portrait" "tsuki-official-36" "alt" "夏日和室里的阿尔托利亚" "portraitAlt" "小仓朝日与朋友们" "position" "50% 0%" "portraitPosition" "50% 35%")
+-}}
+{{- $covers := slice -}}
+{{- range $presets -}}
+  {{- $heroURL := "" -}}
+  {{- $portraitURL := "" -}}
+  {{- if .heroURL -}}
+    {{- $heroURL = .heroURL | relURL -}}
+    {{- $portraitURL = .portraitURL | relURL -}}
+  {{- else -}}
+    {{- $hero := (resources.GetMatch (printf "characters/*/%s.*" .hero)).Fit "1920x1200 webp q85" -}}
+    {{- $portrait := (resources.GetMatch (printf "characters/*/%s.*" .portrait)).Fit "960x640 webp q85" -}}
+    {{- $heroURL = $hero.RelPermalink -}}
+    {{- $portraitURL = $portrait.RelPermalink -}}
+  {{- end -}}
+  {{- $covers = $covers | append (dict "hero" $heroURL "portrait" $portraitURL "alt" .alt "portraitAlt" .portraitAlt "position" .position "portraitPosition" .portraitPosition) -}}
+{{- end -}}
+<script>
+(() => {
+  const covers = {{ $covers | jsonify | safeJS }};
+  const hero = document.getElementById('cappu-cover');
+  const portrait = document.getElementById('cappu-portrait');
+  if (!hero || !portrait || covers.length < 2) return;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let index = 0;
+  let timer;
+  let switching = false;
+  const load = src => new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = src;
+  });
+  const schedule = () => {
+    clearTimeout(timer);
+    if (!document.hidden && !switching) timer = setTimeout(advance, 6000);
+  };
+  const advance = async () => {
+    if (document.hidden || switching) return;
+    switching = true;
+    const next = (index + 1) % covers.length;
+    const cover = covers[next];
+    let overlays = [];
+    try {
+      const images = await Promise.all([load(cover.hero), load(cover.portrait)]);
+      if (document.hidden) return;
+      overlays = images.map((image, i) => {
+        image.className = 'cappu-cover-next';
+        image.alt = '';
+        image.setAttribute('aria-hidden', 'true');
+        image.style.objectPosition = i === 0 ? cover.position : cover.portraitPosition;
+        (i === 0 ? hero : portrait).parentElement.appendChild(image);
+        return image;
+      });
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      overlays.forEach(image => image.classList.add('is-visible'));
+      await new Promise(resolve => setTimeout(resolve, reducedMotion.matches ? 0 : 700));
+      hero.src = cover.hero;
+      hero.alt = cover.alt;
+      hero.style.objectPosition = cover.position;
+      portrait.src = cover.portrait;
+      portrait.alt = cover.portraitAlt;
+      portrait.style.objectPosition = cover.portraitPosition;
+      index = next;
+    } catch {
+      // 暂时加载失败时保留已经显示的封面。
+    } finally {
+      overlays.forEach(image => image.remove());
+      switching = false;
+      schedule();
+    }
+  };
+  document.addEventListener('visibilitychange', schedule);
+  schedule();
+})();
+</script>
