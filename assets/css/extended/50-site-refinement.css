@@ -1,0 +1,89 @@
+/* 暖色手账：用留白和细线建立层级，角色插画保留在原有位置。 */
+body::before { opacity: .08; }
+body .header { background: color-mix(in srgb, var(--paper) 94%, transparent); }
+body .header .logo a { font-size: 1.15rem; letter-spacing: .025em; }
+body .main:has(.cappu-home-shell) { padding-top: 2.75rem; gap: 1.75rem; }
+body .main .cappu-home-shell { gap: 1.75rem; margin-bottom: 1rem; }
+body .cappu-home-shell .cappu-profile,
+body .cappu-home-shell .cappu-feature {
+  border-color: color-mix(in srgb, var(--line) 62%, transparent);
+  border-radius: 1.4rem;
+  background: var(--paper-raised);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--shadow) 45%, transparent);
+}
+body .cappu-home-shell .cappu-profile__portrait { height: 16rem; }
+body .cappu-home-shell .cappu-profile__portrait::after { height: 32%; background: linear-gradient(transparent, rgba(33,29,23,.32)); }
+body .cappu-home-shell .cappu-profile__portrait figcaption { right: 1.4rem; bottom: 1rem; font-size: .6rem; letter-spacing: .13em; }
+body .cappu-home-shell .cappu-profile__body { padding: 2rem 2rem 1.65rem; }
+body .cappu-home-shell .cappu-profile h1 {
+  margin-top: .9rem; margin-bottom: 1rem;
+  font-size: clamp(1.7rem, 2.5vw, 2.35rem);
+  font-weight: 600; line-height: 1.4; letter-spacing: .025em;
+  text-wrap: balance;
+}
+body .cappu-home-shell .cappu-eyebrow { font-size: .62rem; letter-spacing: .16em; font-weight: 500; }
+body .cappu-home-shell .cappu-eyebrow::before { width: 1.25rem; height: 1px; }
+body .cappu-home-shell .cappu-profile__body > p { font-size: .95rem; line-height: 1.95; }
+body .cappu-home-shell .cappu-profile__actions { margin-top: 1.75rem; gap: .65rem; }
+body .cappu-home-shell .cappu-action { min-height: 2.7rem; padding-inline: 1.15rem; font-size: .82rem; font-weight: 500; letter-spacing: .035em; }
+body .cappu-home-shell .cappu-action--primary { background: var(--wine-deep); color: var(--paper); box-shadow: 0 3px 9px color-mix(in srgb, var(--wine-deep) 12%, transparent); }
+body .cappu-home-shell .cappu-action:not(.cappu-action--primary) { border-color: color-mix(in srgb, var(--wine) 50%, var(--line)); }
+body .cappu-home-shell .cappu-profile__status { padding-top: 2rem; font-size: .62rem; }
+body .cappu-home-shell .cappu-feature { grid-template-rows: minmax(16rem, .9fr) auto; }
+body .cappu-home-shell .cappu-feature__body { padding: 2rem 2.25rem 1.85rem; }
+body .cappu-home-shell .cappu-feature h2 { margin-block: .9rem 1rem; max-width: 17ch; font-size: clamp(1.65rem, 2.7vw, 2.4rem); font-weight: 600; line-height: 1.5; text-wrap: balance; }
+body .cappu-home-shell .cappu-feature__body > p { max-width: 39rem; font-size: .95rem; line-height: 1.95; }
+body .cappu-home-shell .cappu-stats { margin-top: 1.7rem; padding-top: 1.25rem; border-top: 1px solid var(--line-soft); }
+body .cappu-home-shell .cappu-stats dt { font-size: 1.15rem; font-weight: 500; }
+body .cappu-home-shell .cappu-stats dd { font-size: .64rem; letter-spacing: .025em; }
+body .main .cappu-topics { margin-top: 0; padding: .9rem .25rem; border-color: var(--line-soft); }
+body .main .cappu-topics > span { font-size: .9rem; font-weight: 500; }
+body .main .cappu-topics a { padding: .35rem .8rem; border-color: var(--line-soft); background: transparent; font-size: .72rem; }
+body .main .cappu-stream-heading { margin-top: .8rem; }
+body .main .cappu-stream-heading h2 { margin-top: .5rem; font-size: 2rem; font-weight: 600; }
+body .main .cappu-stream-heading > a { font-size: .78rem; font-weight: 500; }
+body .main:has(.cappu-home-shell) > .post-entry {
+  min-height: 0; padding: 1.7rem 1.8rem;
+  border-color: var(--line-soft); border-radius: 1rem;
+  background: var(--paper-raised); box-shadow: none;
+}
+body .main:has(.cappu-home-shell) > .post-entry:has(.entry-cover) { min-height: 23rem; padding-top: 12rem; }
+body .main:has(.cappu-home-shell) > .post-entry .entry-cover { height: 10.25rem; }
+body .main:has(.cappu-home-shell) > .post-entry::before { content: none; }
+body .main:has(.cappu-home-shell) > .post-entry .entry-header h2 { max-width: none; font-size: 1.35rem; font-weight: 600; line-height: 1.5; }
+body .main:has(.cappu-home-shell) > .post-entry .entry-content { font-size: .85rem; line-height: 1.9; }
+body .main:has(.cappu-home-shell) > .post-entry .entry-footer { margin-top: .85rem; font-size: .68rem; letter-spacing: .02em; }
+body .main:has(.cappu-home-shell) > .post-entry:hover { transform: translateY(-3px); box-shadow: 0 6px 20px var(--shadow); }
+body .post-single .post-title { font-size: clamp(1.8rem, 4vw, 2.65rem); line-height: 1.4; }
+body .post-single .post-content { line-height: 2; }
+body .post-single .post-content h2 { border-bottom: 1px solid var(--line); padding-bottom: .6rem; }
+body .post-single .post-content img { box-shadow: 0 3px 14px var(--shadow); }
+body .footer { margin-top: 2rem; border-top-color: var(--line-soft); font-size: .68rem; }
+@media (max-width: 1100px) and (min-width: 701px) {
+  body .main .cappu-home-shell { grid-template-columns: minmax(0, .9fr) minmax(0, 1.3fr); }
+  body .cappu-home-shell .cappu-profile__body { padding-inline: 1.5rem; }
+  body .cappu-home-shell .cappu-feature__body { padding-inline: 1.75rem; }
+}
+@media (max-width: 700px) {
+  body .main:has(.cappu-home-shell) { padding-top: 1.5rem; }
+  body .main .cappu-home-shell { gap: 1.25rem; margin-bottom: 2rem; }
+  body .cappu-home-shell .cappu-profile,
+  body .cappu-home-shell .cappu-feature { border-radius: 1rem; }
+  body .cappu-home-shell .cappu-profile__portrait { height: clamp(14rem, 64vw, 18rem); }
+  body .cappu-home-shell .cappu-profile__body,
+  body .cappu-home-shell .cappu-feature__body { padding: 1.7rem 1.5rem; }
+  body .cappu-home-shell .cappu-profile h1 { font-size: 1.65rem; }
+  body .cappu-home-shell .cappu-profile__body > p,
+  body .cappu-home-shell .cappu-feature__body > p { font-size: .9rem; }
+  body .cappu-home-shell .cappu-feature { grid-template-rows: auto auto; }
+  body .cappu-home-shell .cappu-feature__art { aspect-ratio: 16 / 7; }
+  body .cappu-home-shell .cappu-feature h2 { font-size: 1.7rem; line-height: 1.55; }
+  body .main .cappu-stream-heading { margin-top: 0; }
+  body .main .cappu-stream-heading h2 { font-size: 1.65rem; }
+  body .main:has(.cappu-home-shell) > .post-entry { margin-bottom: 1.25rem; padding-inline: 1.5rem; }
+  body .main:has(.cappu-home-shell) > .post-entry:has(.entry-cover) { min-height: 22rem; }
+  body .main:has(.cappu-home-shell) > .post-entry:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .main:has(.cappu-home-shell) > .post-entry { transition: none; }
+}
