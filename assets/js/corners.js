@@ -174,6 +174,8 @@
     if (gain) gain.gain.setTargetAtTime(Number(volume.value) / 100 * 0.18, context.currentTime, 0.05);
   });
   window.addEventListener('pagehide', () => {
+    running = false; remaining = duration;
+    status.textContent = '准备好了，就开始吧。'; render();
     stopSound(); activeSound = 'off'; updateSounds();
     soundStatus.textContent = '现在是安静的。';
     if (context) context.suspend().catch(() => {});
