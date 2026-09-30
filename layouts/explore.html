@@ -1,0 +1,87 @@
+{{ define "main" }}
+{{ $corner := .Params.corner }}
+<section class="station-page explore-page" data-corner="{{ $corner }}">
+  <header class="station-page-header">
+    <span class="cappu-eyebrow">Small corners · 在这里停一会儿</span>
+    <h1>{{ .Title }}</h1><p>{{ .Description }}</p>
+  </header>
+  <nav class="station-page-nav" aria-label="逛逛小站">
+    {{ range slice (dict "path" "interests" "label" "兴趣角落") (dict "path" "updates" "label" "站点动态") (dict "path" "guestbook" "label" "留言板") (dict "path" "focus" "label" "专注角") }}
+    <a href="{{ printf "%s/" .path | relURL }}" {{ if eq $corner .path }}aria-current="page"{{ end }}>{{ .label }}</a>
+    {{ end }}
+    <a href="{{ "posts/" | relURL }}">翻翻手记 ↗</a>
+  </nav>
+  {{ if eq $corner "interests" }}
+  <div class="explore-toolbar" role="group" aria-label="作品类型">
+    <button type="button" data-corner-filter="all" aria-pressed="true">全部作品</button>
+    <button type="button" data-corner-filter="anime" aria-pressed="false">动画与漫画</button>
+    <button type="button" data-corner-filter="game" aria-pressed="false">视觉小说</button>
+    <span data-corner-count role="status">5 部作品</span>
+  </div>
+  <div class="interest-shelf">
+    {{ range $i, $work := hugo.Data.interests }}
+    <details class="interest-entry" data-corner-item="{{ .kind }}">
+      <summary><span class="interest-number" aria-hidden="true">{{ printf "%02d" (add $i 1) }}</span><span><small>{{ .type }}</small><strong>{{ .title }}</strong><em>{{ .people }}</em></span><span class="interest-toggle" aria-hidden="true">+</span></summary>
+      <div class="interest-detail"><p>{{ .detail }}</p><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">去作品官网看看 ↗</a></div>
+    </details>
+    {{ end }}
+  </div>
+  <div class="explore-footnote"><p>有喜欢的作品想聊聊？</p><a href="{{ "guestbook/" | relURL }}">在留言板见 →</a></div>
+  {{ else if eq $corner "updates" }}
+  <div class="explore-toolbar" role="group" aria-label="动态类型">
+    <button type="button" data-corner-filter="all" aria-pressed="true">全部动态</button>
+    <button type="button" data-corner-filter="update" aria-pressed="false">小站更新</button>
+    <button type="button" data-corner-filter="post" aria-pressed="false">新手记</button>
+    <span data-corner-count role="status"></span>
+  </div>
+  <div class="update-timeline">
+    {{ range hugo.Data.updates }}
+    <article data-corner-item="update"><time datetime="{{ .date }}">{{ .date }}</time><span class="update-type">小站更新</span><h2>{{ .title }}</h2><p>{{ .text }}</p><a href="{{ .path | relURL }}">{{ .action }} →</a></article>
+    {{ end }}
+    {{ range (where site.RegularPages "Section" "posts").ByDate.Reverse }}
+    <article data-corner-item="post"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time><span class="update-type">新手记</span><h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2><p>{{ .Description | default (.Summary | plainify | truncate 100) }}</p><a href="{{ .RelPermalink }}">打开这篇手记 →</a></article>
+    {{ end }}
+  </div>
+  {{ else if eq $corner "guestbook" }}
+  <div class="guestbook-welcome">
+    <p class="guestbook-greeting">见字如面。</p>
+    <p>一句问候、一个想法，或者最近喜欢的作品，都可以留在这里。</p>
+    <a class="corner-button corner-button--primary" href="https://github.com/yichuanxiang/yichuanxiang.github.io/issues/new?template=guestbook.yml" target="_blank" rel="noopener noreferrer">用 GitHub 留言 ↗</a>
+    <p class="corner-hint">需要登录 GitHub。留言公开可见，提交后可以在同一条留言里继续回复。</p>
+  </div>
+  <div class="guestbook-heading"><h2>来访的声音</h2><button type="button" class="corner-button" data-guest-refresh>刷新留言</button></div>
+  <p data-guest-status role="status" class="corner-hint">正在翻开留言簿…</p>
+  <div data-guest-list></div>
+  <a class="corner-text-link" href="https://github.com/yichuanxiang/yichuanxiang.github.io/issues?q=is%3Aissue%20label%3Aguestbook" target="_blank" rel="noopener noreferrer">在 GitHub 查看所有留言与回复 ↗</a>
+  <noscript><p>启用 JavaScript 后可以在这里读留言；也可以通过上面的入口直接打开留言簿。</p></noscript>
+  {{ else if eq $corner "focus" }}
+  <div class="focus-desk">
+    <div class="explore-toolbar" role="group" aria-label="专注时长">
+      <button type="button" data-focus-minutes="25" aria-pressed="true">25 分钟</button>
+      <button type="button" data-focus-minutes="50" aria-pressed="false">50 分钟</button>
+      <label class="focus-custom">自定 <input type="number" min="1" max="180" value="25" id="focus-minutes" aria-label="自定专注分钟数"> 分钟</label>
+      <button type="button" data-focus-custom>应用</button>
+    </div>
+    <div class="focus-clock" role="timer" aria-label="剩余专注时间"><span data-focus-clock>25:00</span><span class="focus-clock-caption">留一点时间给自己</span></div>
+    <progress data-focus-progress max="1" value="0" aria-label="本段专注进度"></progress>
+    <div class="focus-actions"><button type="button" class="corner-button corner-button--primary" data-focus-start>开始专注</button><button type="button" class="corner-button" data-focus-reset>重新计时</button></div>
+    <p data-focus-status role="status" class="corner-hint">准备好了，就开始吧。</p>
+    <div class="focus-sound">
+      <h2>桌边的声音</h2><p class="corner-hint">点一下才会播放，离开页面就会停止。</p>
+      <div class="explore-toolbar" role="group" aria-label="环境声">
+        <button type="button" data-sound="off" aria-pressed="true">安静</button>
+        <button type="button" data-sound="rain" aria-pressed="false">雨声</button>
+        <button type="button" data-sound="noise" aria-pressed="false">白噪声</button>
+      </div>
+      <label class="focus-volume">音量 <input type="range" min="0" max="100" value="30" data-focus-volume> <output data-volume-value>30%</output></label>
+      <p data-sound-status role="status" class="corner-hint">现在是安静的。</p>
+    </div>
+    <p class="corner-hint focus-history">这个浏览器已完成 <strong data-focus-total>0</strong> 段专注时间。</p>
+  </div>
+  <div class="explore-footnote"><p>计时只在当前页面运行，离开后本段会结束。时长和完成次数保存在当前浏览器。</p><a href="{{ "reading/" | relURL }}">看看收藏的手记 →</a></div>
+  <noscript><p>计时器和环境声需要启用 JavaScript。</p></noscript>
+  {{ end }}
+</section>
+{{ $script := resources.Get "js/corners.js" | resources.Minify | fingerprint }}
+<script src="{{ $script.RelPermalink }}" defer></script>
+{{ end }}

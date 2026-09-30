@@ -56,28 +56,52 @@ enableRobotsTXT = true
   identifier = "reading"
   name = "阅读清单"
   url = "/reading/"
-  weight = 4
+  weight = 8
 
 [[menu.main]]
   identifier = "archive"
   name = "归档"
   url = "/archives/"
-  weight = 5
+  weight = 9
 
 [[menu.main]]
   identifier = "about"
   name = "关于"
   url = "/about/"
-  weight = 6
+  weight = 10
 
 [[menu.main]]
   identifier = "search"
   name = "搜索"
   url = "/search/"
-  weight = 7
+  weight = 11
 
 [[menu.main]]
   identifier = "github"
   name = "GitHub"
   url = "https://github.com/yichuanxiang/"
-  weight = 8
+  weight = 12
+
+[[menu.main]]
+  identifier = "interests"
+  name = "兴趣"
+  url = "/interests/"
+  weight = 4
+
+[[menu.main]]
+  identifier = "updates"
+  name = "动态"
+  url = "/updates/"
+  weight = 5
+
+[[menu.main]]
+  identifier = "guestbook"
+  name = "留言"
+  url = "/guestbook/"
+  weight = 6
+
+[[menu.main]]
+  identifier = "focus"
+  name = "专注"
+  url = "/focus/"
+  weight = 7

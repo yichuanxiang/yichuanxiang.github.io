@@ -1,0 +1,16 @@
+name: 小站留言
+description: 和仪传祥打个招呼，聊聊作品或有趣的折腾。
+title: "[留言] "
+labels: ["guestbook"]
+body:
+  - type: markdown
+    attributes:
+      value: "欢迎来到仪传祥的个人博客。留言会公开显示在小站留言板；请不要填写联系方式等私人信息。"
+  - type: textarea
+    id: message
+    attributes:
+      label: 想说的话
+      description: 问候、作品、博客或设备折腾，都可以聊。
+      placeholder: "你好，我路过这里……"
+    validations:
+      required: true
