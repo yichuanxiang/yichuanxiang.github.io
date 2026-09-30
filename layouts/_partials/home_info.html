@@ -38,6 +38,13 @@
   </article>
 </section>
 
+<nav class="station-shortcuts" aria-label="探索小站">
+  <a href="{{ "posts/" | relURL }}">{{ partial "station_icon.html" "book" }}<span><strong>翻翻手记</strong><small>生活、学习和灵感</small></span><i aria-hidden="true">↗</i></a>
+  <a href="{{ "workshop/" | relURL }}">{{ partial "station_icon.html" "tools" }}<span><strong>看看折腾</strong><small>设备、网络和博客</small></span><i aria-hidden="true">↗</i></a>
+  <a href="{{ "reading/" | relURL }}">{{ partial "station_icon.html" "bookmark" }}<span><strong>阅读清单 <b class="station-saved-count">0</b></strong><small>收藏后，回来接着读</small></span><i aria-hidden="true">↗</i></a>
+  <a href="{{ "search/" | relURL }}">{{ partial "station_icon.html" "search" }}<span><strong>站内搜索</strong><small>找一篇想看的文章</small></span><i aria-hidden="true">↗</i></a>
+</nav>
+
 <nav class="cappu-topics" aria-label="浏览主题">
   <span>浏览主题</span>
   <a href="{{ "tags/随笔/" | relURL }}">随笔</a>
@@ -53,4 +60,6 @@
   </div>
   <a href="{{ "archives/" | relURL }}">查看全部归档 <span aria-hidden="true">→</span></a>
 </header>
+{{ partial "station_filters.html" "notes" }}
+<p class="station-empty" data-station-empty hidden>这个主题暂时还没有手记。</p>
 {{- partial "decorative_covers.html" . -}}

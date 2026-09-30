@@ -1,0 +1,9 @@
+{{- $posts := slice -}}
+{{- range where site.RegularPages "Section" "posts" -}}
+  {{- $posts = $posts | append (dict "path" .RelPermalink "tags" (.Params.tags | default slice)) -}}
+{{- end -}}
+<script id="station-posts" type="application/json">{{ $posts | jsonify | safeJS }}</script>
+<template id="station-save-template"><button type="button" class="station-save" aria-pressed="false">{{ partial "station_icon.html" "bookmark" }}<span>收藏文章</span></button></template>
+<p class="station-storage-message" role="status" aria-live="polite" hidden></p>
+{{- $script := resources.Get "js/station.js" | resources.Minify | fingerprint -}}
+<script src="{{ $script.RelPermalink }}" defer></script>

@@ -1,0 +1,11 @@
+{{- $filters := slice (dict "id" "all" "label" "全部") (dict "id" "随笔" "label" "生活随笔") (dict "id" "笔记" "label" "学习笔记") (dict "id" "服务器" "label" "服务器") (dict "id" "网络" "label" "网络") (dict "id" "博客" "label" "博客") -}}
+{{- if eq . "workshop" -}}
+  {{- $filters = slice (dict "id" "all" "label" "全部") (dict "id" "服务器" "label" "服务器") (dict "id" "网络" "label" "网络") (dict "id" "博客" "label" "博客") -}}
+{{- end -}}
+<div class="station-filters" role="group" aria-label="按主题筛选手记">
+  {{- range $filters -}}
+  <button type="button" data-post-filter="{{ .id }}" aria-pressed="{{ if eq .id "all" }}true{{ else }}false{{ end }}">{{ .label }} <span data-filter-count="{{ .id }}"></span></button>
+  {{- end -}}
+  <span class="station-filter-status" role="status" aria-live="polite"></span>
+</div>
+<noscript><p>按主题浏览：<a href="{{ "tags/" | relURL }}">全部主题</a></p></noscript>

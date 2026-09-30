@@ -5,6 +5,9 @@ title = "仪传祥的个人博客"
 theme = "PaperMod"
 enableRobotsTXT = true
 
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+
 [params]
   description = "记录生活、灵感、技术与喜欢的事。"
   defaultTheme = "auto"
@@ -38,19 +41,43 @@ enableRobotsTXT = true
   weight = 1
 
 [[menu.main]]
+  identifier = "notes"
+  name = "手记"
+  url = "/posts/"
+  weight = 2
+
+[[menu.main]]
+  identifier = "workshop"
+  name = "折腾"
+  url = "/workshop/"
+  weight = 3
+
+[[menu.main]]
+  identifier = "reading"
+  name = "阅读清单"
+  url = "/reading/"
+  weight = 4
+
+[[menu.main]]
   identifier = "archive"
   name = "归档"
   url = "/archives/"
-  weight = 2
+  weight = 5
 
 [[menu.main]]
   identifier = "about"
   name = "关于"
   url = "/about/"
-  weight = 3
+  weight = 6
+
+[[menu.main]]
+  identifier = "search"
+  name = "搜索"
+  url = "/search/"
+  weight = 7
 
 [[menu.main]]
   identifier = "github"
   name = "GitHub"
   url = "https://github.com/yichuanxiang/"
-  weight = 4
+  weight = 8

@@ -1,0 +1,51 @@
+{{ define "main" }}
+{{- $posts := where site.RegularPages "Section" "posts" -}}
+{{- $kind := .Params.station | default "notes" -}}
+{{- if eq $kind "workshop" -}}
+  {{- $selected := slice -}}
+  {{- range $posts -}}
+    {{- if gt (len (intersect (.Params.tags | default slice) (slice "服务器" "网络" "博客" "折腾"))) 0 -}}
+      {{- $selected = $selected | append . -}}
+    {{- end -}}
+  {{- end -}}
+  {{- $posts = $selected -}}
+{{- end -}}
+<section class="station-page" data-station-kind="{{ $kind }}">
+  <header class="station-page-header">
+    <span class="cappu-eyebrow">仪传祥的小站</span>
+    <h1>{{ .Title }}</h1>
+    <p>{{ .Description }}</p>
+  </header>
+  <nav class="station-page-nav" aria-label="小站分区">
+    <a href="{{ "posts/" | relURL }}" {{ if eq $kind "notes" }}aria-current="page"{{ end }}>所有手记</a>
+    <a href="{{ "workshop/" | relURL }}" {{ if eq $kind "workshop" }}aria-current="page"{{ end }}>技术折腾</a>
+    <a href="{{ "reading/" | relURL }}" {{ if eq $kind "reading" }}aria-current="page"{{ end }}>阅读清单 <span class="station-saved-count">0</span></a>
+    <a href="{{ "search/" | relURL }}">搜一搜 {{ partial "station_icon.html" "search" }}</a>
+  </nav>
+  {{ if eq $kind "reading" }}
+  <p class="station-local-note">收藏保存在当前浏览器，方便下次回来继续看。</p>
+  <noscript><p>阅读清单需要启用 JavaScript。你也可以直接<a href="{{ "posts/" | relURL }}">浏览所有手记</a>。</p></noscript>
+  {{ else }}
+  {{ partial "station_filters.html" $kind }}
+  {{ end }}
+  <div class="station-note-list" data-note-list>
+    {{ range $posts.ByDate.Reverse }}
+    <article class="station-list-row" data-post-path="{{ .RelPermalink }}" {{ if eq $kind "reading" }}hidden{{ end }}>
+      <div class="station-row-main">
+        <time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006.01.02" }}</time>
+        <h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+        <p>{{ .Description | default (.Summary | plainify | truncate 100) }}</p>
+        <div class="station-row-tags">{{ range .GetTerms "tags" }}<a href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>{{ end }}</div>
+      </div>
+      <button type="button" class="station-save" data-bookmark="{{ .RelPermalink }}" aria-pressed="false">{{ partial "station_icon.html" "bookmark" }}<span>收藏</span></button>
+    </article>
+    {{ end }}
+  </div>
+  <div class="station-empty" data-station-empty {{ if ne $kind "reading" }}hidden{{ end }}>
+    {{ if eq $kind "reading" }}
+    <p>清单里还没有文章。看到想再读的手记时，点一下收藏。</p>
+    <a href="{{ "posts/" | relURL }}">去看看手记 <span aria-hidden="true">→</span></a>
+    {{ else }}<p>这个主题暂时还没有手记。</p><button type="button" data-post-filter="all">查看全部</button>{{ end }}
+  </div>
+</section>
+{{ end }}
