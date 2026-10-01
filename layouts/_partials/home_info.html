@@ -6,13 +6,18 @@
       <figcaption>Evening notes · 2026</figcaption>
     </figure>
     <div class="cappu-profile__body">
-      <span class="cappu-eyebrow">Personal notes · 写给此刻</span>
+      <span class="cappu-eyebrow">生活记录 · 写给此刻</span>
       <h1 id="cappu-home-title">{{ .Site.Params.homeInfoParams.Title | markdownify }}</h1>
-      <p>{{ .Site.Params.homeInfoParams.Content | markdownify }}</p>
+      <p>写下生活里的小事、喜欢的作品，也记录偶尔的技术折腾。一本慢慢长大的私人手记。</p>
       <div class="cappu-profile__actions">
         <a class="cappu-action cappu-action--primary" data-desk-panel="翻翻手记" href="{{ "posts/" | relURL }}">阅读手记</a>
         <a class="cappu-action" data-desk-panel="认识这里" href="{{ "about/" | relURL }}">认识这里 <span aria-hidden="true">→</span></a>
       </div>
+      <nav class="home-quick-links" aria-label="随便逛逛">
+        <a data-desk-panel="兴趣角落" href="{{ "interests/" | relURL }}">喜欢的作品 ↗</a>
+        <a data-desk-panel="专注角" href="{{ "focus/" | relURL }}">听雨与专注 ↗</a>
+        <a data-desk-panel="留个招呼" href="{{ "guestbook/" | relURL }}">留个招呼 ↗</a>
+      </nav>
       <div class="cappu-profile__status" aria-label="站点状态">
         <span><i aria-hidden="true"></i> 正在书写</span>
         <span>生活 · 灵感 · 喜欢的事</span>
@@ -25,17 +30,16 @@
       <img id="cappu-cover" src="{{ "images/banner-collage.jpg" | relURL }}" alt="《上伊那牡丹》的角色们与温泉旅店的拼贴插画" width="1600" height="450" fetchpriority="high">
     </figure>
     <div class="cappu-feature__body">
-      <span class="cappu-eyebrow">A place for notes and small joys</span>
-      <h2>把喜欢的事，慢慢写成自己的世界。</h2>
-      <p>这里收集生活片段、灵感随想、作品与偶尔的技术折腾。没有固定主题，只留下值得再次翻看的东西。</p>
       <dl class="cappu-stats">
         <div><dt>{{ len $posts }}</dt><dd>公开手记</dd></div>
         <div><dt>{{ len site.Taxonomies.tags }}</dt><dd>写作主题</dd></div>
         <div><dt>2026</dt><dd>开始记录</dd></div>
-        <div><dt>∞</dt><dd>还会继续</dd></div>
       </dl>
     </div>
   </article>
+  <span class="home-cover-tape home-cover-tape--top" aria-hidden="true"></span>
+  <span class="home-cover-tape home-cover-tape--bottom" aria-hidden="true"></span>
+  <div class="home-ink-stamp" aria-hidden="true"><span>日常手记</span><strong>2026</strong><span>慢慢记录</span></div>
 </section>
 
 {{ partial "journal_desk.html" . }}
