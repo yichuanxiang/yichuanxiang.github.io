@@ -27,6 +27,7 @@
   const covers = {{ $covers | jsonify | safeJS }};
   const hero = document.getElementById('cappu-cover');
   const portrait = document.getElementById('cappu-portrait');
+  const scene = document.getElementById('journal-scene-cover');
   if (!hero || !portrait || covers.length < 2) return;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let index = 0;
@@ -59,6 +60,11 @@
         (i === 0 ? hero : portrait).parentElement.appendChild(image);
         return image;
       });
+      if (scene) {
+        const image = images[0].cloneNode(true);
+        scene.parentElement.prepend(image);
+        overlays.push(image);
+      }
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       overlays.forEach(image => image.classList.add('is-visible'));
       await new Promise(resolve => setTimeout(resolve, reducedMotion.matches ? 0 : 700));
@@ -68,6 +74,11 @@
       portrait.src = cover.portrait;
       portrait.alt = cover.portraitAlt;
       portrait.style.objectPosition = cover.portraitPosition;
+      if (scene) {
+        scene.src = cover.hero;
+        scene.alt = cover.alt;
+        scene.style.objectPosition = cover.position;
+      }
       index = next;
     } catch {
       // 暂时加载失败时保留已经显示的封面。

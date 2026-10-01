@@ -1,4 +1,26 @@
 <script>
+// Only this site's own desk windows use the compact reading layout.
+if (window.self !== window.top && window.frameElement?.hasAttribute('data-journal-frame')) {
+  document.documentElement.classList.add('journal-embedded');
+  const style = document.createElement('style');
+  style.textContent = '@view-transition { navigation: none; }';
+  document.head.append(style);
+  document.addEventListener('click', function (event) {
+    const link = event.target.closest('a[href]');
+    if (!link || event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || link.target || link.hasAttribute('download')) return;
+    const url = new URL(link.href);
+    if (url.origin !== location.origin) { link.target = '_blank'; link.rel = 'noopener'; return; }
+    if (url.pathname === location.pathname && url.hash) return;
+    if (url.pathname === '/') { event.preventDefault(); parent.postMessage({ type: 'journal-close' }, location.origin); return; }
+    url.searchParams.set('panel', '1');
+    link.href = url.href;
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !document.querySelector('.cappu-lightbox.is-open')) {
+      event.preventDefault(); parent.postMessage({ type: 'journal-close' }, location.origin);
+    }
+  });
+}
 // Keep the first-visit entrance separate from native page-to-page transitions.
 window.addEventListener('pagereveal', function (event) {
   if (event.viewTransition) document.documentElement.classList.add('station-page-transition');

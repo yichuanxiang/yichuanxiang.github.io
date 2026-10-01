@@ -10,8 +10,8 @@
       <h1 id="cappu-home-title">{{ .Site.Params.homeInfoParams.Title | markdownify }}</h1>
       <p>{{ .Site.Params.homeInfoParams.Content | markdownify }}</p>
       <div class="cappu-profile__actions">
-        <a class="cappu-action cappu-action--primary" href="{{ "posts/" | relURL }}">阅读手记</a>
-        <a class="cappu-action" href="{{ "about/" | relURL }}">认识这里 <span aria-hidden="true">→</span></a>
+        <a class="cappu-action cappu-action--primary" data-desk-panel="翻翻手记" href="{{ "posts/" | relURL }}">阅读手记</a>
+        <a class="cappu-action" data-desk-panel="认识这里" href="{{ "about/" | relURL }}">认识这里 <span aria-hidden="true">→</span></a>
       </div>
       <div class="cappu-profile__status" aria-label="站点状态">
         <span><i aria-hidden="true"></i> 正在书写</span>
@@ -38,16 +38,7 @@
   </article>
 </section>
 
-<nav class="station-shortcuts" aria-label="探索小站">
-  <a href="{{ "interests/" | relURL }}">{{ partial "station_icon.html" "heart" }}<span><strong>兴趣角落</strong><small>翻翻喜欢的作品</small></span><i aria-hidden="true">↗</i></a>
-  <a href="{{ "updates/" | relURL }}">{{ partial "station_icon.html" "activity" }}<span><strong>站点动态</strong><small>看看小站的新变化</small></span><i aria-hidden="true">↗</i></a>
-  <a href="{{ "guestbook/" | relURL }}">{{ partial "station_icon.html" "message" }}<span><strong>留个招呼</strong><small>聊作品，聊有趣的事</small></span><i aria-hidden="true">↗</i></a>
-  <a href="{{ "focus/" | relURL }}">{{ partial "station_icon.html" "clock" }}<span><strong>专注角</strong><small>计时、雨声与白噪声</small></span><i aria-hidden="true">↗</i></a>
-  <a href="{{ "posts/" | relURL }}">{{ partial "station_icon.html" "book" }}<span><strong>翻翻手记</strong><small>生活、学习和灵感</small></span><i aria-hidden="true">↗</i></a>
-  <a href="{{ "workshop/" | relURL }}">{{ partial "station_icon.html" "tools" }}<span><strong>看看折腾</strong><small>设备、网络和博客</small></span><i aria-hidden="true">↗</i></a>
-  <a href="{{ "reading/" | relURL }}">{{ partial "station_icon.html" "bookmark" }}<span><strong>阅读清单 <b class="station-saved-count">0</b></strong><small>收藏后，回来接着读</small></span><i aria-hidden="true">↗</i></a>
-  <a href="{{ "search/" | relURL }}">{{ partial "station_icon.html" "search" }}<span><strong>站内搜索</strong><small>找一篇想看的文章</small></span><i aria-hidden="true">↗</i></a>
-</nav>
+{{ partial "journal_desk.html" . }}
 
 <nav class="cappu-topics" aria-label="浏览主题">
   <span>浏览主题</span>
