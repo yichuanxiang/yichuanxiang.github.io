@@ -43,6 +43,7 @@
   </div>
   <div class="station-empty" data-station-empty {{ if ne $kind "reading" }}hidden{{ end }}>
     {{ if eq $kind "reading" }}
+    <div class="reading-empty-art" aria-hidden="true"><span class="reading-empty-sheet"></span><span class="reading-empty-book"></span>{{ partial "station_icon.html" "bookmark" }}</div>
     <p>清单里还没有文章。看到想再读的手记时，点一下收藏。</p>
     <a href="{{ "posts/" | relURL }}">去看看手记 <span aria-hidden="true">→</span></a>
     {{ else }}<p>这个主题暂时还没有手记。</p><button type="button" data-post-filter="all">查看全部</button>{{ end }}

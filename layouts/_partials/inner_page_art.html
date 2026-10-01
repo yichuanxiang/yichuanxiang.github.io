@@ -1,0 +1,23 @@
+{{- if and (not .IsHome) (not (and .IsPage (eq .Section "posts"))) -}}
+  {{- $key := .Params.corner | default .Params.station | default .Layout | default "notes" -}}
+  {{- if eq .RelPermalink ("about/" | relURL) -}}{{- $key = "about" -}}{{- end -}}
+  {{- $artworks := dict
+    "notes" (dict "image" "yagakimi-6qk89w" "position" "50% 25%" "tape" "var(--moss)")
+    "station" (dict "image" "yagakimi-6qk89w" "position" "50% 25%" "tape" "var(--moss)")
+    "reading" (dict "image" "tsuki-x1lqeo" "position" "65% 35%" "tape" "var(--wine)")
+    "workshop" (dict "image" "saber-1q3k63" "position" "55% 30%" "tape" "var(--dusk)")
+    "interests" (dict "image" "megumin-j89655" "position" "50% 50%" "tape" "var(--wine)")
+    "updates" (dict "image" "tsuki-official-36" "position" "50% 35%" "tape" "var(--moss)")
+    "guestbook" (dict "image" "yagakimi-ymvkdk" "position" "24% 30%" "tape" "var(--dusk)")
+    "focus" (dict "image" "saber-73zrk9" "position" "55% 30%" "tape" "var(--moss)")
+    "search" (dict "image" "tsuki-x1lqeo" "position" "65% 35%" "tape" "var(--dusk)")
+    "archives" (dict "image" "tsuki-official-36" "position" "50% 35%" "tape" "var(--wine)")
+    "about" (dict "image" "yagakimi-6qk89w" "position" "50% 25%" "tape" "var(--moss)")
+  -}}
+  {{- $setting := index $artworks $key | default (index $artworks "notes") -}}
+  {{- $art := (resources.GetMatch (printf "characters/*/%s.*" $setting.image)).Fit "800x600 webp q85" -}}
+  <meta name="journal-inner-art" content="{{ $key }}">
+  <style>
+    html { --inner-art: url("{{ $art.RelPermalink | safeURL }}"); --inner-art-position: {{ $setting.position | safeCSS }}; --inner-tape: {{ $setting.tape | safeCSS }}; }
+  </style>
+{{- end -}}

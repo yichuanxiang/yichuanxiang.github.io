@@ -1,0 +1,85 @@
+/* Printed illustrations stay inside the title area, clear of the reading surface. */
+html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) {
+  position: relative; isolation: isolate; min-height: 15rem; margin: .4rem 0 1.7rem; padding: 2.1rem 2.3rem;
+  border: 1px solid var(--line-soft); border-radius: 1.15rem; background: var(--paper-raised);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--shadow) 45%, transparent), inset 0 -4px 0 color-mix(in srgb, var(--paper-warm) 70%, transparent);
+}
+html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::after {
+  content: ''; position: absolute; z-index: -1; right: 2rem; top: 1.8rem; width: 15.5rem; height: 10.5rem;
+  border: .55rem solid var(--paper); border-bottom-width: 1.5rem; border-radius: .15rem;
+  background: var(--inner-art) var(--inner-art-position, center) / cover no-repeat;
+  outline: 1px solid rgba(0,0,0,.08); outline-offset: -1px;
+  box-shadow: 3px 6px 15px var(--shadow); transform: rotate(4deg); pointer-events: none;
+}
+html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::before {
+  content: ''; position: absolute; z-index: 1; right: 7.6rem; top: 1.2rem; width: 5rem; height: 1.4rem;
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--inner-tape) 30%, var(--paper)) 0 3px, color-mix(in srgb, var(--inner-tape) 17%, var(--paper)) 3px 7px);
+  opacity: .9; transform: rotate(-7deg); clip-path: polygon(2% 0, 99% 3%, 97% 28%, 100% 49%, 96% 71%, 99% 98%, 0 100%, 3% 76%, 0 50%, 4% 23%); pointer-events: none;
+}
+html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) > :is(h1, p, .post-description, .post-meta, .cappu-eyebrow, .breadcrumbs, .station-article-actions) { max-width: calc(100% - 18rem); }
+html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) h1 { text-wrap: balance; }
+html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) :is(p, .post-description) { text-wrap: pretty; line-height: 1.9; }
+html:has(meta[name="journal-inner-art"]) body .page-header h1 { margin-bottom: .75rem; }
+html:has(meta[name="journal-inner-art"]) body .station-page-nav { padding-inline: .7rem; border-bottom-style: dashed; }
+body .station-note-list:has(.station-list-row:not([hidden])) { border: 1px solid var(--line-soft); border-radius: 1rem; background: var(--paper-raised); overflow: hidden; }
+body .station-note-list .station-list-row { margin-inline: 1.5rem; padding-block: 1.65rem; }
+body .station-note-list .station-list-row:last-child { border-bottom: 0; }
+body .station-page[data-station-kind="reading"] > .station-empty {
+  position: relative; margin: 1.7rem 0 1rem; padding: 2.4rem 1.5rem 2.1rem; border: 1px dashed var(--line); border-radius: 1rem;
+  background: color-mix(in srgb, var(--paper-raised) 75%, transparent);
+}
+body .station-page[data-station-kind="reading"] > .station-empty > a { min-height: 44px; padding: .6rem 1.3rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper-raised); }
+body .reading-empty-art { position: relative; width: 8rem; height: 6.2rem; margin: 0 auto 1.1rem; }
+body .reading-empty-sheet { position: absolute; left: 1.45rem; top: .3rem; width: 5rem; height: 5.1rem; border: 1px solid var(--line); background: var(--paper-raised); box-shadow: 3px 4px 0 var(--paper-warm); transform: rotate(9deg); }
+body .reading-empty-book { position: absolute; left: .9rem; top: .6rem; width: 4.7rem; height: 5rem; border-radius: .2rem .45rem .45rem .2rem; border: 1px solid color-mix(in srgb, var(--wine) 28%, var(--line)); border-left: .45rem solid color-mix(in srgb, var(--wine) 30%, var(--paper)); background: var(--wine-soft); box-shadow: 2px 4px 9px var(--shadow); transform: rotate(-9deg); }
+body .reading-empty-book::after { content: ''; position: absolute; left: .65rem; right: .65rem; top: 1.5rem; height: 1rem; border-block: 1px solid color-mix(in srgb, var(--wine) 25%, transparent); }
+body .reading-empty-art > svg { position: absolute; right: 1.1rem; top: .25rem; width: 1.6rem; height: 3.4rem; color: var(--wine); fill: var(--wine-soft); stroke-width: 1.3; transform: rotate(9deg); }
+body .interest-shelf { padding-inline: 1.5rem; border: 1px solid var(--line-soft); border-radius: 1rem; background: var(--paper-raised); }
+body .interest-shelf .interest-entry:last-child { border-bottom: 0; }
+body .update-timeline { padding: 1.4rem 1.6rem 0 2rem; border: 1px solid var(--line-soft); border-left: 2px solid var(--line); border-radius: 0 1rem 1rem 0; background: var(--paper-raised); }
+body .guestbook-welcome { position: relative; padding: 1.8rem 1.8rem 1.3rem; margin-top: 1.5rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--paper-raised); }
+body .guestbook-welcome::after { content: '✿'; position: absolute; right: 1.4rem; top: 1.2rem; width: 3rem; height: 3rem; border: 3px double var(--wine); border-radius: 50%; color: var(--wine); font-size: 1.8rem; line-height: 2.7rem; text-align: center; opacity: .2; transform: rotate(-14deg); pointer-events: none; }
+body .focus-desk { position: relative; padding: 1.5rem 1.4rem 1.2rem; margin-top: 1.7rem; border: 1px solid var(--line); border-radius: 1rem; background: var(--paper-raised); box-shadow: 0 5px 16px var(--shadow); }
+body .focus-desk::before { content: ''; position: absolute; top: 0; right: 2rem; height: 2.5rem; width: .85rem; background: color-mix(in srgb, var(--moss) 60%, var(--paper)); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 77%, 0 100%); pointer-events: none; }
+body .archive-year { margin-top: 1.7rem; padding: 1.6rem 1.7rem; border: 1px solid var(--line-soft); border-radius: 1rem; background: var(--paper-raised); }
+body .searchbox { padding: 1.3rem; border: 1px solid var(--line-soft); border-radius: 1rem; background: color-mix(in srgb, var(--paper-raised) 75%, transparent); }
+html[data-theme="dark"]:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::after { outline-color: rgba(255,255,255,.12); }
+
+/* The same decoration remains visible in desk windows without wasting their height. */
+html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) { min-height: 8rem; margin: 0 0 1rem; padding: 1.2rem 1.4rem; }
+html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::after { width: 8.4rem; height: 5.5rem; right: 1.2rem; top: 1rem; border-width: .35rem; border-bottom-width: .65rem; }
+html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::before { right: 3.5rem; top: .65rem; width: 3.5rem; height: 1rem; }
+html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) > :is(h1, p, .post-description, .post-meta, .cappu-eyebrow, .station-article-actions) { max-width: calc(100% - 10rem); }
+@media (max-width: 800px) {
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) { padding: 1.8rem; min-height: 13.5rem; }
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::after { width: 12rem; height: 8.6rem; right: 1.4rem; top: 2rem; }
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::before { right: 5.1rem; top: 1.5rem; width: 4rem; }
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) > :is(h1, p, .post-description, .post-meta, .cappu-eyebrow, .breadcrumbs, .station-article-actions) { max-width: calc(100% - 14rem); }
+}
+@media (max-width: 550px) {
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) { min-height: 13rem; padding: 1.4rem 1.2rem; margin-bottom: 1.3rem; }
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::after { width: 6.6rem; height: 5.6rem; right: 1rem; top: 1.6rem; border-width: .35rem; border-bottom-width: .7rem; }
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::before { width: 3rem; height: 1rem; right: 2.5rem; top: 1.2rem; }
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) > :is(h1, .post-meta, .cappu-eyebrow, .breadcrumbs) { max-width: calc(100% - 7.5rem); }
+  html:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) > :is(p, .post-description, .station-article-actions) { max-width: 100%; margin-top: 1.2rem; }
+  html:has(meta[name="journal-inner-art"]) body .station-page-header > p { padding-top: .35rem; }
+  html:has(meta[name="journal-inner-art"]) body .station-page-header > .cappu-eyebrow { font-size: .5rem; letter-spacing: .05em; }
+  body .station-page-header .inner-eyebrow-en { display: none; }
+  html:has(meta[name="journal-inner-art"]) body .station-page-header h1 { font-size: 1.75rem; }
+  html:has(meta[name="journal-inner-art"]) body :is(.page-header, .post-header) > h1 { min-height: 6.3rem; }
+  body .station-note-list .station-list-row { margin-inline: 1rem; }
+  body .station-page[data-station-kind="reading"] > .station-empty { padding: 1.9rem 1rem; }
+  body .reading-empty-art { margin-bottom: .7rem; }
+  body .interest-shelf { padding-inline: .8rem; }
+  body .update-timeline { padding-right: 1rem; padding-left: 1.3rem; }
+  body .guestbook-welcome { padding: 1.4rem 1.1rem 1.1rem; }
+  body .focus-desk { padding-inline: .8rem; }
+  body .archive-year { padding: 1.1rem 1rem; }
+  body .searchbox { padding: .8rem; }
+  html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) { min-height: 7.5rem; padding: 1rem 1.1rem; }
+  html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::after { width: 5.3rem; height: 4.4rem; top: .9rem; right: .8rem; }
+  html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header)::before { right: 2rem; top: .6rem; width: 2.5rem; }
+  html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) > :is(p, .post-description) { max-width: calc(100% - 6.2rem); margin-top: 0; }
+  html.journal-embedded:has(meta[name="journal-inner-art"]) body .post-header > :is(h1, .post-meta) { max-width: calc(100% - 6.2rem); }
+  html.journal-embedded:has(meta[name="journal-inner-art"]) body :is(.page-header, .post-header) > h1 { min-height: 0; }
+}
