@@ -93,6 +93,7 @@
         localStorage.setItem(key, JSON.stringify([...next]));
         saved = next;
         render();
+        window.StationMotion?.bookmark(button, saved.has(path));
       } catch {
         const notice = document.querySelector('.station-storage-message');
         notice.textContent = '收藏暂时无法保存，请允许此浏览器保存网站数据。';
@@ -101,7 +102,7 @@
       return;
     }
     const tab = event.target.closest('[data-post-filter]');
-    if (tab) { filter = tab.dataset.postFilter; render(); }
+    if (tab && tab.dataset.postFilter !== filter) { filter = tab.dataset.postFilter; render(); window.StationMotion?.reveal(rows); }
   });
   document.addEventListener('keydown', event => {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {

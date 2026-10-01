@@ -11,7 +11,7 @@
     const status = page.querySelector('[data-corner-count]');
     if (status) status.textContent = `${count} ${kind === 'interests' ? '部作品' : '条动态'}`;
   };
-  filters.forEach(button => button.addEventListener('click', () => applyFilter(button.dataset.cornerFilter)));
+  filters.forEach(button => button.addEventListener('click', () => { applyFilter(button.dataset.cornerFilter); window.StationMotion?.reveal(items); }));
   if (items.length) applyFilter('all');
 
   if (kind === 'guestbook') {

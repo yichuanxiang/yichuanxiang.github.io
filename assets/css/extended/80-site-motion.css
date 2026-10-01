@@ -1,0 +1,51 @@
+:root {
+  --station-motion-fast: 240ms;
+  --station-motion-enter: 360ms;
+  --station-motion-ease: cubic-bezier(.22, 1, .36, 1);
+}
+@view-transition { navigation: auto; }
+body .main { view-transition-name: station-main; animation: station-page-enter var(--station-motion-enter) var(--station-motion-ease) both; }
+body .header { view-transition-name: station-header; }
+.station-page-transition body .main { animation: none; }
+::view-transition-group(station-main), ::view-transition-group(station-header) { animation: none; }
+::view-transition-old(station-main) { animation: station-page-exit 160ms ease-in both; }
+::view-transition-new(station-main) { animation: station-page-enter var(--station-motion-enter) var(--station-motion-ease) both; }
+::view-transition-old(station-header), ::view-transition-new(station-header) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 180ms; }
+@keyframes station-page-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes station-page-exit { to { opacity: 0; transform: translateY(-8px); } }
+@keyframes station-ink { from { opacity: .45; transform: translate(-50%, -50%) scale(.4); } to { opacity: 0; transform: translate(-50%, -50%) scale(2.6); } }
+.station-click-ink {
+  position: fixed; z-index: 100; pointer-events: none; width: 32px; height: 32px;
+  border: 1px solid var(--wine); border-radius: 50%; background: color-mix(in srgb, var(--wine) 9%, transparent);
+  animation: station-ink 440ms var(--station-motion-ease) both;
+}
+body :is(.station-save, .corner-button, .explore-toolbar button, .station-filters button, .station-shortcuts > a, .station-page-nav > a, .theme-toggle) {
+  transition: transform var(--station-motion-fast) var(--station-motion-ease), background-color var(--station-motion-fast) ease, color var(--station-motion-fast) ease, border-color var(--station-motion-fast) ease, box-shadow var(--station-motion-fast) ease;
+}
+body :is(.station-save, .corner-button, .explore-toolbar button, .station-filters button):active:not(:disabled) { transform: scale(.96); }
+body .station-save svg { transform-origin: center; }
+body .station-shortcuts > a > i { transition: transform var(--station-motion-fast) var(--station-motion-ease), color var(--station-motion-fast) ease; }
+body .station-shortcuts > a:hover > i { transform: translate(3px, -3px); color: var(--wine); }
+body .station-list-row { transition: background-color var(--station-motion-fast) ease, border-color var(--station-motion-fast) ease; }
+body .station-list-row:hover { background: color-mix(in srgb, var(--wine-soft) 32%, transparent); border-bottom-color: var(--wine); }
+body .station-row-main h2 a { transition: color var(--station-motion-fast) ease; }
+body .interest-entry summary { border-radius: .65rem; transition: background-color var(--station-motion-fast) ease, color var(--station-motion-fast) ease; }
+body .interest-entry summary:hover { background: color-mix(in srgb, var(--wine-soft) 35%, transparent); }
+body .interest-entry .interest-toggle { transition: transform var(--station-motion-fast) var(--station-motion-ease); }
+body .interest-entry::details-content { transition: height var(--station-motion-enter) var(--station-motion-ease), opacity var(--station-motion-fast) ease, content-visibility var(--station-motion-enter) allow-discrete; }
+body .interest-entry[open] .interest-detail { animation: station-page-enter var(--station-motion-enter) var(--station-motion-ease) both; }
+body, body .header, body .station-page { transition: background-color var(--station-motion-fast) ease, color var(--station-motion-fast) ease; }
+@media (hover: hover) {
+  body :is(.station-save, .corner-button, .explore-toolbar button, .station-filters button):hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 3px 8px var(--shadow); }
+  body :is(.station-save, .corner-button, .explore-toolbar button, .station-filters button):active:not(:disabled) { transform: translateY(0) scale(.96); }
+}
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+  body .main, body .interest-entry[open] .interest-detail { animation: none; }
+  body .interest-entry::details-content { transition: none; }
+  body :is(.station-save, .corner-button, .explore-toolbar button, .station-filters button, .station-shortcuts > a, .station-page-nav > a, .interest-toggle, .theme-toggle) { transition: color 120ms ease, background-color 120ms ease, border-color 120ms ease; }
+  body :is(.station-save, .corner-button, .explore-toolbar button, .station-filters button):is(:hover, :active):not(:disabled), body .station-shortcuts > a:hover > i { transform: none; }
+  body .station-click-ink { display: none; }
+  body .main > .post-entry:hover { transform: none; }
+}

@@ -5,5 +5,7 @@
 <script id="station-posts" type="application/json">{{ $posts | jsonify | safeJS }}</script>
 <template id="station-save-template"><button type="button" class="station-save" aria-pressed="false">{{ partial "station_icon.html" "bookmark" }}<span>收藏文章</span></button></template>
 <p class="station-storage-message" role="status" aria-live="polite" hidden></p>
+{{- $motion := resources.Get "js/site-motion.js" | resources.Minify | fingerprint -}}
+<script src="{{ $motion.RelPermalink }}" defer></script>
 {{- $script := resources.Get "js/station.js" | resources.Minify | fingerprint -}}
 <script src="{{ $script.RelPermalink }}" defer></script>
