@@ -7,6 +7,9 @@
   let activeRain;
   let cleanupTimer;
   let activePanel;
+  let pendingArrival = false;
+  let arrivalFrame = 0;
+  let arrivalGeneration = 0;
   const clearRain = () => {
     clearTimeout(cleanupTimer);
     activePanel?.removeEventListener('close', clearRain);
@@ -23,12 +26,19 @@
     layer.setAttribute('aria-hidden', 'true');
     // A manual popover puts decoration above the native dialog without taking focus.
     if (typeof layer.showPopover === 'function') layer.setAttribute('popover', 'manual');
-    const count = innerWidth <= 700 ? 14 : 24;
+    const count = innerWidth <= 700 ? 18 : 32;
+    let lastPetal = 0;
     for (let index = 0; index < count; index++) {
       const petal = document.createElement('span');
       petal.className = 'journal-petal';
       petal.innerHTML = petalShape;
-      petal.style.cssText = `--petal-x:${(index + Math.random()) / count * 100}%;--petal-start:${-20 + Math.random() * 35}vh;--petal-size:${12 + Math.random() * 12}px;--petal-drift:${-65 + Math.random() * 130}px;--petal-turn:${-70 + Math.random() * 140}deg;--petal-delay:${Math.random() * 300}ms;--petal-duration:${1800 + Math.random() * 400}ms;--petal-opacity:${.48 + Math.random() * .25};--petal-color:${index % 3 === 0 ? '#f5b7c7' : index % 3 === 1 ? '#ed8da9' : '#f6a5bc'};`;
+      const x = (index + Math.random()) / count * 100;
+      const direction = x < 15 ? 1 : x > 85 ? -1 : Math.random() < .5 ? -1 : 1;
+      const drift = direction * (12 + Math.random() * 14);
+      const delay = Math.random() * 500;
+      const duration = 2800 + Math.random() * 1100;
+      lastPetal = Math.max(lastPetal, delay + duration);
+      petal.style.cssText = `--petal-x:${x}%;--petal-start:${-16 + Math.random() * 41}vh;--petal-size:${14 + Math.random() * 12}px;--petal-drift:${drift}vw;--petal-bend-one:${drift * .35 - 8 + Math.random() * 16}vw;--petal-bend-two:${drift * .7 - 10 + Math.random() * 20}vw;--petal-y-one:${30 + Math.random() * 18}vh;--petal-y-two:${64 + Math.random() * 18}vh;--petal-turn:${-90 + Math.random() * 180}deg;--petal-spin:${(Math.random() < .5 ? -1 : 1) * (100 + Math.random() * 150)}deg;--petal-flutter-duration:${850 + Math.random() * 650}ms;--petal-flutter-start:${-15 - Math.random() * 25}deg;--petal-flutter-end:${15 + Math.random() * 25}deg;--petal-delay:${delay}ms;--petal-duration:${duration}ms;--petal-opacity:${.6 + Math.random() * .2};--petal-color:${index % 3 === 0 ? '#f5b7c7' : index % 3 === 1 ? '#ed8da9' : '#f6a5bc'};`;
       layer.append(petal);
     }
     (panel || document.body).append(layer);
@@ -38,34 +48,67 @@
       panel.addEventListener('close', clearRain, { once: true });
     }
     if (layer.hasAttribute('popover')) layer.showPopover();
-    cleanupTimer = setTimeout(clearRain, 2600);
+    cleanupTimer = setTimeout(clearRain, lastPetal + 100);
   };
-  const consumeArrival = () => {
+  const readArrival = () => {
     let arrival;
     try {
       arrival = JSON.parse(sessionStorage.getItem(arrivalKey));
       sessionStorage.removeItem(arrivalKey);
-    } catch { return; }
-    if (!arrival || Date.now() - arrival.at < 0 || Date.now() - arrival.at > 15000) return;
-    if (arrival.destination === location.pathname + location.search) rain();
+    } catch { return false; }
+    if (!arrival || Date.now() - arrival.at < 0 || Date.now() - arrival.at > 15000) return false;
+    return arrival.destination === location.pathname + location.search;
   };
-  consumeArrival();
-  if (isHome) {
-    window.addEventListener('journal:panel-open', event => {
-      const panel = event.detail?.panel;
-      if (panel instanceof HTMLDialogElement && panel.open) rain(panel);
+  const markedArrival = readArrival();
+  const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+  // Fresh inner-page entries also work with older cached pages that lack the marker.
+  pendingArrival = navigationType !== 'reload' && navigationType !== 'back_forward' && (markedArrival || (!isHome && navigationType === 'navigate'));
+  const revealArrival = () => {
+    cancelAnimationFrame(arrivalFrame);
+    const generation = ++arrivalGeneration;
+    if (!pendingArrival || document.hidden) return;
+    if (reduce.matches) { pendingArrival = false; return; }
+    // Start on the new page after its transition, rather than spending the burst on a snapshot.
+    arrivalFrame = requestAnimationFrame(() => {
+      Promise.resolve(window.journalPageTransition).catch(() => {}).then(() => {
+        if (generation !== arrivalGeneration) return;
+        arrivalFrame = requestAnimationFrame(() => {
+          arrivalFrame = 0;
+          if (generation !== arrivalGeneration || !pendingArrival || document.hidden) return;
+          pendingArrival = false;
+          rain();
+        });
+      });
     });
-    document.addEventListener('click', event => {
-      if (event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || reduce.matches) return;
-      const link = event.target.closest('a[href]');
-      if (!link || link.hasAttribute('download') || link.dataset.deskPanel || (link.target && link.target !== '_self')) return;
-      const destination = new URL(link.href, location.href);
-      if (destination.origin !== location.origin || destination.pathname === location.pathname) return;
-      // The destination page consumes this once; navigation itself stays immediate.
-      try { sessionStorage.setItem(arrivalKey, JSON.stringify({ destination: destination.pathname + destination.search, at: Date.now() })); } catch { /* Navigation still works when storage is unavailable. */ }
-    });
-  }
-  window.addEventListener('pagehide', clearRain);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) clearRain(); });
-  reduce.addEventListener('change', () => { if (reduce.matches) clearRain(); });
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', revealArrival, { once: true });
+  else revealArrival();
+  window.addEventListener('pagereveal', revealArrival);
+  window.addEventListener('pageshow', event => { if (!event.persisted) revealArrival(); });
+  window.addEventListener('journal:panel-open', event => {
+    const panel = event.detail?.panel;
+    if (panel instanceof HTMLDialogElement && panel.open) rain(panel);
+  });
+  document.addEventListener('click', event => {
+    if (event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || reduce.matches) return;
+    const link = event.target.closest('a[href]');
+    if (!link || link.hasAttribute('download') || link.dataset.deskPanel || (link.target && link.target !== '_self')) return;
+    const destination = new URL(link.href, location.href);
+    if (destination.origin !== location.origin || destination.pathname === location.pathname) return;
+    // Any section can lead to the next one; navigation itself stays immediate.
+    try { sessionStorage.setItem(arrivalKey, JSON.stringify({ destination: destination.pathname + destination.search, at: Date.now() })); } catch { /* Navigation still works when storage is unavailable. */ }
+  });
+  window.addEventListener('pagehide', () => {
+    pendingArrival = false;
+    ++arrivalGeneration;
+    cancelAnimationFrame(arrivalFrame);
+    clearRain();
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { ++arrivalGeneration; cancelAnimationFrame(arrivalFrame); clearRain(); }
+    else revealArrival();
+  });
+  reduce.addEventListener('change', () => {
+    if (reduce.matches) { pendingArrival = false; ++arrivalGeneration; cancelAnimationFrame(arrivalFrame); clearRain(); }
+  });
 })();

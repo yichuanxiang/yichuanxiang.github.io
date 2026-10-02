@@ -24,6 +24,9 @@ if (window.self !== window.top && window.frameElement?.hasAttribute('data-journa
 }
 // Keep the first-visit entrance separate from native page-to-page transitions.
 window.addEventListener('pagereveal', function (event) {
-  if (event.viewTransition) document.documentElement.classList.add('station-page-transition');
+  if (event.viewTransition) {
+    document.documentElement.classList.add('station-page-transition');
+    window.journalPageTransition = event.viewTransition.finished;
+  }
 });
 </script>
