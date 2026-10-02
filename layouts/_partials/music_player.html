@@ -1,0 +1,47 @@
+{{- $tracks := slice -}}
+{{- with .Site.Params.musicPlayer -}}
+  {{- range .tracks -}}
+    {{- if and .title .url -}}
+      {{- $tracks = $tracks | append (dict "title" .title "artist" (.artist | default "") "url" (.url | relURL) "sourceURL" (.sourceURL | default "") "license" (.license | default "")) -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+{{- if $tracks -}}
+{{- $first := index $tracks 0 -}}
+<aside class="music-player" data-music-player data-state="idle" data-expanded="false" aria-label="小站音乐" hidden>
+  <audio data-music-audio preload="none"></audio>
+  <script type="application/json" data-music-tracks>{{ $tracks | jsonify | safeJS }}</script>
+  <div class="music-player__head">
+    <button class="music-player__play" type="button" data-music-play aria-label="播放音乐">
+      <svg class="music-player__record" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20"/><circle cx="22" cy="22" r="15"/><circle cx="22" cy="22" r="11"/><circle cx="22" cy="22" r="3"/></svg>
+      <svg class="music-player__play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5.5 19 12 9 18.5Z"/></svg>
+      <svg class="music-player__pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>
+    </button>
+    <div class="music-player__summary">
+      <strong data-music-title>{{ $first.title }}</strong>
+      <span data-music-status role="status" aria-live="polite">点一下，听首音乐</span>
+    </div>
+    <button class="music-player__expand" type="button" data-music-expand aria-label="展开音乐播放器" aria-expanded="false" aria-controls="music-player-detail">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg>
+    </button>
+  </div>
+  <div id="music-player-detail" class="music-player__detail" data-music-detail hidden>
+    <p class="music-player__artist" data-music-artist>{{ $first.artist }}</p>
+    <label class="music-player__field" for="music-player-seek">播放进度</label>
+    <input id="music-player-seek" class="music-player__range" data-music-seek type="range" min="0" max="100" step="0.1" value="0" aria-label="播放进度" aria-valuetext="尚未载入音乐" disabled>
+    <div class="music-player__time" aria-hidden="true"><span data-music-current>0:00</span><span data-music-duration>--:--</span></div>
+    <label class="music-player__volume" for="music-player-volume"><span>音量</span><input id="music-player-volume" class="music-player__range" data-music-volume type="range" min="0" max="100" value="50" aria-label="音乐音量"><output data-music-volume-output for="music-player-volume">50%</output></label>
+    {{- if gt (len $tracks) 1 -}}
+    <label class="music-player__field" for="music-player-track">换一首</label>
+    <select id="music-player-track" class="music-player__select" data-music-track aria-label="选择曲目">
+      {{- range $index, $track := $tracks -}}<option value="{{ $index }}">{{ $track.title }}{{ with $track.artist }} · {{ . }}{{ end }}</option>{{- end -}}
+    </select>
+    {{- end -}}
+    <a class="music-player__source" data-music-source href="{{ $first.sourceURL }}" target="_blank" rel="noopener"{{ if not $first.sourceURL }} hidden{{ end }}>曲目来源 <span aria-hidden="true">↗</span></a>
+    <small class="music-player__license" data-music-license{{ if not $first.license }} hidden{{ end }}>{{ $first.license }}</small>
+  </div>
+</aside>
+<noscript><p class="music-player-nojs">{{ if $first.sourceURL }}<a href="{{ $first.sourceURL }}" target="_blank" rel="noopener">听听音乐 ↗</a>{{ else }}<a href="{{ $first.url }}">听听音乐 ↗</a>{{ end }}</p></noscript>
+{{- $script := resources.Get "js/music-player.js" | minify | fingerprint -}}
+<script src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}" defer></script>
+{{- end -}}

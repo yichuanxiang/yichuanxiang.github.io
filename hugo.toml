@@ -34,6 +34,12 @@ enableRobotsTXT = true
   Title = "仪传祥的个人博客"
   Content = "写下生活里的小事，也记录偶尔认真的思考。技术只是其中一章，这里更像一本慢慢长大的私人手记。"
 
+[[params.musicPlayer.tracks]]
+  title = "神的随波逐流"
+  artist = "れるりり feat. 初音ミク・鏡音リン・GUMI"
+  url = "https://music.163.com/song/media/outer/url?id=32431066.mp3"
+  sourceURL = "https://music.163.com/song?id=32431066"
+
 [[menu.main]]
   identifier = "home"
   name = "首页"
