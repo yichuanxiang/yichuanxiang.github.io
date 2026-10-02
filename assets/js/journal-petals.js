@@ -26,19 +26,33 @@
     layer.setAttribute('aria-hidden', 'true');
     // A manual popover puts decoration above the native dialog without taking focus.
     if (typeof layer.showPopover === 'function') layer.setAttribute('popover', 'manual');
-    const count = innerWidth <= 700 ? 18 : 32;
+    const veil = document.createElement('span');
+    veil.className = 'journal-petal-veil';
+    layer.append(veil);
+    const mobile = innerWidth <= 700;
+    const columns = mobile ? 6 : 12;
+    const rows = mobile ? 8 : 6;
+    const curtainCount = columns * rows;
+    const count = curtainCount + (mobile ? 18 : 36);
     let lastPetal = 0;
     for (let index = 0; index < count; index++) {
       const petal = document.createElement('span');
       petal.className = 'journal-petal';
       petal.innerHTML = petalShape;
-      const x = (index + Math.random()) / count * 100;
+      const curtain = index < curtainCount;
+      const x = ((index % columns) + Math.random()) / columns * 100;
       const direction = x < 15 ? 1 : x > 85 ? -1 : Math.random() < .5 ? -1 : 1;
       const drift = direction * (12 + Math.random() * 14);
-      const delay = Math.random() * 500;
-      const duration = 2800 + Math.random() * 1100;
+      // The first wave fills every part of the screen; a second falls in from above.
+      const start = curtain ? (Math.floor(index / columns) + Math.random()) / rows * 104 - 12 : -24 + Math.random() * 18;
+      const end = curtain ? start + 62 + Math.random() * 24 : 108 + Math.random() * 10;
+      const travel = end - start;
+      const foreground = index % 7 === 0;
+      const size = foreground ? (mobile ? 32 : 40) + Math.random() * 16 : (mobile ? 18 : 22) + Math.random() * 14;
+      const delay = curtain ? Math.random() * 180 : 300 + Math.random() * 350;
+      const duration = curtain ? 1950 + Math.random() * 500 : 1650 + Math.random() * 450;
       lastPetal = Math.max(lastPetal, delay + duration);
-      petal.style.cssText = `--petal-x:${x}%;--petal-start:${-16 + Math.random() * 41}vh;--petal-size:${14 + Math.random() * 12}px;--petal-drift:${drift}vw;--petal-bend-one:${drift * .35 - 8 + Math.random() * 16}vw;--petal-bend-two:${drift * .7 - 10 + Math.random() * 20}vw;--petal-y-one:${30 + Math.random() * 18}vh;--petal-y-two:${64 + Math.random() * 18}vh;--petal-turn:${-90 + Math.random() * 180}deg;--petal-spin:${(Math.random() < .5 ? -1 : 1) * (100 + Math.random() * 150)}deg;--petal-flutter-duration:${850 + Math.random() * 650}ms;--petal-flutter-start:${-15 - Math.random() * 25}deg;--petal-flutter-end:${15 + Math.random() * 25}deg;--petal-delay:${delay}ms;--petal-duration:${duration}ms;--petal-opacity:${.6 + Math.random() * .2};--petal-color:${index % 3 === 0 ? '#f5b7c7' : index % 3 === 1 ? '#ed8da9' : '#f6a5bc'};`;
+      petal.style.cssText = `--petal-x:${x}%;--petal-start:${start}vh;--petal-end:${end}vh;--petal-size:${size}px;--petal-drift:${drift}vw;--petal-bend-one:${drift * .35 - 8 + Math.random() * 16}vw;--petal-bend-two:${drift * .7 - 10 + Math.random() * 20}vw;--petal-y-one:${start + travel * .35 - 4 + Math.random() * 8}vh;--petal-y-two:${start + travel * .7 - 4 + Math.random() * 8}vh;--petal-turn:${-90 + Math.random() * 180}deg;--petal-spin:${(Math.random() < .5 ? -1 : 1) * (100 + Math.random() * 150)}deg;--petal-flutter-duration:${700 + Math.random() * 600}ms;--petal-flutter-start:${-15 - Math.random() * 25}deg;--petal-flutter-end:${15 + Math.random() * 25}deg;--petal-delay:${delay}ms;--petal-duration:${duration}ms;--petal-opacity:${(foreground ? .78 : .6) + Math.random() * .17};--petal-color:${index % 3 === 0 ? '#f5b7c7' : index % 3 === 1 ? '#ed8da9' : '#f6a5bc'};`;
       layer.append(petal);
     }
     (panel || document.body).append(layer);

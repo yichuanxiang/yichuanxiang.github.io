@@ -1,9 +1,10 @@
-/* A short entrance shower; the transparent layer never intercepts input. */
+/* A full-screen petal curtain that clears to reveal the new page. */
 body .journal-petal-rain {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   max-width: none;
   max-height: none;
   padding: 0;
@@ -17,6 +18,14 @@ body .journal-petal-rain {
   contain: strict;
 }
 body .journal-petal-rain::backdrop { background: transparent; pointer-events: none; }
+body .journal-petal-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 75% 20%, rgba(248, 161, 191, .45), transparent 70%),
+    linear-gradient(135deg, color-mix(in srgb, var(--paper) 88%, #f4b3c9), color-mix(in srgb, var(--paper) 94%, #f9d9b3));
+  animation: journal-petal-reveal 1800ms cubic-bezier(.22, 1, .36, 1) both;
+}
 body .journal-petal {
   position: absolute;
   top: 0;
@@ -41,7 +50,13 @@ body .journal-petal > svg {
   35% { opacity: var(--petal-opacity); transform: translate3d(var(--petal-bend-one, calc(var(--petal-drift) * .35)), var(--petal-y-one, 39vh), 0) rotate(calc(var(--petal-turn) + var(--petal-spin, 110deg) * .35)); }
   70% { opacity: var(--petal-opacity); transform: translate3d(var(--petal-bend-two, calc(var(--petal-drift) * .7)), var(--petal-y-two, 73vh), 0) rotate(calc(var(--petal-turn) + var(--petal-spin, 110deg) * .7)); }
   88% { opacity: var(--petal-opacity); }
-  100% { opacity: 0; transform: translate3d(var(--petal-drift), 105vh, 0) rotate(calc(var(--petal-turn) + var(--petal-spin, 110deg))); }
+  100% { opacity: 0; transform: translate3d(var(--petal-drift), var(--petal-end, 105vh), 0) rotate(calc(var(--petal-turn) + var(--petal-spin, 110deg))); }
+}
+@keyframes journal-petal-reveal {
+  0% { opacity: .96; }
+  20% { opacity: .9; }
+  65% { opacity: .3; }
+  100% { opacity: 0; }
 }
 @keyframes journal-petal-flutter {
   from { transform: rotate(var(--petal-flutter-start, -22deg)) scaleX(.65); }
@@ -49,5 +64,5 @@ body .journal-petal > svg {
 }
 @media (prefers-reduced-motion: reduce) {
   body .journal-petal-rain { display: none; }
-  body .journal-petal, body .journal-petal > svg { animation: none; }
+  body .journal-petal, body .journal-petal > svg, body .journal-petal-veil { animation: none; }
 }
