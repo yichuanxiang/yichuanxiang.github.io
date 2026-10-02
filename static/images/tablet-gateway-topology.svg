@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="450" viewBox="0 0 1000 450" role="img" aria-labelledby="title desc">
+  <title id="title">独立 Wi-Fi 网关的网络结构</title>
+  <desc id="desc">手机或电脑连接睿易的 Accelerator Wi-Fi，使用小米平板 3 作为网关。平板通过睿易 WAN 和上游网络连接 Cloudflare 节点入口，流量由 JTTI VPS 访问目标网站。</desc>
+  <defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0 0L9 4.5L0 9" fill="#994354"/></marker></defs>
+  <rect width="1000" height="450" rx="20" fill="#fff9ee"/>
+  <g fill="none" stroke="#994354" stroke-width="3" marker-end="url(#arrow)">
+    <path d="M280 105H357"/><path d="M615 105H692"/><path d="M835 160V255"/>
+    <path d="M790 315H743"/><path d="M535 315H488"/><path d="M280 315H238"/>
+  </g>
+  <g font-family="Microsoft YaHei, PingFang SC, sans-serif" text-anchor="middle">
+    <g stroke="#d7bf9a" stroke-width="1.5">
+      <rect x="30" y="55" width="250" height="105" rx="12" fill="#f6e5d3"/>
+      <rect x="365" y="55" width="250" height="105" rx="12" fill="#deeaed"/>
+      <rect x="700" y="55" width="270" height="105" rx="12" fill="#e2ead9"/>
+      <rect x="790" y="265" width="180" height="110" rx="12" fill="#deeaed"/>
+      <rect x="535" y="265" width="200" height="110" rx="12" fill="#f6e5d3"/>
+      <rect x="280" y="265" width="200" height="110" rx="12" fill="#efd9de"/>
+      <rect x="30" y="265" width="200" height="110" rx="12" fill="#e2ead9"/>
+    </g>
+    <g fill="#352b29" font-size="24" font-weight="600">
+      <text x="155" y="95">手机 / 电脑</text><text x="490" y="95">睿易 Wi-Fi</text><text x="835" y="95">小米平板 3</text>
+      <text x="880" y="304">上游网络</text><text x="635" y="304">Cloudflare</text><text x="380" y="304">JTTI VPS</text><text x="130" y="304">目标网站</text>
+    </g>
+    <g fill="#645849" font-size="17">
+      <text x="155" y="130">自动获取 IP 与 DNS</text><text x="490" y="130">Accelerator · DHCP 关闭</text><text x="835" y="130">Xray · DHCP · 断线保护</text>
+      <text x="880" y="336">睿易 WAN / 路由</text><text x="635" y="336">节点域名入口</text><text x="380" y="336">已验证的网站出口</text><text x="130" y="336">访问请求</text>
+    </g>
+    <g fill="#994354" font-size="16">
+      <text x="318" y="85">连接</text><text x="658" y="85">网关</text><text x="835" y="151" font-size="14">LAN: 192.168.110.2</text>
+    </g>
+    <text x="500" y="419" fill="#645849" font-size="18">Cloudflare 提供节点入口，网站出口仍是 VPS。</text>
+  </g>
+</svg>
