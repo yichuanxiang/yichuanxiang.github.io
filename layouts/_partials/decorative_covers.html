@@ -30,14 +30,20 @@
   const scene = document.getElementById('journal-scene-cover');
   if (!hero || !portrait || covers.length < 2) return;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let index = 0;
-  let timer;
-  let switching = false;
   const compact = window.matchMedia('(max-width: 700px)');
   const positionFor = cover => compact.matches ? cover.mobilePosition : cover.position;
+  const channels = [
+    { element: hero, key: 'hero', offset: 0 },
+    { element: portrait, key: 'portrait', offset: 1500 },
+    { element: scene, key: 'hero', offset: 3000 }
+  ].filter(channel => channel.element).map(channel => ({ ...channel, index: 0, run: 0, switching: false }));
+  let cycleTimer;
+  const positionForChannel = (channel, cover) => channel.key === 'portrait' ? cover.portraitPosition : positionFor(cover);
   const positionCurrent = () => {
-    hero.style.objectPosition = positionFor(covers[index]);
-    if (scene) scene.style.objectPosition = positionFor(covers[index]);
+    channels.forEach(channel => {
+      channel.element.style.objectPosition = positionForChannel(channel, covers[channel.index]);
+      if (channel.overlay) channel.overlay.style.objectPosition = positionForChannel(channel, covers[channel.next]);
+    });
   };
   compact.addEventListener('change', positionCurrent);
   positionCurrent();
@@ -47,56 +53,69 @@
     image.onerror = reject;
     image.src = src;
   });
-  const schedule = () => {
-    clearTimeout(timer);
-    if (!document.hidden && !switching) timer = setTimeout(advance, 6000);
-  };
-  const advance = async () => {
-    if (document.hidden || switching) return;
-    switching = true;
-    const next = (index + 1) % covers.length;
+  const advance = async channel => {
+    if (document.hidden || channel.switching) return;
+    channel.switching = true;
+    const run = ++channel.run;
+    const active = () => !document.hidden && run === channel.run;
+    const next = (channel.index + 1) % covers.length;
     const cover = covers[next];
-    let overlays = [];
+    let image;
     try {
-      const images = await Promise.all([load(cover.hero), load(cover.portrait)]);
-      if (document.hidden) return;
-      overlays = images.map((image, i) => {
-        image.className = 'cappu-cover-next';
-        image.alt = '';
-        image.setAttribute('aria-hidden', 'true');
-        image.style.objectPosition = i === 0 ? positionFor(cover) : cover.portraitPosition;
-        (i === 0 ? hero : portrait).parentElement.appendChild(image);
-        return image;
-      });
-      if (scene) {
-        const image = images[0].cloneNode(true);
-        scene.parentElement.prepend(image);
-        overlays.push(image);
-      }
+      image = await load(cover[channel.key]);
+      if (!active()) return;
+      image.className = 'cappu-cover-next';
+      image.alt = '';
+      image.setAttribute('aria-hidden', 'true');
+      image.style.objectPosition = positionForChannel(channel, cover);
+      channel.next = next;
+      channel.overlay = image;
+      channel.element.parentElement.appendChild(image);
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      overlays.forEach(image => image.classList.add('is-visible'));
+      if (!active()) return;
+      image.classList.add('is-visible');
       await new Promise(resolve => setTimeout(resolve, reducedMotion.matches ? 0 : 700));
-      hero.src = cover.hero;
-      hero.alt = cover.alt;
-      hero.style.objectPosition = positionFor(cover);
-      portrait.src = cover.portrait;
-      portrait.alt = cover.portraitAlt;
-      portrait.style.objectPosition = cover.portraitPosition;
-      if (scene) {
-        scene.src = cover.hero;
-        scene.alt = cover.alt;
-        scene.style.objectPosition = positionFor(cover);
-      }
-      index = next;
+      if (!active()) return;
+      channel.element.src = cover[channel.key];
+      channel.element.alt = channel.key === 'portrait' ? cover.portraitAlt : cover.alt;
+      channel.element.style.objectPosition = positionForChannel(channel, cover);
+      channel.index = next;
     } catch {
-      // 暂时加载失败时保留已经显示的封面。
+      // 某一张加载失败时保留它的旧图，其他位置继续轮播。
     } finally {
-      overlays.forEach(image => image.remove());
-      switching = false;
-      schedule();
+      image?.remove();
+      if (run === channel.run) {
+        channel.overlay = null;
+        channel.switching = false;
+      }
     }
   };
-  document.addEventListener('visibilitychange', schedule);
+  const schedule = () => {
+    clearTimeout(cycleTimer);
+    if (!document.hidden) cycleTimer = setTimeout(() => {
+      channels.forEach(channel => {
+        clearTimeout(channel.timer);
+        channel.timer = setTimeout(() => advance(channel), channel.offset);
+      });
+      schedule();
+    }, 6000);
+  };
+  const pause = () => {
+    clearTimeout(cycleTimer);
+    channels.forEach(channel => {
+      clearTimeout(channel.timer);
+      channel.run += 1;
+      channel.overlay?.remove();
+      channel.overlay = null;
+      channel.switching = false;
+    });
+  };
+  document.addEventListener('visibilitychange', () => {
+    pause();
+    if (!document.hidden) schedule();
+  });
+  window.addEventListener('pagehide', pause);
+  window.addEventListener('pageshow', event => { if (event.persisted) schedule(); });
   schedule();
 })();
 </script>
