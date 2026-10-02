@@ -1,0 +1,2 @@
+{{- $petalsJS := resources.Get "js/journal-petals.js" | minify | fingerprint -}}
+<script defer src="{{ $petalsJS.RelPermalink }}" integrity="{{ $petalsJS.Data.Integrity }}" data-journal-home="{{ .IsHome }}"></script>

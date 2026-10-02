@@ -137,6 +137,7 @@
     dialog.showModal();
     closeButton.focus({ preventScroll: true });
     preserveScroll();
+    window.dispatchEvent(new CustomEvent('journal:panel-open', { detail: { panel: dialog } }));
     if (!reduce.matches && paper.animate) entering = paper.animate([
       { opacity: 0, transform: 'translateY(32px) scale(.94) rotate(-.5deg)', filter: 'blur(4px)' },
       { opacity: 1, transform: 'translateY(0) scale(1) rotate(0)', filter: 'blur(0)' }

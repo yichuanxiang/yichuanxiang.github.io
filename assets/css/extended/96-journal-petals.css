@@ -1,0 +1,51 @@
+/* A short entrance shower; the transparent layer never intercepts input. */
+body .journal-petal-rain {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10000;
+  contain: strict;
+}
+body .journal-petal-rain::backdrop { background: transparent; pointer-events: none; }
+body .journal-petal {
+  position: absolute;
+  top: 0;
+  left: var(--petal-x);
+  width: var(--petal-size);
+  height: calc(var(--petal-size) * 1.25);
+  color: var(--petal-color);
+  opacity: 0;
+  pointer-events: none;
+  animation: journal-petal-fall var(--petal-duration) var(--petal-delay) linear both;
+}
+body .journal-petal > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 80%;
+  animation: journal-petal-flutter 950ms var(--petal-delay) ease-in-out infinite alternate;
+}
+@keyframes journal-petal-fall {
+  0% { opacity: 0; transform: translate3d(0, var(--petal-start), 0) rotate(var(--petal-turn)); }
+  12% { opacity: var(--petal-opacity); }
+  76% { opacity: var(--petal-opacity); }
+  100% { opacity: 0; transform: translate3d(var(--petal-drift), 105vh, 0) rotate(calc(var(--petal-turn) + 110deg)); }
+}
+@keyframes journal-petal-flutter {
+  from { transform: rotate(-22deg) scaleX(.65); }
+  to { transform: rotate(26deg) scaleX(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .journal-petal-rain { display: none; }
+  body .journal-petal, body .journal-petal > svg { animation: none; }
+}
