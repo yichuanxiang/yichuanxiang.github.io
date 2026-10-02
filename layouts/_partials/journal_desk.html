@@ -1,11 +1,13 @@
 {{- $megumin := (resources.GetMatch "characters/*/megumin-j89655.*").Fit "1200x800 webp q85" -}}
 {{- $yagakimi := (resources.GetMatch "characters/*/yagakimi-ymvkdk.*").Fit "800x600 webp q85" -}}
+{{- $saber := (resources.GetMatch "characters/*/saber-1q3k63.*").Fit "1000x700 webp q85" -}}
 <header class="journal-desk-heading" id="explore-desk">
   <div><span class="cappu-eyebrow">On my desk</span><h2>在这里，坐一会儿</h2></div>
   <p>点开一处小角落，看看里面有什么。</p>
 </header>
 <nav class="station-shortcuts journal-desk" aria-label="探索小站">
   <a class="desk-portal desk-portal--notes" data-desk-panel="翻翻手记" href="{{ "posts/" | relURL }}">
+    <img class="desk-portal__art" src="{{ "images/scene-20.jpg" | relURL }}" alt="" aria-hidden="true" width="842" height="853" loading="lazy">
     <div class="desk-object desk-book" aria-hidden="true"><span>日常<br>手记</span><b>2026</b></div>
     {{ partial "station_icon.html" "book" }}<span><strong>翻翻手记</strong><small>生活、学习和灵感</small></span><i aria-hidden="true">↗</i>
   </a>
@@ -24,6 +26,7 @@
     {{ partial "station_icon.html" "message" }}<span><strong>留个招呼</strong><small>聊作品，聊有趣的事</small></span><i aria-hidden="true">↗</i>
   </a>
   <a class="desk-portal desk-portal--focus" data-desk-panel="专注角" href="{{ "focus/" | relURL }}">
+    <img class="desk-portal__art" src="{{ $saber.RelPermalink }}" alt="" aria-hidden="true" width="{{ $saber.Width }}" height="{{ $saber.Height }}" loading="lazy">
     <div class="desk-object desk-clock" aria-hidden="true"><span></span><b>25</b></div>
     {{ partial "station_icon.html" "clock" }}<span><strong>专注角</strong><small>计时、雨声与白噪声</small></span><i aria-hidden="true">↗</i>
   </a>

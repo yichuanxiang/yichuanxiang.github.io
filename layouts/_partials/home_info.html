@@ -3,24 +3,24 @@
   <article class="cappu-profile">
     <figure class="cappu-profile__portrait">
       <img id="cappu-portrait" src="{{ "images/scene-18.jpg" | relURL }}" alt="《上伊那牡丹》的角色坐在钢琴旁" width="720" height="729" fetchpriority="high">
-      <figcaption>Evening notes · 2026</figcaption>
+      <figcaption>把喜欢留在这里</figcaption>
     </figure>
     <div class="cappu-profile__body">
-      <span class="cappu-eyebrow">生活记录 · 写给此刻</span>
+      <span class="cappu-eyebrow">欢迎来到我的小世界</span>
       <h1 id="cappu-home-title">{{ .Site.Params.homeInfoParams.Title | markdownify }}</h1>
-      <p>写下生活里的小事、喜欢的作品，也记录偶尔的技术折腾。一本慢慢长大的私人手记。</p>
+      <p>生活、作品和折腾，都记在这里。<br>慢慢写成自己的世界。</p>
       <div class="cappu-profile__actions">
         <a class="cappu-action cappu-action--primary" data-desk-panel="翻翻手记" href="{{ "posts/" | relURL }}">阅读手记</a>
         <a class="cappu-action" data-desk-panel="认识这里" href="{{ "about/" | relURL }}">认识这里 <span aria-hidden="true">→</span></a>
       </div>
       <nav class="home-quick-links" aria-label="随便逛逛">
-        <a data-desk-panel="兴趣角落" href="{{ "interests/" | relURL }}">喜欢的作品 ↗</a>
-        <a data-desk-panel="专注角" href="{{ "focus/" | relURL }}">听雨与专注 ↗</a>
-        <a data-desk-panel="留个招呼" href="{{ "guestbook/" | relURL }}">留个招呼 ↗</a>
+        <a data-desk-panel="兴趣角落" href="{{ "interests/" | relURL }}">喜欢的作品 <span aria-hidden="true">↗</span></a>
+        <a data-desk-panel="专注角" href="{{ "focus/" | relURL }}">听雨与专注 <span aria-hidden="true">↗</span></a>
+        <a data-desk-panel="留个招呼" href="{{ "guestbook/" | relURL }}">留个招呼 <span aria-hidden="true">↗</span></a>
       </nav>
       <div class="cappu-profile__status" aria-label="站点状态">
         <span><i aria-hidden="true"></i> 正在书写</span>
-        <span>生活 · 灵感 · 喜欢的事</span>
+        <a href="#explore-desk">继续逛逛 <span aria-hidden="true">↓</span></a>
       </div>
     </div>
   </article>
