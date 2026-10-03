@@ -3,6 +3,21 @@
   const isHome = document.currentScript?.dataset.journalHome === 'true';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const arrivalKey = 'journal-petal-arrival';
+  const historyKey = 'journal-transition-history';
+  const effects = ['sakura', 'kamui'];
+  let effectHistory;
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(historyKey));
+    if (effects.includes(saved?.effect) && Number.isInteger(saved.count) && saved.count >= 1 && saved.count <= 2) effectHistory = saved;
+  } catch { /* Random transitions also work without storage. */ }
+  const chooseEffect = () => {
+    let effect = effects[Math.floor(Math.random() * effects.length)];
+    // Keep it random, while avoiding a long run of the same effect.
+    if (effectHistory?.effect === effect && effectHistory.count >= 2) effect = effects.find(value => value !== effect);
+    effectHistory = { effect, count: effectHistory?.effect === effect ? effectHistory.count + 1 : 1 };
+    try { sessionStorage.setItem(historyKey, JSON.stringify(effectHistory)); } catch { /* Keep this page's history in memory. */ }
+    return effect;
+  };
   const petalContours = [
     'M4 -74C-4 -94 -28 -91 -48 -60C-78 -12 -40 52 -10 78C16 72 58 26 61 -19C61 -55 38 -88 17 -89L4 -74Z',
     'M7 -71C-6 -86 -31 -79 -48 -45C-74 9 -30 68 -6 82C25 58 61 9 54 -32C48 -67 31 -89 17 -84L7 -71Z',
@@ -56,26 +71,52 @@
   let arrivalGeneration = 0;
   let rainFrame = 0;
   let rainResizeObserver;
+  let sceneAnimation;
+  let sceneTarget;
+  let sceneOrigin;
   const clearRain = () => {
     clearTimeout(cleanupTimer);
     cancelAnimationFrame(rainFrame);
     rainFrame = 0;
     rainResizeObserver?.disconnect();
     rainResizeObserver = null;
+    sceneAnimation?.cancel();
+    sceneAnimation = null;
+    if (sceneTarget) {
+      if (sceneOrigin.value) sceneTarget.style.setProperty('transform-origin', sceneOrigin.value, sceneOrigin.priority);
+      else sceneTarget.style.removeProperty('transform-origin');
+      sceneTarget = null;
+    }
     activePanel?.removeEventListener('close', clearRain);
     activePanel = null;
     if (activeRain?.hasAttribute('popover') && activeRain.matches(':popover-open')) activeRain.hidePopover();
     activeRain?.remove();
     activeRain = null;
   };
+  const createLayer = effect => {
+    const layer = document.createElement('div');
+    layer.className = 'journal-transition-layer';
+    layer.dataset.effect = effect;
+    layer.setAttribute('aria-hidden', 'true');
+    // Decorations can cross the native dialog's edges without taking focus.
+    if (typeof layer.showPopover === 'function') layer.setAttribute('popover', 'manual');
+    return layer;
+  };
+  const mountLayer = (layer, panel, duration) => {
+    (panel || document.body).append(layer);
+    activeRain = layer;
+    if (panel) {
+      activePanel = panel;
+      panel.addEventListener('close', clearRain, { once: true });
+    }
+    if (layer.hasAttribute('popover')) layer.showPopover();
+    cleanupTimer = setTimeout(clearRain, duration + 150);
+  };
   const rain = panel => {
     clearRain();
     if (reduce.matches || document.hidden) return;
-    const layer = document.createElement('div');
-    layer.className = 'journal-petal-rain';
-    layer.setAttribute('aria-hidden', 'true');
-    // A manual popover puts decoration above the native dialog without taking focus.
-    if (typeof layer.showPopover === 'function') layer.setAttribute('popover', 'manual');
+    const layer = createLayer('sakura');
+    layer.classList.add('journal-petal-rain');
     const veil = document.createElement('span');
     veil.className = 'journal-petal-veil';
     layer.append(veil);
@@ -124,20 +165,14 @@
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
     };
-    (panel || document.body).append(layer);
-    activeRain = layer;
-    if (panel) {
-      activePanel = panel;
-      panel.addEventListener('close', clearRain, { once: true });
-    }
-    if (layer.hasAttribute('popover')) layer.showPopover();
+    const duration = 3450;
+    mountLayer(layer, panel, duration);
     resizeCanvas();
     if (typeof ResizeObserver === 'function') {
       rainResizeObserver = new ResizeObserver(resizeCanvas);
       rainResizeObserver.observe(layer);
     }
     const started = performance.now();
-    const duration = 3450;
     const render = now => {
       if (activeRain !== layer) return;
       const elapsed = now - started;
@@ -168,7 +203,156 @@
       rainFrame = requestAnimationFrame(render);
     };
     rainFrame = requestAnimationFrame(render);
-    cleanupTimer = setTimeout(clearRain, duration + 150);
+  };
+  const kamui = panel => {
+    const layer = createLayer('kamui');
+    const canvas = document.createElement('canvas');
+    canvas.className = 'journal-kamui-canvas';
+    layer.append(canvas);
+    const context = canvas.getContext('2d', { alpha: true });
+    if (!context) return;
+    const mobile = innerWidth <= 700;
+    const dark = document.documentElement.dataset.theme === 'dark';
+    const direction = Math.random() < .5 ? -1 : 1;
+    const focus = { x: .48 + Math.random() * .12, y: .4 + Math.random() * .12 };
+    const arms = Array.from({ length: 7 }, (_, index) => {
+      const primary = [0, 2, 5].includes(index);
+      return {
+        phase: index * Math.PI * 2 / 7 + (Math.random() - .5) * .28,
+        from: primary ? 0 : .09 + Math.random() * .13,
+        to: primary ? .9 + Math.random() * .1 : .52 + Math.random() * .27,
+        breadth: primary ? .95 + Math.random() * .6 : .25 + Math.random() * .4,
+        opacity: primary ? .72 + Math.random() * .18 : .2 + Math.random() * .24,
+        primary
+      };
+    });
+    const duration = 2100;
+    let width, height, ratio;
+    const resizeCanvas = () => {
+      const box = layer.getBoundingClientRect();
+      width = box.width;
+      height = box.height;
+      ratio = Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.5);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+    };
+    mountLayer(layer, panel, duration);
+    resizeCanvas();
+    if (typeof ResizeObserver === 'function') {
+      rainResizeObserver = new ResizeObserver(resizeCanvas);
+      rainResizeObserver.observe(layer);
+    }
+    // A restrained pull on the actual page makes the vortex feel spatial.
+    sceneTarget = panel?.querySelector('.journal-panel__paper') || document.querySelector('.main');
+    if (sceneTarget && typeof sceneTarget.animate === 'function') {
+      const box = sceneTarget.getBoundingClientRect();
+      const room = Math.max(2, Math.min(box.left, innerWidth - box.right));
+      const turn = Math.min(.65, Math.atan(room / Math.max(box.height, width)) * 180 / Math.PI * .7);
+      sceneOrigin = { value: sceneTarget.style.getPropertyValue('transform-origin'), priority: sceneTarget.style.getPropertyPriority('transform-origin') };
+      sceneTarget.style.transformOrigin = `${focus.x * width - box.left}px ${focus.y * height - box.top}px`;
+      sceneAnimation = sceneTarget.animate([
+        { transform: 'scale(1) rotate(0deg)', filter: 'blur(0px)', offset: 0 },
+        { transform: `scale(.978) rotate(${direction * turn}deg)`, filter: `blur(${mobile ? 1 : 1.5}px)`, offset: .4 },
+        { transform: `scale(.99) rotate(${direction * -turn * .23}deg)`, filter: 'blur(.4px)', offset: .7 },
+        { transform: 'scale(1) rotate(0deg)', filter: 'blur(0px)', offset: 1 }
+      ], { duration, easing: 'cubic-bezier(.4, 0, .2, 1)' });
+    } else sceneTarget = null;
+    const started = performance.now();
+    const render = now => {
+      if (activeRain !== layer) return;
+      const progress = Math.min(1, (now - started) / duration);
+      if (progress >= 1) { clearRain(); return; }
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      context.clearRect(0, 0, width, height);
+      const pulse = Math.pow(Math.sin(progress * Math.PI), .8);
+      const pull = Math.sin(Math.min(1, progress / .75) * Math.PI);
+      const reach = Math.hypot(width, height) * .76;
+      const core = (mobile ? 25 : 36) + pull * (mobile ? 14 : 22);
+      const rotation = direction * (progress * 1.7 + pull * .42);
+      const winding = direction * (5.2 + pull * 3.1);
+      const cx = width * focus.x, cy = height * focus.y;
+      context.save();
+      context.translate(cx, cy);
+      const shade = context.createRadialGradient(0, 0, core, 0, 0, reach);
+      shade.addColorStop(0, 'rgba(29,23,37,.30)');
+      shade.addColorStop(.46, 'rgba(54,45,62,.08)');
+      shade.addColorStop(1, 'rgba(54,45,62,0)');
+      context.globalAlpha = pulse;
+      context.fillStyle = shade;
+      context.fillRect(-cx, -cy, width, height);
+      const point = (t, arm, side = 0, breadth = 1) => {
+        const radius = core * .5 + reach * Math.pow(t, 1.55);
+        const halfWidth = .024 + Math.sin(t * Math.PI * .82) * .085;
+        const angle = arm + rotation + winding * Math.pow(1 - t, 1.8) + side * halfWidth * breadth;
+        return [Math.cos(angle) * radius, Math.sin(angle) * radius];
+      };
+      // Tapered, uneven ribbons resemble space being twisted, rather than rings.
+      for (const arm of arms) {
+        const edge = (step, side) => {
+          const along = step / 160;
+          const t = arm.from + (arm.to - arm.from) * along;
+          return point(t, arm.phase, side, arm.breadth * Math.pow(Math.sin(along * Math.PI), .55));
+        };
+        context.beginPath();
+        for (let step = 0; step <= 160; step++) {
+          const [x, y] = edge(step, 1);
+          if (!step) context.moveTo(x, y); else context.lineTo(x, y);
+        }
+        for (let step = 160; step >= 0; step--) context.lineTo(...edge(step, -1));
+        context.closePath();
+        const fold = context.createRadialGradient(0, 0, core * .3, 0, 0, reach);
+        fold.addColorStop(0, 'rgba(17,14,24,.96)');
+        fold.addColorStop(.18, dark ? 'rgba(43,39,50,.70)' : 'rgba(47,37,57,.76)');
+        fold.addColorStop(.46, dark ? 'rgba(102,93,116,.22)' : 'rgba(90,78,100,.30)');
+        fold.addColorStop(.82, 'rgba(98,86,105,.03)');
+        fold.addColorStop(1, 'rgba(98,86,105,0)');
+        context.globalAlpha = pulse * arm.opacity;
+        context.fillStyle = fold;
+        context.fill();
+        context.beginPath();
+        for (let step = 10; step <= 137; step++) {
+          const [x, y] = edge(step, 1);
+          if (step === 10) context.moveTo(x, y); else context.lineTo(x, y);
+        }
+        context.strokeStyle = dark ? 'rgba(185,172,195,.22)' : 'rgba(247,232,224,.34)';
+        context.lineWidth = mobile ? .8 : 1.25;
+        context.stroke();
+      }
+      for (let thread = 0; thread < 9; thread++) {
+        context.beginPath();
+        const phase = thread * Math.PI * 2 / 9 + Math.sin(thread * 2.1) * .2;
+        const ending = 96 + thread % 4 * 12;
+        for (let step = 23 + thread % 3 * 5; step <= ending; step++) {
+          const [x, y] = point(step / 160, phase);
+          if (step === 23 + thread % 3 * 5) context.moveTo(x, y); else context.lineTo(x, y);
+        }
+        context.globalAlpha = pulse * .46;
+        context.strokeStyle = thread % 3 ? 'rgba(73,60,86,.33)' : 'rgba(222,207,225,.28)';
+        context.lineWidth = thread % 4 ? .65 : 1.4;
+        context.stroke();
+      }
+      const abyss = context.createRadialGradient(-core * .12, -core * .08, 0, 0, 0, core);
+      abyss.addColorStop(0, 'rgba(9,8,15,.99)');
+      abyss.addColorStop(.58, 'rgba(16,12,23,.94)');
+      abyss.addColorStop(.82, 'rgba(42,30,52,.62)');
+      abyss.addColorStop(1, 'rgba(51,36,64,0)');
+      context.rotate(rotation);
+      context.scale(1, .84 + Math.sin(progress * Math.PI) * .12);
+      context.globalAlpha = pulse;
+      context.fillStyle = abyss;
+      context.beginPath();
+      context.arc(0, 0, core, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+      rainFrame = requestAnimationFrame(render);
+    };
+    rainFrame = requestAnimationFrame(render);
+  };
+  const transition = panel => {
+    clearRain();
+    if (reduce.matches || document.hidden) return;
+    if (chooseEffect() === 'kamui') kamui(panel);
+    else rain(panel);
   };
   const readArrival = () => {
     let arrival;
@@ -196,7 +380,7 @@
           arrivalFrame = 0;
           if (generation !== arrivalGeneration || !pendingArrival || document.hidden) return;
           pendingArrival = false;
-          rain();
+          transition();
         });
       });
     });
@@ -207,7 +391,7 @@
   window.addEventListener('pageshow', event => { if (!event.persisted) revealArrival(); });
   window.addEventListener('journal:panel-open', event => {
     const panel = event.detail?.panel;
-    if (panel instanceof HTMLDialogElement && panel.open) rain(panel);
+    if (panel instanceof HTMLDialogElement && panel.open) transition(panel);
   });
   document.addEventListener('click', event => {
     if (event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || reduce.matches) return;

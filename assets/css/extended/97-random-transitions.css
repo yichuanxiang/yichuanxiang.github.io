@@ -1,0 +1,12 @@
+/* A shared, full-viewport plane for the randomly chosen arrival effect. */
+body .journal-transition-layer {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh;
+  max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: transparent; overflow: hidden; pointer-events: none; user-select: none;
+  z-index: 10000; contain: strict;
+}
+body .journal-transition-layer::backdrop { background: transparent; pointer-events: none; }
+body .journal-kamui-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  body .journal-transition-layer { display: none; }
+}
