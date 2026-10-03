@@ -1,4 +1,4 @@
-/* A full-screen petal curtain that clears to reveal the new page. */
+/* Lens-depth petals and a brief shaft of spring light, above the page and dialogs. */
 body .journal-petal-rain {
   position: fixed;
   inset: 0;
@@ -20,49 +20,26 @@ body .journal-petal-rain {
 body .journal-petal-rain::backdrop { background: transparent; pointer-events: none; }
 body .journal-petal-veil {
   position: absolute;
-  inset: 0;
+  inset: -18%;
   pointer-events: none;
-  background: radial-gradient(ellipse at 75% 20%, rgba(248, 161, 191, .45), transparent 70%),
-    linear-gradient(135deg, color-mix(in srgb, var(--paper) 88%, #f4b3c9), color-mix(in srgb, var(--paper) 94%, #f9d9b3));
-  animation: journal-petal-reveal 1800ms cubic-bezier(.22, 1, .36, 1) both;
+  background: radial-gradient(ellipse at 16% 24%, rgba(255, 245, 224, .28), transparent 54%),
+    linear-gradient(120deg, transparent 25%, rgba(255, 243, 250, .04) 36%, rgba(255, 250, 238, .25) 46%, rgba(255, 243, 250, .08) 58%, transparent 72%);
+  animation: journal-spring-light 1700ms cubic-bezier(.22, 1, .36, 1) both;
 }
-body .journal-petal {
+body .journal-petal-canvas {
   position: absolute;
-  top: 0;
-  left: var(--petal-x);
-  width: var(--petal-size);
-  height: calc(var(--petal-size) * 1.25);
-  color: var(--petal-color);
-  opacity: 0;
-  pointer-events: none;
-  animation: journal-petal-fall var(--petal-duration) var(--petal-delay) linear both;
-}
-body .journal-petal > svg {
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
-  transform-origin: 50% 80%;
-  animation: journal-petal-flutter var(--petal-flutter-duration, 950ms) var(--petal-delay) ease-in-out infinite alternate;
+  pointer-events: none;
 }
-@keyframes journal-petal-fall {
-  0% { opacity: 0; transform: translate3d(0, var(--petal-start), 0) rotate(var(--petal-turn)); }
-  8% { opacity: var(--petal-opacity); }
-  35% { opacity: var(--petal-opacity); transform: translate3d(var(--petal-bend-one, calc(var(--petal-drift) * .35)), var(--petal-y-one, 39vh), 0) rotate(calc(var(--petal-turn) + var(--petal-spin, 110deg) * .35)); }
-  70% { opacity: var(--petal-opacity); transform: translate3d(var(--petal-bend-two, calc(var(--petal-drift) * .7)), var(--petal-y-two, 73vh), 0) rotate(calc(var(--petal-turn) + var(--petal-spin, 110deg) * .7)); }
-  88% { opacity: var(--petal-opacity); }
-  100% { opacity: 0; transform: translate3d(var(--petal-drift), var(--petal-end, 105vh), 0) rotate(calc(var(--petal-turn) + var(--petal-spin, 110deg))); }
-}
-@keyframes journal-petal-reveal {
-  0% { opacity: .96; }
-  20% { opacity: .9; }
-  65% { opacity: .3; }
-  100% { opacity: 0; }
-}
-@keyframes journal-petal-flutter {
-  from { transform: rotate(var(--petal-flutter-start, -22deg)) scaleX(.65); }
-  to { transform: rotate(var(--petal-flutter-end, 26deg)) scaleX(1); }
+@keyframes journal-spring-light {
+  0% { opacity: 0; transform: translateX(-8%); }
+  18% { opacity: .8; }
+  100% { opacity: 0; transform: translateX(12%); }
 }
 @media (prefers-reduced-motion: reduce) {
   body .journal-petal-rain { display: none; }
-  body .journal-petal, body .journal-petal > svg, body .journal-petal-veil { animation: none; }
+  body .journal-petal-veil { animation: none; }
 }

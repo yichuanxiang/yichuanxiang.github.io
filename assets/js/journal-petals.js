@@ -3,15 +3,65 @@
   const isHome = document.currentScript?.dataset.journalHome === 'true';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const arrivalKey = 'journal-petal-arrival';
-  const petalShape = '<svg viewBox="0 0 24 30" xmlns="http://www.w3.org/2000/svg"><path d="M12 29C3 23-2 13 3 5 6 0 9 1 12 5 15 1 18 0 21 5 26 13 21 23 12 29Z" fill="currentColor"/><path d="M12 8C9 15 10 22 12 27" fill="none" stroke="white" stroke-opacity=".32" stroke-width="1"/></svg>';
+  const petalContours = [
+    'M4 -74C-4 -94 -28 -91 -48 -60C-78 -12 -40 52 -10 78C16 72 58 26 61 -19C61 -55 38 -88 17 -89L4 -74Z',
+    'M7 -71C-6 -86 -31 -79 -48 -45C-74 9 -30 68 -6 82C25 58 61 9 54 -32C48 -67 31 -89 17 -84L7 -71Z',
+    'M3 -73C-13 -85 -35 -60 -38 -27C-44 16 -15 60 10 78C25 39 46 -4 42 -32C37 -59 26 -82 13 -84L3 -73Z'
+  ];
+  let sprites;
+  const makeSprites = () => petalContours.map(contour => [false, true].map(back => {
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = 224;
+    const brush = sprite.getContext('2d');
+    brush.translate(112, 112);
+    const shape = new Path2D(contour);
+    const tissue = brush.createLinearGradient(-44, -70, 45, 76);
+    tissue.addColorStop(0, back ? '#efb1c7' : '#fff7fb');
+    tissue.addColorStop(.34, back ? '#e9a0bb' : '#fbe3ed');
+    tissue.addColorStop(.72, back ? '#d789aa' : '#f2bdd3');
+    tissue.addColorStop(1, back ? '#d48eaa' : '#e8a0bd');
+    brush.fillStyle = tissue;
+    brush.fill(shape);
+    brush.save();
+    brush.clip(shape);
+    const foldedEdge = brush.createLinearGradient(20, 0, 60, 8);
+    foldedEdge.addColorStop(0, 'rgba(205,119,154,0)');
+    foldedEdge.addColorStop(.68, 'rgba(209,129,162,.10)');
+    foldedEdge.addColorStop(1, 'rgba(181,98,138,.35)');
+    brush.fillStyle = foldedEdge;
+    brush.fillRect(-80, -100, 170, 195);
+    brush.strokeStyle = 'rgba(255,250,253,.52)';
+    brush.lineWidth = 1.25;
+    brush.beginPath();
+    brush.moveTo(15, -77);
+    brush.bezierCurveTo(46, -47, 31, 20, -8, 74);
+    brush.stroke();
+    brush.strokeStyle = 'rgba(184,107,143,.09)';
+    brush.lineWidth = .8;
+    brush.beginPath();
+    brush.moveTo(4, -65);
+    brush.bezierCurveTo(-9, -18, 1, 30, -8, 67);
+    brush.stroke();
+    brush.restore();
+    brush.strokeStyle = 'rgba(255,235,246,.18)';
+    brush.lineWidth = .85;
+    brush.stroke(shape);
+    return sprite;
+  }));
   let activeRain;
   let cleanupTimer;
   let activePanel;
   let pendingArrival = false;
   let arrivalFrame = 0;
   let arrivalGeneration = 0;
+  let rainFrame = 0;
+  let rainResizeObserver;
   const clearRain = () => {
     clearTimeout(cleanupTimer);
+    cancelAnimationFrame(rainFrame);
+    rainFrame = 0;
+    rainResizeObserver?.disconnect();
+    rainResizeObserver = null;
     activePanel?.removeEventListener('close', clearRain);
     activePanel = null;
     if (activeRain?.hasAttribute('popover') && activeRain.matches(':popover-open')) activeRain.hidePopover();
@@ -30,31 +80,50 @@
     veil.className = 'journal-petal-veil';
     layer.append(veil);
     const mobile = innerWidth <= 700;
-    const columns = mobile ? 6 : 12;
-    const rows = mobile ? 8 : 6;
-    const curtainCount = columns * rows;
-    const count = curtainCount + (mobile ? 18 : 36);
-    let lastPetal = 0;
-    for (let index = 0; index < count; index++) {
-      const petal = document.createElement('span');
-      petal.className = 'journal-petal';
-      petal.innerHTML = petalShape;
-      const curtain = index < curtainCount;
-      const x = ((index % columns) + Math.random()) / columns * 100;
-      const direction = x < 15 ? 1 : x > 85 ? -1 : Math.random() < .5 ? -1 : 1;
-      const drift = direction * (12 + Math.random() * 14);
-      // The first wave fills every part of the screen; a second falls in from above.
-      const start = curtain ? (Math.floor(index / columns) + Math.random()) / rows * 104 - 12 : -24 + Math.random() * 18;
-      const end = curtain ? start + 62 + Math.random() * 24 : 108 + Math.random() * 10;
-      const travel = end - start;
-      const foreground = index % 7 === 0;
-      const size = foreground ? (mobile ? 32 : 40) + Math.random() * 16 : (mobile ? 18 : 22) + Math.random() * 14;
-      const delay = curtain ? Math.random() * 180 : 300 + Math.random() * 350;
-      const duration = curtain ? 1950 + Math.random() * 500 : 1650 + Math.random() * 450;
-      lastPetal = Math.max(lastPetal, delay + duration);
-      petal.style.cssText = `--petal-x:${x}%;--petal-start:${start}vh;--petal-end:${end}vh;--petal-size:${size}px;--petal-drift:${drift}vw;--petal-bend-one:${drift * .35 - 8 + Math.random() * 16}vw;--petal-bend-two:${drift * .7 - 10 + Math.random() * 20}vw;--petal-y-one:${start + travel * .35 - 4 + Math.random() * 8}vh;--petal-y-two:${start + travel * .7 - 4 + Math.random() * 8}vh;--petal-turn:${-90 + Math.random() * 180}deg;--petal-spin:${(Math.random() < .5 ? -1 : 1) * (100 + Math.random() * 150)}deg;--petal-flutter-duration:${700 + Math.random() * 600}ms;--petal-flutter-start:${-15 - Math.random() * 25}deg;--petal-flutter-end:${15 + Math.random() * 25}deg;--petal-delay:${delay}ms;--petal-duration:${duration}ms;--petal-opacity:${(foreground ? .78 : .6) + Math.random() * .17};--petal-color:${index % 3 === 0 ? '#f5b7c7' : index % 3 === 1 ? '#ed8da9' : '#f6a5bc'};`;
-      layer.append(petal);
-    }
+    const softenNear = mobile && document.documentElement.dataset.theme === 'dark' ? .8 : 1;
+    const canvas = document.createElement('canvas');
+    canvas.className = 'journal-petal-canvas';
+    layer.append(canvas);
+    const context = canvas.getContext('2d', { alpha: true });
+    if (!context) return;
+    sprites ||= makeSprites();
+    const wind = Math.random() < .5 ? -1 : 1;
+    const petals = [];
+    const counts = mobile ? [48, 38, 5] : [86, 62, 8];
+    counts.forEach((count, depth) => {
+      const columns = depth === 2 ? 3 : mobile ? 8 : 14;
+      const rows = Math.ceil(count / columns);
+      for (let index = 0; index < count; index++) {
+        const counter = Math.random() < .06 ? -.25 : 1;
+        petals.push({
+          x: ((index % columns) + Math.random()) / columns * 1.32 - .16,
+          y: (Math.floor(index / columns) + Math.random()) / rows * 1.35 - .2,
+          depth,
+          size: depth === 0 ? 5 + Math.random() * 7 : depth === 1 ? (mobile ? 16 : 20) + Math.random() * 16 : (mobile ? 66 : 90) + Math.random() * 55,
+          drift: wind * counter * (depth === 0 ? .045 + Math.random() * .055 : depth === 1 ? .13 + Math.random() * .16 : .44 + Math.random() * .26),
+          drop: depth === 0 ? .13 + Math.random() * .12 : depth === 1 ? .24 + Math.random() * .22 : .16 + Math.random() * .16,
+          sway: depth === 0 ? .009 : depth === 1 ? .025 : .055,
+          phase: Math.random() * Math.PI * 2,
+          angle: Math.random() * Math.PI * 2,
+          spin: (Math.random() < .5 ? -1 : 1) * (.35 + Math.random() * 1.05),
+          flip: .8 + Math.random() * 1.6,
+          opacity: depth === 0 ? .24 + Math.random() * .2 : depth === 1 ? .6 + Math.random() * .22 : .45 + Math.random() * .18,
+          variant: index % sprites.length,
+          blur: depth === 2 ? 1.8 + Math.random() * 2.8 : depth === 0 && index % 3 === 0 ? .45 : 0
+        });
+      }
+    });
+    let width = 0;
+    let height = 0;
+    let ratio = 1;
+    const resizeCanvas = () => {
+      const box = layer.getBoundingClientRect();
+      width = box.width;
+      height = box.height;
+      ratio = Math.min(devicePixelRatio || 1, mobile ? 1.5 : 1.75);
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+    };
     (panel || document.body).append(layer);
     activeRain = layer;
     if (panel) {
@@ -62,7 +131,44 @@
       panel.addEventListener('close', clearRain, { once: true });
     }
     if (layer.hasAttribute('popover')) layer.showPopover();
-    cleanupTimer = setTimeout(clearRain, lastPetal + 100);
+    resizeCanvas();
+    if (typeof ResizeObserver === 'function') {
+      rainResizeObserver = new ResizeObserver(resizeCanvas);
+      rainResizeObserver.observe(layer);
+    }
+    const started = performance.now();
+    const duration = 3450;
+    const render = now => {
+      if (activeRain !== layer) return;
+      const elapsed = now - started;
+      const progress = Math.min(1, elapsed / duration);
+      if (progress >= 1) { clearRain(); return; }
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      context.clearRect(0, 0, width, height);
+      const seconds = elapsed / 1000;
+      const gust = progress * 1.7 + Math.sin(progress * Math.PI) * .22;
+      const enter = Math.min(1, elapsed / 240);
+      const exit = Math.max(0, Math.min(1, (duration - elapsed) / 750));
+      for (const petal of petals) {
+        const x = (petal.x + petal.drift * gust + Math.sin(seconds * 1.3 + petal.phase) * petal.sway) * width;
+        const y = (petal.y + petal.drop * seconds + Math.cos(seconds * 1.15 + petal.phase) * petal.sway * .6) * height;
+        if (x < -petal.size || x > width + petal.size || y < -petal.size || y > height + petal.size) continue;
+        const face = Math.cos(seconds * petal.flip + petal.phase);
+        const roll = petal.angle + seconds * petal.spin + Math.sin(seconds * .9 + petal.phase) * .24;
+        context.save();
+        context.translate(x, y);
+        context.rotate(roll);
+        context.scale(Math.sign(face) * (.18 + Math.abs(face) * .82), 1);
+        const edgeLight = petal.depth === 0 ? .45 + Math.abs(face) * .55 : .7 + Math.abs(face) * .3;
+        context.globalAlpha = petal.opacity * enter * exit * edgeLight * (petal.depth === 2 ? softenNear : 1);
+        context.filter = petal.blur ? `blur(${petal.blur}px)` : 'none';
+        context.drawImage(sprites[petal.variant][face < 0 ? 1 : 0], -petal.size / 2, -petal.size / 2, petal.size, petal.size);
+        context.restore();
+      }
+      rainFrame = requestAnimationFrame(render);
+    };
+    rainFrame = requestAnimationFrame(render);
+    cleanupTimer = setTimeout(clearRain, duration + 150);
   };
   const readArrival = () => {
     let arrival;
