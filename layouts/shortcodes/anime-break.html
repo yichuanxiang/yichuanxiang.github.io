@@ -1,0 +1,15 @@
+{{- $artworks := dict
+  "megumin" (dict "image" "megumin-j89655" "position" "50% 45%" "lean" "-2deg" "tape" "var(--wine)")
+  "yagakimi" (dict "image" "yagakimi-6qk89w" "position" "50% 25%" "lean" "2deg" "tape" "var(--moss)")
+  "saber" (dict "image" "saber-73zrk9" "position" "55% 20%" "lean" "-1.5deg" "tape" "var(--dusk)")
+  "luna" (dict "image" "tsuki-x1lqeo" "position" "65% 35%" "lean" "2deg" "tape" "var(--wine)")
+-}}
+{{- $setting := index $artworks (.Get "art" | default "yagakimi") | default (index $artworks "yagakimi") -}}
+{{- $art := (resources.GetMatch (printf "characters/*/%s.*" $setting.image)).Fit "900x600 webp q85" -}}
+<div class="article-anime-break" aria-hidden="true" style="--article-art-position: {{ $setting.position | safeCSS }}; --article-art-lean: {{ $setting.lean | safeCSS }}; --article-art-tape: {{ $setting.tape | safeCSS }};">
+  <span class="article-anime-break__rule"></span>
+  <div class="article-anime-break__photo">
+    <img src="{{ $art.RelPermalink }}" width="{{ $art.Width }}" height="{{ $art.Height }}" alt="" loading="lazy" decoding="async" data-journal-decoration>
+  </div>
+  <span class="article-anime-break__rule"></span>
+</div>

@@ -1,7 +1,7 @@
 {{- /* 文章图片点击放大：无依赖的轻量查看层（配合 assets/css/extended/30-cappu-images.css） */ -}}
 <script>
     (function () {
-        var SELECTOR = ".post-content img, .md-content img";
+        var SELECTOR = ".post-content img:not([data-journal-decoration]), .md-content img:not([data-journal-decoration])";
         var box = null;
         var rotation = 0;
 

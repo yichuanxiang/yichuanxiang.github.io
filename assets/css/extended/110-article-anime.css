@@ -1,0 +1,39 @@
+/* Small pasted photographs separate long chapters while leaving the text clear. */
+body .post-single .post-content .article-anime-break {
+  display: flex; align-items: center; justify-content: center; gap: 1.2rem;
+  margin: 2.6rem auto 2.9rem; padding: .7rem .6rem; max-width: 100%;
+  break-inside: avoid;
+}
+body .post-single .post-content .article-anime-break__rule {
+  position: relative; flex: 1; min-width: .5rem; height: 1px;
+  border-bottom: 1px dashed var(--line);
+}
+body .post-single .post-content .article-anime-break__rule::after {
+  content: ''; position: absolute; top: -2px; left: 50%; width: 4px; height: 4px;
+  border: 1px solid var(--article-art-tape); transform: rotate(45deg); opacity: .5;
+}
+body .post-single .post-content .article-anime-break__photo {
+  position: relative; flex: 0 1 21rem; min-width: 0;
+  padding: .45rem .45rem 1rem; border: 1px solid var(--line-soft); border-radius: .15rem;
+  background: var(--paper-raised); transform: rotate(var(--article-art-lean));
+  box-shadow: 2px 5px 12px var(--shadow); pointer-events: none;
+}
+body .post-single .post-content .article-anime-break__photo::before {
+  content: ''; position: absolute; z-index: 1; top: -.45rem; left: 37%; width: 4.2rem; height: 1rem;
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--article-art-tape) 28%, var(--paper)) 0 3px, color-mix(in srgb, var(--article-art-tape) 14%, var(--paper)) 3px 7px);
+  opacity: .85; transform: rotate(-6deg);
+  clip-path: polygon(2% 0, 97% 3%, 100% 28%, 97% 49%, 100% 71%, 98% 98%, 0 100%, 3% 76%, 0 50%, 4% 23%);
+}
+body .post-single .post-content .article-anime-break img {
+  display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; max-height: none; margin: 0;
+  border: 0; border-radius: 0; object-fit: cover; object-position: var(--article-art-position);
+  box-shadow: none; cursor: default; pointer-events: none;
+}
+@media (max-width: 550px) {
+  body .post-single .post-content .article-anime-break { gap: .65rem; margin-block: 2.1rem 2.4rem; padding-inline: .3rem; }
+  body .post-single .post-content .article-anime-break__photo { flex-basis: 16rem; padding: .35rem .35rem .8rem; }
+  body .post-single .post-content .article-anime-break__photo::before { width: 3.3rem; height: .8rem; top: -.35rem; }
+}
+@media print {
+  body .post-single .post-content .article-anime-break { display: none; }
+}
