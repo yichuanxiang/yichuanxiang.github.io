@@ -1,6 +1,6 @@
-{{- $filters := slice (dict "id" "all" "label" "全部") (dict "id" "随笔" "label" "生活随笔") (dict "id" "笔记" "label" "学习笔记") (dict "id" "服务器" "label" "服务器") (dict "id" "网络" "label" "网络") (dict "id" "博客" "label" "博客") -}}
+{{- $filters := slice (dict "id" "all" "label" "全部") (dict "id" "随笔" "label" "生活随笔") (dict "id" "笔记" "label" "学习笔记") (dict "id" "服务器" "label" "服务器") (dict "id" "网络" "label" "网络") (dict "id" "博客" "label" "博客") (dict "id" "软件开发" "label" "软件开发") -}}
 {{- if eq . "workshop" -}}
-  {{- $filters = slice (dict "id" "all" "label" "全部") (dict "id" "服务器" "label" "服务器") (dict "id" "网络" "label" "网络") (dict "id" "博客" "label" "博客") -}}
+  {{- $filters = slice (dict "id" "all" "label" "全部") (dict "id" "服务器" "label" "服务器") (dict "id" "网络" "label" "网络") (dict "id" "博客" "label" "博客") (dict "id" "软件开发" "label" "软件开发") -}}
 {{- end -}}
 <div class="station-filters" role="group" aria-label="按主题筛选手记">
   {{- range $filters -}}
