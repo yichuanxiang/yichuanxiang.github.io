@@ -5,8 +5,23 @@
   "luna" (dict "image" "tsuki-x1lqeo" "position" "65% 35%" "lean" "2deg" "tape" "var(--wine)")
 -}}
 {{- $setting := index $artworks (.Get "art" | default "yagakimi") | default (index $artworks "yagakimi") -}}
-{{- $art := (resources.GetMatch (printf "characters/*/%s.*" $setting.image)).Fit "900x600 webp q85" -}}
-<div class="article-anime-break" aria-hidden="true" style="--article-art-position: {{ $setting.position | safeCSS }}; --article-art-lean: {{ $setting.lean | safeCSS }}; --article-art-tape: {{ $setting.tape | safeCSS }};">
+{{- $resource := resources.GetMatch (printf "characters/*/%s.*" $setting.image) -}}
+{{- $full := false -}}
+{{- with .Get "image" -}}
+  {{- $entry := index hugo.Data.article_art . -}}
+  {{- if $entry -}}
+    {{- $resource = resources.Get $entry.asset -}}
+    {{- $setting = merge $setting (dict "position" $entry.focal) -}}
+    {{- $full = true -}}
+  {{- else -}}
+    {{- errorf "anime-break: unknown image %q at %s" . $.Position -}}
+  {{- end -}}
+{{- end -}}
+{{- $art := $resource -}}
+{{- if or (gt $resource.Width 900) (gt $resource.Height 600) -}}
+  {{- $art = $resource.Fit "900x600 webp q85" -}}
+{{- end -}}
+<div class="article-anime-break{{ if $full }} article-anime-break--full{{ end }}{{ if le $art.Width 256 }} article-anime-break--sticker{{ end }}" aria-hidden="true" style="--article-art-position: {{ $setting.position | safeCSS }}; --article-art-lean: {{ $setting.lean | safeCSS }}; --article-art-tape: {{ $setting.tape | safeCSS }};">
   <span class="article-anime-break__rule"></span>
   <div class="article-anime-break__photo">
     <img src="{{ $art.RelPermalink }}" width="{{ $art.Width }}" height="{{ $art.Height }}" alt="" loading="lazy" decoding="async" data-journal-decoration>

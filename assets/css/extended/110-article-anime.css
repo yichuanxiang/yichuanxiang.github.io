@@ -29,6 +29,13 @@ body .post-single .post-content .article-anime-break img {
   border: 0; border-radius: 0; object-fit: cover; object-position: var(--article-art-position);
   box-shadow: none; cursor: default; pointer-events: none;
 }
+body .post-single .post-content .article-anime-break--full img {
+  width: auto; max-width: 100%; max-height: 25rem; aspect-ratio: auto;
+  margin-inline: auto; object-fit: contain;
+}
+body .post-single .post-content .article-anime-break--sticker .article-anime-break__photo {
+  flex-basis: 11rem;
+}
 @media (max-width: 550px) {
   body .post-single .post-content .article-anime-break { gap: .65rem; margin-block: 2.1rem 2.4rem; padding-inline: .3rem; }
   body .post-single .post-content .article-anime-break__photo { flex-basis: 16rem; padding: .35rem .35rem .8rem; }
