@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>三相全控桥 · α=90° 课堂演示 | 仪传祥的个人博客</title>
+  <link rel="stylesheet" href="classroom.css">
+  <script src="data.js" defer></script>
+  <script src="classroom.js" defer></script>
+</head>
+<body>
+  <header class="site-bar">
+    <a class="brand" href="https://yichuanxiang.github.io/">仪传祥的个人博客 <span>/ 课堂</span></a>
+    <a href="https://yichuanxiang.github.io/posts/thyristor-alpha90-classroom/">完整讲解 ↗</a>
+  </header>
+  <main id="classroom">
+    <div class="heading">
+      <div><p class="eyebrow">电力电子 · 三相全控桥 · 电阻负载</p><h1>VT1 的管压，从哪两个电位相减？</h1></div>
+      <div class="heading-actions"><button id="circuit-button" type="button">电路图</button><button id="fullscreen" type="button">全屏演示 ⛶</button></div>
+    </div>
+    <div class="mode-bar">
+      <div class="mode-buttons" role="group" aria-label="选择波形条件">
+        <button type="button" data-mode="ideal" aria-pressed="true">课件理想约定</button>
+        <button type="button" data-mode="rc" aria-pressed="false">含外接 RC 的仿真</button>
+      </div>
+      <label class="compare-control"><input type="checkbox" id="compare">叠加另一种管压</label>
+    </div>
+    <p class="scope" id="scope">正在读取波形…</p>
+    <div class="board">
+      <section class="wave-board" aria-label="交互波形">
+        <div class="graph-top"><span>α = 90° <span class="unit-note">· 电压以相电压峰值 Uₘ 归一化</span></span><label><input type="checkbox" id="phase-reference">其他相电压</label></div>
+        <div id="graph-host"><svg id="waveform" role="img" aria-label="相电压与公共端电位、负载电压和 VT1 管压的对齐波形"></svg></div>
+        <div class="legend"><span class="legend-a">uₐ</span><span class="legend-d">u<sub>d1</sub></span><span class="legend-v">u<sub>VT1</sub></span><span class="legend-other" id="other-legend" hidden>另一种条件的管压</span><span class="off-key">浅色区：主导电流中断</span></div>
+        <div class="scrubber"><button type="button" id="play" aria-pressed="false">▶ 播放</button><label for="angle" class="sr-only">选择一个周期内的时刻</label><input id="angle" type="range" min="0" max="360" value="15" step="0.1"><output id="angle-value" for="angle">ωt = 135°</output></div>
+        <div class="focus-controls"><button type="button" data-focus="45">第一段断流</button><button type="button" data-focus="105">第二段断流</button><button type="button" id="zoom" aria-pressed="false">放大光标附近</button><button type="button" id="reset">回到起点</button></div>
+      </section>
+      <aside class="explanation" aria-label="当前时刻讲解">
+        <p class="eyebrow">先看电位，再做相减</p>
+        <div class="equation">u<sub>VT1</sub> = u<sub>a</sub> − u<sub>d1</sub></div>
+        <div class="readouts">
+          <div><span class="signal a">a 相电位 u<sub>a</sub></span><strong id="read-ua">—</strong></div>
+          <div><span class="signal d">阴极电位 u<sub>d1</sub></span><strong id="read-d1">—</strong></div>
+          <div class="difference"><span class="signal v">VT1 管压</span><strong id="read-vt1">—</strong></div>
+        </div>
+        <p class="instant-formula" id="instant-formula"></p>
+        <div class="state-line"><span id="state-dot"></span><strong id="state-title">—</strong></div>
+        <p id="state-description"></p>
+        <p class="current" id="load-current"></p>
+        <p class="measure-note">电压方向：阳极 A 减阴极 K。参考点：电源中性点 N。</p>
+      </aside>
+    </div>
+    <section class="lesson" aria-label="逐步讲解">
+      <div class="lesson-label"><span class="eyebrow">指图讲解</span><span id="step-count">01 / 06</span></div>
+      <div class="lesson-content"><h2 id="step-title"></h2><p id="step-description"></p></div>
+      <nav class="step-controls" aria-label="讲解步骤"><button id="previous" type="button">← 上一步</button><div id="step-dots"></div><button id="next" type="button">下一步 →</button></nav>
+    </section>
+    <footer class="demo-footer"><span>键盘：← → 切换讲解 · 空格播放 · F 全屏</span><div><button id="share" type="button">分享给同学 ↗</button><a id="download" href="../../downloads/thyristor-alpha90-classroom.zip" download>下载模型与离线演示 ↓</a></div></footer>
+    <noscript><p>交互演示需要 JavaScript。可以直接查看<a href="../../images/thyristor-alpha90/vt1_courseware_vs_externalRC.png">两种条件的对照图</a>。</p></noscript>
+    <p id="error" role="alert" hidden></p>
+  </main>
+  <dialog id="circuit-dialog" aria-labelledby="circuit-title"><div class="dialog-bar"><h2 id="circuit-title">仿真模型：三相桥与外接 RC</h2><button id="close-circuit" type="button" autofocus>关闭 ×</button></div><img src="../../images/thyristor-alpha90/clear_bridge_circuit.png" alt="三相 a、b、c 桥臂和电阻负载，VT1/VT3/VT5 为上组，VT4/VT6/VT2 为下组；这个仿真模型的每管内部有外接 RC 支路。"><p>这张图对应含外接 RC 的仿真模型；课件示意使用另一种截止电位约定。</p><a href="../../images/thyristor-alpha90/clear_bridge_circuit.png" target="_blank" rel="noopener">查看完整电路原图 ↗</a></dialog>
+  <dialog id="share-dialog" aria-labelledby="share-title"><div class="dialog-bar"><h2 id="share-title">一起看这份课堂演示</h2><button id="close-share" type="button" autofocus>关闭 ×</button></div><img src="share-qr.png" alt="课堂演示页二维码" width="300" height="300"><a href="https://yichuanxiang.github.io/classroom/thyristor-alpha90/">yichuanxiang.github.io/classroom/thyristor-alpha90/</a><p>扫描二维码，在手机或电脑上打开同一个演示页。</p></dialog>
+</body>
+</html>
