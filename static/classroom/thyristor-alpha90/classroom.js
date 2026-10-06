@@ -3,12 +3,12 @@
   const $ = id => document.getElementById(id);
   const svgNS = 'http://www.w3.org/2000/svg';
   const lesson = [
-    { title: '从阳极和阴极的电位开始', text: 'VT1 的阳极接 a 相，阴极接公共端 d1。先确认电压方向，再用 uVT1 = ua − ud1。零负载电流只约束 d1 与 d2 的电位差。', phi: 15, mode: 'ideal' },
-    { title: 'VT1 自己导通：两端电位接近', text: 'VT1 把 d1 钳位到 a 相，所以 ua 与 ud1 重合，管压约为零。含 RC 的器件模型保留了约 0.8 V 的小导通压降。', phi: 75, mode: 'ideal' },
-    { title: '另一只上桥臂导通：VT1 承受线电压', text: '这里 VT3 导通，d1 跟随 b 相，于是 uVT1 ≈ ua − ub = uab。VT5 导通时同理得到 uac。下桥臂与上桥臂共同组成负载电流通路。', phi: 135, mode: 'ideal' },
-    { title: '课件的断流段：采用零公共电位约定', text: '这幅课件示意在断流段取 ud1 = ud2 = 0，所以 uVT1 = ua，青色管压沿红色相电压变化。这是一条解析示意曲线，不能称为无 RC 完整切换仿真的验证结果。', phi: 45, mode: 'ideal' },
-    { title: '加入外接 RC 后：先求公共电位 ux', text: '本模型第一段 ux 约为 +Um/2，第二段约为 −Um/2。两段都要看 ua − ux：165° 时 ua 小于正 ux，225° 时 ua 比负 ux 更负，差值都可以是负的。点击“第一段断流”和“第二段断流”对照。', phi: 45, mode: 'rc' },
-    { title: '带着模型条件，回到同一个电位差关系', text: '叠加图展示的是两种条件，不是两次同一电路的仿真。通用关系是 uVT1 = ua − ud1；±半峰公共电位仅是这套对称 RC 电路的稳态近似。实际器件还要按实物参数分析。', phi: 45, mode: 'rc', compare: true }
+    { title: 'VT1 的电压方向', text: '阳极接 a 相，阴极接 d1。红线是 ua，蓝线是 ud1，青线是两者的差。', phi: 15, mode: 'ideal' },
+    { title: 'VT1 导通', text: '这时 VT1、VT2 导通，d1 跟着 a 相变化。忽略导通压降，VT1 两端的电压为零。', phi: 75, mode: 'ideal' },
+    { title: 'VT3 导通', text: 'd1 跟着 b 相变化，VT1 的电压约为 ua − ub，即 uab。VT5 导通时，同理得到 uac。', phi: 135, mode: 'ideal' },
+    { title: '课件里的断流段', text: '课件在这里取 ud1 = ud2 = 0，所以 uVT1 = ua。青线和红线重合。', phi: 45, mode: 'ideal' },
+    { title: '外接 RC 后的断流段', text: '这份模型中，ux 在相邻两段约为 +Um/2、−Um/2。点“第一段断流”和“第二段断流”，分别比较 ua 与 ux。', phi: 45, mode: 'rc' },
+    { title: '两条管压对照', text: '课件示意在断流段取零电位；RC 模型保留了非零 ux。差别来自电路条件，管压都按 ua − ud1 计算。', phi: 45, mode: 'rc', compare: true }
   ];
   try {
     const data = window.THYRISTOR_DATA;
@@ -34,7 +34,7 @@
     const append = (tag, attrs, text) => { const element = node(tag, attrs, text); $('waveform').append(element); return element; };
     const active = sample => [1, 2, 3, 4, 5, 6].filter(id => Math.abs(sample[`iVT${id}`] || 0) > 0.05);
     const voltage = n => `${(n * peak).toFixed(1)} V`;
-    const norm = n => Math.abs(n) < 0.00005 ? '0.000' : n.toFixed(3);
+    const u = sub => `<i>u</i><sub>${sub}</sub>`;
     function draw() {
       const svg = $('waveform');
       const width = Math.max(230, $('graph-host').clientWidth);
@@ -96,23 +96,33 @@
       if (state.zoom && (state.phi < state.lo || state.phi > state.hi)) { setWindow(); draw(); return; }
       $('angle').value = state.phi;
       $('angle-value').textContent = `ωt = ${(state.phi + offset).toFixed(1).replace('.0', '')}°`;
-      $('read-ua').textContent = voltage(sample.ua);
-      $('read-d1').textContent = voltage(sample.ud1);
-      $('read-vt1').textContent = voltage(sample.uVT1);
-      $('instant-formula').textContent = `${norm(sample.ua)} − (${norm(sample.ud1)}) = ${norm(sample.uVT1)} Uₘ`;
+      $('read-ua').innerHTML = u('a');
+      $('value-ua').textContent = voltage(sample.ua);
+      $('value-d1').textContent = voltage(sample.ud1);
+      $('value-vt1').textContent = voltage(sample.uVT1);
       $('load-current').textContent = `负载电流 id ≈ ${(sample.ud * peak / load).toFixed(2)} A`;
       const conducting = active(sample), upper = conducting.filter(id => [1, 3, 5].includes(id));
       const off = conducting.length === 0;
       $('state-dot').style.background = off ? 'var(--wine)' : 'var(--moss)';
       if (off) {
-        $('state-title').textContent = '主导电流中断';
-        $('state-description').textContent = state.mode === 'ideal' ? '按课件约定 d1、d2 的共同电位为零，VT1 管压等于 a 相电压。' : `d1、d2 接近共同电位 ux ≈ ${norm((sample.ud1 + sample.ud2) / 2)} Uₘ。管压由 ua − ud1 求得；RC 和截止漏电仍可能有小电流。`;
+        $('state-title').textContent = 'SCR 断流';
+        $('read-d1').innerHTML = state.mode === 'ideal' ? '0' : '≈ ' + u('x');
+        $('read-vt1').innerHTML = state.mode === 'ideal' ? u('a') : '≈ ' + u('a') + ' − ' + u('x');
+        $('instant-formula').innerHTML = state.mode === 'ideal' ? `${u('a')} − 0 = ${u('a')}` : `${u('x')} ≈ ${(sample.ud1 + sample.ud2) < 0 ? '−' : '+'}<i>U</i><sub>m</sub>/2`;
+        $('state-description').textContent = state.mode === 'ideal' ? 'd1 取零，管压就是 a 相电压。' : 'd1、d2 的电位接近 ux。ua 比 ux 小时，VT1 的管压为负。RC 支路仍可能有小电流。';
       } else if (conducting.length === 2 && upper.length === 1) {
+        const phase = {1: 'a', 3: 'b', 5: 'c'}[upper[0]], approximate = state.mode === 'rc' ? '≈ ' : '';
+        $('read-d1').innerHTML = approximate + u(phase);
+        $('read-vt1').innerHTML = approximate + (phase === 'a' ? '0' : u('a' + phase));
+        $('instant-formula').innerHTML = `${u('a')} − ${u(phase)} = ${phase === 'a' ? '0' : u('a' + phase)}`;
         $('state-title').textContent = `VT${upper[0]} / VT${conducting.find(id => id !== upper[0])} 导通`;
-        $('state-description').textContent = upper[0] === 1 ? 'd1 跟随 a 相。VT1 自己导通，管压为零或小导通压降。' : `d1 跟随 ${upper[0] === 3 ? 'b' : 'c'} 相，VT1 的管压接近 ${upper[0] === 3 ? 'uab' : 'uac'}。`;
+        $('state-description').textContent = `d1 跟着 ${phase} 相变化。${state.mode === 'rc' ? '上面的符号关系忽略了很小的导通压降。' : ''}`;
       } else {
+        $('read-d1').innerHTML = u('d1');
+        $('read-vt1').innerHTML = u('a') + ' − ' + u('d1');
+        $('instant-formula').innerHTML = '';
         $('state-title').textContent = '开关边沿附近';
-        $('state-description').textContent = '当前位于状态切换附近。移动光标到区间内部，可以更清楚地看出节点钳位与断流电位。';
+        $('state-description').textContent = '这里正在切换。把光标移到区间中间，再看导通关系。';
       }
       if (cursor && paths) {
         const xpos = paths.x(sample.phi);
@@ -127,7 +137,7 @@
     function setMode(mode) {
       state.mode = mode;
       for (const button of document.querySelectorAll('[data-mode]')) button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
-      $('scope').textContent = mode === 'ideal' ? '课件约定：全截止段 ud1 = ud2 = 0。这是解析示意；无 RC 的完整切换仿真尚未通过校验。' : '指定电路仿真：六条外接 RC（500 Ω / 250 nF），直流端未接中性点；曲线来自已保存的 Simscape 传感器数据。';
+      $('scope').textContent = mode === 'ideal' ? '按课件画的示意：断流段取 ud1 = ud2 = 0。' : '保存的仿真波形：每管外接串联 RC（500 Ω、250 nF），直流端浮置。';
       draw();
     }
     function stop() { state.playing = false; $('play').textContent = '▶ 播放'; $('play').setAttribute('aria-pressed', 'false'); cancelAnimationFrame(raf); lastFrame = 0; }
@@ -157,10 +167,10 @@
     }
     for (const button of document.querySelectorAll('[data-mode]')) button.addEventListener('click', () => {
       stop(); setMode(button.dataset.mode); state.step = -1;
-      $('step-count').textContent = '自由观察'; $('previous').disabled = true; $('next').disabled = false;
+      $('step-count').textContent = '整周期'; $('previous').disabled = true; $('next').disabled = false;
       for (const dot of $('step-dots').children) dot.setAttribute('aria-current', 'false');
-      $('step-title').textContent = state.mode === 'ideal' ? '课件约定：从各段的 d1 电位判断' : '外接 RC 模型：观察电路求得的 d1 电位';
-      $('step-description').textContent = state.mode === 'ideal' ? '上桥臂导通时 d1 跟随相应相电压；全截止段按课件取零公共电位。拖动光标比较同一时刻的 ua、ud1 与管压，也可以点“下一步”回到指图讲解。' : '导通时 d1 被上桥臂钳位，断流时要保留本网络求得的公共电位。两种模式采用不同条件；这里的曲线是已有仿真数据，不是实物测量。';
+      $('step-title').textContent = state.mode === 'ideal' ? '课件示意' : 'RC 仿真';
+      $('step-description').textContent = '拖动光标看各段电位，或点“下一步”按顺序看。';
     });
     for (const button of document.querySelectorAll('[data-focus]')) button.addEventListener('click', () => { stop(); state.phi = Number(button.dataset.focus); setWindow(); draw(); });
     $('angle').addEventListener('input', event => { stop(); state.phi = Number(event.target.value); update(); });
