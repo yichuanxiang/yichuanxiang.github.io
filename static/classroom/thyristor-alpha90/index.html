@@ -5,9 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light">
   <title>三相全控桥 · α=90° 课堂演示 | 仪传祥的个人博客</title>
-  <link rel="stylesheet" href="classroom.css?v=notes2">
+  <link rel="stylesheet" href="classroom.css?v=circuit1">
   <script src="data.js" defer></script>
-  <script src="classroom.js?v=notes2" defer></script>
+  <script src="circuit.js?v=circuit1" defer></script>
+  <script src="classroom.js?v=circuit1" defer></script>
 </head>
 <body>
   <header class="site-bar">
@@ -17,7 +18,7 @@
   <main id="classroom">
     <div class="heading">
       <div><p class="eyebrow">三相桥式全控整流 · 电阻负载</p><h1>α = 90° 时的 VT1 电压</h1></div>
-      <div class="heading-actions"><button id="circuit-button" type="button">电路图</button><button id="fullscreen" type="button">全屏演示 ⛶</button></div>
+      <div class="heading-actions"><button id="circuit-button" type="button">仿真原图</button><button id="fullscreen" type="button">全屏演示 ⛶</button></div>
     </div>
     <div class="mode-bar">
       <div class="mode-buttons" role="group" aria-label="选择波形条件">
@@ -34,6 +35,11 @@
         <div class="legend"><span class="legend-a">uₐ</span><span class="legend-d">u<sub>d1</sub></span><span class="legend-v">u<sub>VT1</sub></span><span class="legend-other" id="other-legend" hidden>对照管压</span><span class="off-key">浅色区：SCR 断流</span></div>
         <div class="scrubber"><button type="button" id="play" aria-pressed="false">▶ 播放</button><label for="angle" class="sr-only">选择一个周期内的时刻</label><input id="angle" type="range" min="0" max="360" value="15" step="0.1"><output id="angle-value" for="angle">ωt = 135°</output></div>
         <div class="focus-controls"><button type="button" data-focus="45">第一段断流</button><button type="button" data-focus="105">第二段断流</button><button type="button" id="zoom" aria-pressed="false">放大光标附近</button><button type="button" id="reset">回到起点</button></div>
+      </section>
+      <section class="circuit-board" aria-label="随波形同步的导通电路">
+        <div class="circuit-heading"><h2>当前电路</h2><span class="circuit-key"><i></i> 导通 <b></b> 截止</span></div>
+        <svg id="bridge-circuit" role="img" aria-label="三相全控桥的导通与截止状态"></svg>
+        <p id="circuit-caption" aria-live="polite"></p>
       </section>
       <aside class="explanation" aria-label="当前时刻讲解">
         <p class="eyebrow">当前电位关系</p>
@@ -55,7 +61,7 @@
       <div class="lesson-content"><h2 id="step-title"></h2><p id="step-description"></p></div>
       <nav class="step-controls" aria-label="讲解步骤"><button id="previous" type="button">← 上一步</button><div id="step-dots"></div><button id="next" type="button">下一步 →</button></nav>
     </section>
-    <footer class="demo-footer"><span>键盘：← → 切换讲解 · 空格播放 · F 全屏</span><div><button id="share" type="button">分享给同学 ↗</button><a id="download" href="../../downloads/thyristor-alpha90-classroom.zip" download>下载模型与离线演示 ↓</a></div></footer>
+    <footer class="demo-footer"><span>键盘：← → 切换讲解 · 空格播放 · F 全屏</span><div><a href="./waveform-demo.mp4" id="watch-video">演示视频 ↗</a><button id="share" type="button">分享给同学 ↗</button><a id="download" href="../../downloads/thyristor-alpha90-classroom.zip" download>下载模型与离线演示 ↓</a></div></footer>
     <noscript><p>交互演示需要 JavaScript。可以直接查看<a href="../../images/thyristor-alpha90/vt1_courseware_vs_externalRC.png">两种条件的对照图</a>。</p></noscript>
     <p id="error" role="alert" hidden></p>
   </main>

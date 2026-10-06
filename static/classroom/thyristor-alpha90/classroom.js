@@ -13,6 +13,8 @@
   try {
     const data = window.THYRISTOR_DATA;
     if (!data || !data.modes) throw new Error('波形资料未加载。请确认网页、data.js 与脚本在同一目录。');
+    if (!window.ThyristorCircuit) throw new Error('电路图未加载，请确认 circuit.js 在演示文件夹内。');
+    window.ThyristorCircuit.init();
     const peak = data.params.phasePeakV;
     const load = data.params.loadOhm;
     const offset = data.phaseStartDegrees;
@@ -103,6 +105,11 @@
       $('load-current').textContent = `负载电流 id ≈ ${(sample.ud * peak / load).toFixed(2)} A`;
       const conducting = active(sample), upper = conducting.filter(id => [1, 3, 5].includes(id));
       const off = conducting.length === 0;
+      window.ThyristorCircuit.update({active: conducting, mode: state.mode, phi: state.phi,
+        theta: state.phi + offset, off, currents: Object.fromEntries([1, 2, 3, 4, 5, 6].map(id => [id, sample[`iVT${id}`]]))});
+      $('bridge-circuit').dataset.ready = 'true';
+      $('bridge-circuit').dataset.active = conducting.join(',');
+      $('bridge-circuit').dataset.angle = String(state.phi + offset);
       $('state-dot').style.background = off ? 'var(--wine)' : 'var(--moss)';
       if (off) {
         $('state-title').textContent = 'SCR 断流';
@@ -136,7 +143,7 @@
     }
     function setMode(mode) {
       state.mode = mode;
-      for (const button of document.querySelectorAll('[data-mode]')) button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
+      for (const button of document.querySelectorAll('button[data-mode]')) button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
       $('scope').textContent = mode === 'ideal' ? '按课件画的示意：断流段取 ud1 = ud2 = 0。' : '保存的仿真波形：每管外接串联 RC（500 Ω、250 nF），直流端浮置。';
       draw();
     }
@@ -148,7 +155,15 @@
     }
     function play() {
       if (state.playing) return stop();
+      observe();
       state.playing = true; $('play').textContent = 'Ⅱ 暂停'; $('play').setAttribute('aria-pressed', 'true'); lastFrame = 0; raf = requestAnimationFrame(frame);
+    }
+    function observe() {
+      state.step = -1;
+      $('step-count').textContent = '整周期'; $('previous').disabled = true; $('next').disabled = false;
+      for (const dot of $('step-dots').children) dot.setAttribute('aria-current', 'false');
+      $('step-title').textContent = state.mode === 'ideal' ? '课件示意' : 'RC 仿真';
+      $('step-description').textContent = '拖动光标看各段电位，或点“下一步”按顺序看。';
     }
     function selectStep(index) {
       stop(); state.step = Math.max(0, Math.min(lesson.length - 1, index));
@@ -165,15 +180,11 @@
       button.setAttribute('aria-label', `第 ${i + 1} 步：${lesson[i].title}`); button.title = lesson[i].title;
       button.addEventListener('click', () => selectStep(i)); $('step-dots').append(button);
     }
-    for (const button of document.querySelectorAll('[data-mode]')) button.addEventListener('click', () => {
-      stop(); setMode(button.dataset.mode); state.step = -1;
-      $('step-count').textContent = '整周期'; $('previous').disabled = true; $('next').disabled = false;
-      for (const dot of $('step-dots').children) dot.setAttribute('aria-current', 'false');
-      $('step-title').textContent = state.mode === 'ideal' ? '课件示意' : 'RC 仿真';
-      $('step-description').textContent = '拖动光标看各段电位，或点“下一步”按顺序看。';
+    for (const button of document.querySelectorAll('button[data-mode]')) button.addEventListener('click', () => {
+      stop(); setMode(button.dataset.mode); observe();
     });
-    for (const button of document.querySelectorAll('[data-focus]')) button.addEventListener('click', () => { stop(); state.phi = Number(button.dataset.focus); setWindow(); draw(); });
-    $('angle').addEventListener('input', event => { stop(); state.phi = Number(event.target.value); update(); });
+    for (const button of document.querySelectorAll('[data-focus]')) button.addEventListener('click', () => { stop(); observe(); state.phi = Number(button.dataset.focus); setWindow(); draw(); });
+    $('angle').addEventListener('input', event => { stop(); observe(); state.phi = Number(event.target.value); update(); });
     $('compare').addEventListener('change', event => { state.compare = event.target.checked; draw(); });
     $('phase-reference').addEventListener('change', event => { state.references = event.target.checked; draw(); });
     $('play').addEventListener('click', play);
@@ -186,7 +197,7 @@
       state.phi = Math.max(state.lo, Math.min(state.hi, state.lo + (xpos - geometry.left) / (geometry.right - geometry.left) * (state.hi - state.lo)));
       update();
     };
-    $('waveform').addEventListener('pointerdown', event => { stop(); moving = true; $('waveform').setPointerCapture(event.pointerId); moveCursor(event); });
+    $('waveform').addEventListener('pointerdown', event => { stop(); observe(); moving = true; $('waveform').setPointerCapture(event.pointerId); moveCursor(event); });
     $('waveform').addEventListener('pointermove', event => { if (moving) moveCursor(event); });
     $('waveform').addEventListener('pointerup', () => { moving = false; }); $('waveform').addEventListener('pointercancel', () => { moving = false; });
     async function fullscreen() {

@@ -12,7 +12,7 @@ cover:
   hiddenInSingle: true
 ---
 
-[课堂演示](/classroom/thyristor-alpha90/) · [模型、波形和讲稿](/downloads/thyristor-alpha90-classroom.zip)
+[课堂演示](/classroom/thyristor-alpha90/) · [短视频](/classroom/thyristor-alpha90/waveform-demo.mp4) · [模型、波形和讲稿](/downloads/thyristor-alpha90-classroom.zip)
 
 这次课堂要讲的是 **α=90° 时 VT1 的管压**。电路为三相桥式全控整流，接纯电阻负载，电压方向取阳极到阴极。
 
@@ -101,7 +101,9 @@ VT1/VT2 的理想关断点在 210°：
 4. 读断流段：课件取 ud1=0，得到 ua；RC 模型保留 ux，得到 ua−ux。
 5. 放大 150°—180° 与 210°—240°，比较 ua、ux 和两者之差。
 
-[演示页](/classroom/thyristor-alpha90/)沿用这些符号，可以拖动光标查看已有波形。课件图 3-30 属于连续电流工况，这里是图 3-26 的电阻负载断续工况，不能直接套用完整的 120° 导通段。
+[演示页](/classroom/thyristor-alpha90/)中，电路图和波形使用同一个时间光标：亮起的管正在导通，绿色路径表示经过负载的主电流，灰色管表示截止。可以逐段看，也可以播放一整周期。[短视频](/classroom/thyristor-alpha90/waveform-demo.mp4)录下了这套演示，前半为课件示意，后半为保存的 RC 仿真数据。
+
+课件图 3-30 属于连续电流工况，这里是图 3-26 的电阻负载断续工况，不能直接套用完整的 120° 导通段。
 
 ## 仿真参数与核对结果
 
