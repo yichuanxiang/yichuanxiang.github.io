@@ -45,6 +45,7 @@
 .api-settings-status:empty{display:none}
 .api-settings-actions{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px}
 .api-settings-actions button{min-height:44px;margin:0;font-size:12px;justify-content:center}
+#settings-dialog .api-settings-actions .primary-button{margin:0}
 #settings-dialog .settings-instructions{margin:20px 0 14px;border-top:1px solid var(--line);padding-top:14px;font-size:12px;overflow-wrap:anywhere}
 #settings-dialog summary{cursor:pointer;color:var(--green)}
 #settings-dialog .settings-instructions p{font-size:12px}
