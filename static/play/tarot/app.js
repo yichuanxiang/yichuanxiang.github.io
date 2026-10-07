@@ -1,5 +1,6 @@
 import { DECK, SPREADS, CATEGORIES } from './modules/deck.js';
 import { generateReading, validateReading } from './modules/reading.js';
+import { normalizeApiConfig, requestApiReading } from './modules/api-client.js';
 import { cardArt, cardBack } from './modules/card-art.js';
 import { CARD_THEMES, DEFAULT_CARD_THEME, CHARACTERS, SHOWCASE_CARDS, getCardTheme, setCardTheme, getCardCharacters, getCardScene } from './modules/deck-themes.js';
 import { BOTAN_V8_READY } from './modules/botan-v8-ready.js';
@@ -11,7 +12,8 @@ const CARD_MAP = new Map(DECK.map(card => [card.id, card]));
 const JOURNAL_KEY = 'moonlit.public.journal.v1';
 const DAILY_KEY = 'moonlit.public.daily.v1';
 const THEME_KEY = 'moonlit.public.card-theme.v1';
-const state = { page:'reading',category:'general',spread:'three',question:'',deck:[],drawn:[],selected:new Set(),busy:false,controller:null,session:null,librarySuit:'all',libraryCharacter:'all',libraryScene:'all' };
+const API_PREFERENCES_KEY = 'moonlit.public.api-preferences.v1';
+const state = { page:'reading',category:'general',spread:'three',question:'',deck:[],drawn:[],selected:new Set(),busy:false,controller:null,session:null,readingMode:'offline',apiConfig:null,apiStatus:'unverified',librarySuit:'all',libraryCharacter:'all',libraryScene:'all' };
 let toastTimer;
 let libraryImageObserver;
 let journal = loadJournal();
@@ -28,7 +30,7 @@ function loadJournal() {
   try {
     const data=JSON.parse(localStorage.getItem(JOURNAL_KEY)||'[]');
     if(!Array.isArray(data))return [];
-    return data.filter(item=>item&&typeof item.id==='string'&&typeof item.question==='string'&&item.question.length<=500&&Object.hasOwn(SPREADS,item.spread)&&CATEGORIES.some(c=>c.id===item.category)&&item.mode==='offline'&&Number.isFinite(Date.parse(item.date))&&Array.isArray(item.cards)&&item.cards.length===SPREADS[item.spread].positions.length&&new Set(item.cards.map(c=>c?.id)).size===item.cards.length&&item.cards.every(c=>c&&CARD_MAP.has(c.id)&&typeof c.reversed==='boolean')&&validateReading(item.reading,{cards:item.cards})).slice(0,50);
+    return data.filter(item=>item&&typeof item.id==='string'&&typeof item.question==='string'&&item.question.length<=500&&Object.hasOwn(SPREADS,item.spread)&&CATEGORIES.some(c=>c.id===item.category)&&['offline','ai'].includes(item.mode)&&Number.isFinite(Date.parse(item.date))&&Array.isArray(item.cards)&&item.cards.length===SPREADS[item.spread].positions.length&&new Set(item.cards.map(c=>c?.id)).size===item.cards.length&&item.cards.every(c=>c&&CARD_MAP.has(c.id)&&typeof c.reversed==='boolean')&&validateReading(item.reading,{cards:item.cards})).slice(0,50);
   }catch{return [];}
 }
 function storeJournal(next) {
@@ -56,6 +58,7 @@ function shuffledDeck() {
 function resolveCards(cards) {return cards.map(c=>({...CARD_MAP.get(c.id),reversed:c.reversed}));}
 function say(message) {$('#luna-message').textContent=message;}
 function showPage(page) {
+  if(state.busy&&page!=='reading')cancelReading();
   state.page=page;
   $$('.page').forEach(el=>{el.hidden=el.id!==`page-${page}`;});
   $$('.nav-item').forEach(btn=>{const active=btn.dataset.page===page;btn.classList.toggle('active',active);if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');});
@@ -84,6 +87,7 @@ function beginDraw(event) {
   Object.assign(state,{question,deck:shuffledDeck(),drawn:[],selected:new Set(),busy:false,session:null});
   $('#question-form').hidden=true;$('#draw-section').hidden=false;$('#result').hidden=true;
   $('#reading-error').hidden=true;$('#reading-status').textContent='';
+  $('#use-local-reading').hidden=true;
   $('#draw-question').textContent=question;
   $('#draw-title').textContent=`跟随直觉，选择 ${SPREADS[state.spread].positions.length} 张牌`;
   renderSlots();renderDeck();updateProgress();
@@ -101,6 +105,7 @@ function updateProgress() {
   const total=SPREADS[state.spread].positions.length,complete=state.drawn.length===total;
   $('#draw-progress').textContent=complete?'你的牌已经就位。准备好听听露娜的解读了吗？':`已选择 ${state.drawn.length} / ${total} 张 · 下一张：${SPREADS[state.spread].positions[state.drawn.length]}`;
   $('#interpret').disabled=!complete||state.busy;
+  if(!state.busy)$('#interpret').firstElementChild.textContent=state.readingMode==='ai'?'AI 解读这组牌':state.session?.mode==='offline'?'再次解读这组牌':'解读这组牌';
   $$('#deck button').forEach(btn=>{const selected=state.selected.has(Number(btn.dataset.deckIndex));btn.disabled=selected||complete||state.busy;btn.classList.toggle('selected',selected);btn.setAttribute('aria-pressed',String(selected));});
 }
 function pickCard(index) {
@@ -113,46 +118,68 @@ function pickCard(index) {
 }
 async function interpret() {
   if(state.busy||state.drawn.length!==SPREADS[state.spread].positions.length)return;
+  const mode=state.readingMode;
+  if(mode==='ai'&&!state.apiConfig){openSettings();return;}
   state.busy=true;state.controller=new AbortController();
+  state.session=null;$('#result').hidden=true;
   const controller=state.controller;
   const input={question:state.question,category:state.category,spread:state.spread,cards:state.drawn.map(c=>({...c}))};
   const cardTheme=getCardTheme();
-  $('#card-theme').disabled=true;
+  setReadingBusy(true);
   updateProgress();$('#back-question').disabled=true;$('#reading-error').hidden=true;
-  $('#interpret').classList.add('pending');$('#interpret').firstElementChild.textContent='露娜正在整理牌面的线索';
-  $('#reading-status').textContent='正在浏览器中整理本地牌义。';
+  $('#use-local-reading').hidden=true;
+  $('#interpret').classList.add('pending');$('#interpret').firstElementChild.textContent=mode==='ai'?'AI 正在解读，请稍等':'露娜正在整理牌面的线索';
+  $('#reading-status').textContent=mode==='ai'?'正在请求你配置的 API，最多等待 60 秒。':'正在浏览器中整理本地牌义。';
   say('每张牌都有一个不同的视角。我正在把它们连成你的故事。');
   try {
     await new Promise(resolve=>requestAnimationFrame(resolve));
     if(state.controller!==controller||controller.signal.aborted)return;
-    const reading=generateReading({...input,cards:resolveCards(input.cards)});
+    const reading=mode==='ai'?await requestApiReading({config:state.apiConfig,input,cards:resolveCards(input.cards),signal:controller.signal}):generateReading({...input,cards:resolveCards(input.cards)});
+    if(state.controller!==controller||controller.signal.aborted)return;
     if(!validateReading(reading,{cards:input.cards}))throw new Error('解读格式不完整，请重新尝试。');
-    state.session={id:sessionId(),date:new Date().toISOString(),...input,cardTheme,mode:'offline',reading};
+    state.session={id:sessionId(),date:new Date().toISOString(),...input,cardTheme,mode,reading};
+    if(mode==='ai'){state.apiStatus='ok';updateApiStatus();}
     $('#result').innerHTML=renderReading(state.session,false);$('#result').hidden=false;
-    $('#reading-status').textContent='本次使用免费本地牌义解读，问题与抽牌结果不会上传。';
+    $('#reading-status').textContent=mode==='ai'?'本次由你配置的 API 生成 AI 解读。手记只有点击保存才会留在当前浏览器。':'本次使用免费本地牌义解读，问题与抽牌结果不会上传。';
     say('解读准备好了。先看看哪一句最让你有感触？');
     scrollTo($('#result'));$('#result').focus({preventScroll:true});
   }catch(error) {
     if(state.controller!==controller)return;
+    if(mode==='ai'){state.apiStatus='error';updateApiStatus();}
     $('#reading-error').hidden=false;
-    $('#reading-error').textContent=error.message||'本地解读暂时无法完成，请重试。';
-    $('#reading-status').textContent='本次抽牌已保留，可以再次点击解读。';
+    $('#reading-error').textContent=error.message||'这次解读暂时无法完成，请重试。';
+    $('#reading-status').textContent='抽好的牌已保留。可以重试，也可以选择下面的本地牌义。';
+    $('#use-local-reading').hidden=mode!=='ai';
     say('这次解读暂时没有完成。你的牌还在，我们可以再试一次。');
   }finally{
-    if(state.controller===controller){state.busy=false;$('#card-theme').disabled=false;$('#back-question').disabled=false;$('#interpret').classList.remove('pending');$('#interpret').firstElementChild.textContent=state.session?'再次解读这组牌':'解读这组牌';updateProgress();}
+    if(state.controller===controller){state.busy=false;setReadingBusy(false);updateProgress();}
   }
 }
 function renderReading(session,fromJournal) {
   const reading=session.reading;
-  return `<div class="result-head"><div><span class="result-label">LUNA'S READING · ${escape(SPREADS[session.spread].name)}</span><h2 id="${fromJournal?'saved-result-title':'result-title'}">${escape(reading.title)}</h2></div><span class="result-mode">✧ 本地牌义解读</span></div>${fromJournal?`<p class="draw-question">${escape(session.question)}</p><div class="card-slots">${resolveCards(session.cards).map((c,i)=>`<div class="card-slot selected"><div>${cardArt(c,c.reversed,session.cardTheme||'forest')}</div><small>${escape(SPREADS[session.spread].positions[i])}</small><strong>${escape(c.name)}<span class="orientation">${c.reversed?'逆位':'正位'}</span></strong></div>`).join('')}</div>`:''}<div class="luna-reading"><img src="/play/tarot/assets/luna-companion.webp" class="luna-avatar" alt="露娜"><div><b>露娜 · 给你的解读</b><p>${escape(reading.intro)}</p></div></div><div class="reading-cards ${reading.cards.length===1?'single':''}">${reading.cards.map((c,i)=>`<article class="reading-card"><span class="position">${String(i+1).padStart(2,'0')} / ${escape(SPREADS[session.spread].positions[i])}</span><h3>${escape(c.title)}</h3><p>${escape(c.text)}</p></article>`).join('')}</div><div class="guidance"><h3>✧ 可以从这些小事开始</h3><ul>${reading.guidance.map(item=>`<li>${escape(item)}</li>`).join('')}</ul></div><p class="reflection">${escape(reading.reflection)}</p>${fromJournal?'':`<div class="result-actions"><button class="secondary-button" data-action="new-reading">开始新的占卜 ↗</button><button class="primary-button" data-action="save" ${journal.some(item=>item.id===session.id)?'disabled':''}><span>${journal.some(item=>item.id===session.id)?'已保存到手记':'保存到占卜手记'}</span><span>▤</span></button></div>`}`;
+  return `<div class="result-head"><div><span class="result-label">LUNA'S READING · ${escape(SPREADS[session.spread].name)}</span><h2 id="${fromJournal?'saved-result-title':'result-title'}">${escape(reading.title)}</h2></div><span class="result-mode">✧ ${session.mode==='ai'?'AI 解读':'本地牌义解读'}</span></div>${fromJournal?`<p class="draw-question">${escape(session.question)}</p><div class="card-slots">${resolveCards(session.cards).map((c,i)=>`<div class="card-slot selected"><div>${cardArt(c,c.reversed,session.cardTheme||'forest')}</div><small>${escape(SPREADS[session.spread].positions[i])}</small><strong>${escape(c.name)}<span class="orientation">${c.reversed?'逆位':'正位'}</span></strong></div>`).join('')}</div>`:''}<div class="luna-reading"><img src="/play/tarot/assets/luna-companion.webp" class="luna-avatar" alt="露娜"><div><b>露娜 · 给你的解读</b><p>${escape(reading.intro)}</p></div></div><div class="reading-cards ${reading.cards.length===1?'single':''}">${reading.cards.map((c,i)=>`<article class="reading-card"><span class="position">${String(i+1).padStart(2,'0')} / ${escape(SPREADS[session.spread].positions[i])}</span><h3>${escape(c.title)}</h3><p>${escape(c.text)}</p></article>`).join('')}</div><div class="guidance"><h3>✧ 可以从这些小事开始</h3><ul>${reading.guidance.map(item=>`<li>${escape(item)}</li>`).join('')}</ul></div><p class="reflection">${escape(reading.reflection)}</p>${fromJournal?'':`<div class="result-actions"><button class="secondary-button" data-action="new-reading">开始新的占卜 ↗</button><button class="primary-button" data-action="save" ${journal.some(item=>item.id===session.id)?'disabled':''}><span>${journal.some(item=>item.id===session.id)?'已保存到手记':'保存到占卜手记'}</span><span>▤</span></button></div>`}`;
 }
 function resetQuestion() {
   state.controller?.abort();state.controller=null;state.busy=false;state.session=null;
-  $('#card-theme').disabled=false;
+  setReadingBusy(false);
   $('#back-question').disabled=false;$('#question-form').hidden=false;$('#draw-section').hidden=true;$('#result').hidden=true;
   $('#interpret').classList.remove('pending');$('#interpret').firstElementChild.textContent='解读这组牌';
+  $('#use-local-reading').hidden=true;
   say('每个问题，都可以有新的角度。今天还想一起聊些什么？');
   scrollTo($('#workspace'));$('#question').focus({preventScroll:true});
+}
+function setReadingBusy(busy) {
+  for(const id of ['card-theme','reading-mode','back-question','save-api-settings','clear-api-settings'])$(`#${id}`).disabled=busy;
+  $('#cancel-reading').hidden=!busy;
+  if(!busy)$('#interpret').classList.remove('pending');
+}
+function cancelReading() {
+  if(!state.busy)return;
+  state.controller?.abort();state.controller=null;state.busy=false;
+  setReadingBusy(false);updateProgress();
+  $('#reading-error').hidden=true;
+  $('#reading-status').textContent='已取消等待，抽好的牌还在。';
+  $('#use-local-reading').hidden=state.readingMode!=='ai';
 }
 function saveSession() {
   if(!state.session||journal.some(item=>item.id===state.session.id))return;
@@ -203,7 +230,7 @@ function showCard(id,daily=false) {
   if(scene?.description){const caption=document.createElement('p');caption.className='detail-scene';caption.textContent=scene.description;$('.detail-keywords').before(caption);}
 }
 function renderJournal() {
-  $('#journal-list').innerHTML=journal.length?journal.map(item=>`<article class="journal-entry"><div class="journal-mini-cards">${resolveCards(item.cards).map(c=>cardArt(c,c.reversed,item.cardTheme||'forest')).join('')}</div><div class="journal-content"><time datetime="${escape(item.date)}">${escape(new Date(item.date).toLocaleString('zh-CN',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</time><h3>${escape(item.question)}</h3><p>${escape(SPREADS[item.spread].name)} · 本地牌义解读 · ${item.cards.map(c=>escape(CARD_MAP.get(c.id).name)).join(' / ')}</p></div><div class="journal-actions"><button class="secondary-button" data-entry-id="${escape(item.id)}">回看 ↗</button><button class="remove-entry" data-remove-id="${escape(item.id)}" aria-label="删除这条手记">删除</button></div></article>`).join(''):'<div class="empty-state"><span>☾</span><h2>你的星光，还在等待落笔</h2><p>完成一次占卜后，点击「保存到占卜手记」。<br>这些记录会留在当前浏览器里，陪你回看自己的变化。</p><button class="secondary-button" data-go-reading>开始第一次占卜 ↗</button></div>';
+  $('#journal-list').innerHTML=journal.length?journal.map(item=>`<article class="journal-entry"><div class="journal-mini-cards">${resolveCards(item.cards).map(c=>cardArt(c,c.reversed,item.cardTheme||'forest')).join('')}</div><div class="journal-content"><time datetime="${escape(item.date)}">${escape(new Date(item.date).toLocaleString('zh-CN',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</time><h3>${escape(item.question)}</h3><p>${escape(SPREADS[item.spread].name)} · ${item.mode==='ai'?'AI 解读':'本地牌义解读'} · ${item.cards.map(c=>escape(CARD_MAP.get(c.id).name)).join(' / ')}</p></div><div class="journal-actions"><button class="secondary-button" data-entry-id="${escape(item.id)}">回看 ↗</button><button class="remove-entry" data-remove-id="${escape(item.id)}" aria-label="删除这条手记">删除</button></div></article>`).join(''):'<div class="empty-state"><span>☾</span><h2>你的星光，还在等待落笔</h2><p>完成一次占卜后，点击「保存到占卜手记」。<br>这些记录会留在当前浏览器里，陪你回看自己的变化。</p><button class="secondary-button" data-go-reading>开始第一次占卜 ↗</button></div>';
 }
 function removeEntry(id) {
   const item=journal.find(i=>i.id===id);if(!item)return;
@@ -224,12 +251,58 @@ function initDaily() {
   const schedule=()=>{const midnight=new Date();midnight.setHours(24,0,1,0);setTimeout(()=>{refresh();render();schedule();},midnight.getTime()-Date.now());};
   $('#daily-card').addEventListener('click',open);$('#daily-open').addEventListener('click',open);refresh();render();schedule();
 }
-function initPublicStatus() {
-  $('#mode-badge').textContent='免费本地牌义试玩';
-  $('#sidebar-mode').textContent='免费本地牌义试玩';
-  $('#settings-status').textContent='这是一份免费开放的塔罗试玩。抽牌与解读在你的浏览器中完成，无需登录。';
+function updateApiStatus() {
+  const ai=state.readingMode==='ai'&&state.apiConfig;
+  const connection=state.apiStatus==='ok'?'已完成一次解读':state.apiStatus==='error'?'上次调用未完成':'尚未验证连接';
+  $('#mode-badge').textContent=ai?`我的 API · ${state.apiStatus==='ok'?'已连接':state.apiStatus==='error'?'调用失败':'待验证'}`:'免费本地牌义试玩';
+  $('#mode-badge').classList.toggle('ai',!!ai&&state.apiStatus==='ok');
+  $('#sidebar-mode').textContent=ai?'使用我的 API':'免费本地牌义试玩';
+  $('#settings-status').textContent=state.apiConfig?`已填写模型 ${state.apiConfig.model}，${connection}。点击抽牌后的 AI 解读才会调用。`:'可以直接免费抽牌，也可以填写自己的 API，让 AI 结合问题解读。';
+  $('#reading-mode-note').textContent=ai?'问题和牌会发给你的 API；费用按服务商规则计算。':'在浏览器中整理牌义，不上传问题。';
+  $('#reading-mode').value=state.readingMode;
 }
-function openSettings() {$('#settings-dialog').showModal();}
+function initApiSettings() {
+  try {
+    const prefs=JSON.parse(localStorage.getItem(API_PREFERENCES_KEY)||'null');
+    if(prefs&&typeof prefs.baseUrl==='string'&&typeof prefs.model==='string'){
+      $('#api-base-url').value=prefs.baseUrl.slice(0,2048);$('#api-model').value=prefs.model.slice(0,200);
+    }
+  }catch{}
+  $('#api-settings-form').addEventListener('submit',event=>{
+    event.preventDefault();if(state.busy)return;
+    try {
+      const config=normalizeApiConfig({baseUrl:$('#api-base-url').value,model:$('#api-model').value,apiKey:$('#api-key').value});
+      state.apiConfig=config;state.apiStatus='unverified';state.readingMode='ai';
+      let remembered=true;
+      try{localStorage.setItem(API_PREFERENCES_KEY,JSON.stringify({baseUrl:config.baseUrl,model:config.model}));}catch{remembered=false;}
+      $('#api-settings-status').textContent=remembered?'设置已应用，尚未发起调用。刷新后需要重新填写 Key。':'设置已应用；此浏览器暂时无法记住地址和模型。';
+      updateApiStatus();updateProgress();$('#settings-dialog').close();
+      toast('已切换到 AI 解读。抽好牌后才会请求 API。');
+    }catch(error){$('#api-settings-status').textContent=error.message||'请检查接口设置。';}
+  });
+  $('#clear-api-settings').addEventListener('click',()=>{
+    if(state.busy)return;
+    state.apiConfig=null;state.apiStatus='unverified';state.readingMode='offline';
+    for(const id of ['api-base-url','api-model','api-key'])$(`#${id}`).value='';
+    let removed=true;try{localStorage.removeItem(API_PREFERENCES_KEY);}catch{removed=false;}
+    $('#api-settings-status').textContent=removed?'API 设置已清除，继续使用免费本地牌义。':'当前页面的 Key 已清除；浏览器未能删除保存的地址和模型。';
+    $('#use-local-reading').hidden=true;updateApiStatus();updateProgress();
+  });
+  $('#reading-mode').addEventListener('change',()=>{
+    if(state.busy)return;
+    if($('#reading-mode').value==='ai'&&!state.apiConfig){$('#reading-mode').value='offline';openSettings();return;}
+    state.readingMode=$('#reading-mode').value;
+    $('#reading-error').hidden=true;$('#reading-status').textContent='';$('#use-local-reading').hidden=true;
+    updateApiStatus();updateProgress();
+  });
+  $('#cancel-reading').addEventListener('click',cancelReading);
+  $('#use-local-reading').addEventListener('click',()=>{
+    if(state.busy)return;
+    state.readingMode='offline';updateApiStatus();interpret();
+  });
+  updateApiStatus();
+}
+function openSettings() {updateApiStatus();$('#settings-dialog').showModal();}
 
 function initThemes() {
   let selected=DEFAULT_CARD_THEME;
@@ -270,4 +343,4 @@ $$('.close-dialog').forEach(btn=>btn.addEventListener('click',()=>btn.closest('d
 $$('dialog').forEach(dialog=>dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();}));
 $('#open-settings').addEventListener('click',openSettings);$('#mode-badge').addEventListener('click',openSettings);$('#refresh-status').addEventListener('click',()=>$('#settings-dialog').close());
 $('#journal-count').textContent=String(journal.length);
-initThemes();renderCategories();renderSpreads();initDaily();initPublicStatus();
+initThemes();renderCategories();renderSpreads();initDaily();initApiSettings();

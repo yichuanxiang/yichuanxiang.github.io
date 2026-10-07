@@ -27,6 +27,28 @@
 .library-grid .empty-state{grid-column:1/-1}
 .detail-copy,.luna-reading>div{min-width:0;overflow-wrap:anywhere}
 .guidance,.reflection,.result-head h2{overflow-wrap:anywhere}
+.reading-mode-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding-bottom:17px;margin-bottom:24px;border-bottom:1px solid var(--line);font-size:12px}
+.reading-mode-row label{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.reading-mode-row select{color:var(--green);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:100%;font:inherit}
+.reading-mode-row p{margin:0;color:var(--muted);font-size:11px;overflow-wrap:anywhere}
+.reading-recovery{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.reading-recovery:has(>button:not([hidden])){padding-top:4px}
+#settings-dialog{width:min(580px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow-y:auto;font-size:13px}
+#settings-dialog h2{font-size:27px;margin:10px 0 12px}
+#settings-status{overflow-wrap:anywhere}
+.api-settings-form{display:grid;gap:12px;margin:22px 0}
+.api-settings-form label{display:block;font-size:12px;font-weight:600}
+.api-settings-form input{display:block;width:100%;min-height:43px;margin-top:6px;padding:9px 11px;background:#fffef9;color:var(--ink);border:1px solid #d7decc;border-radius:7px;font-size:14px;font-weight:400}
+.api-settings-form .field-help{margin:-5px 0 0;font-size:11px;color:var(--muted);line-height:1.8}
+.api-send-note{margin:0;padding:12px 14px;background:#edf1e5;border-radius:7px;font-size:12px;line-height:1.8}
+.api-settings-status{margin:0;color:var(--green);font-size:12px;overflow-wrap:anywhere}
+.api-settings-status:empty{display:none}
+.api-settings-actions{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:10px}
+.api-settings-actions button{min-height:44px;margin:0;font-size:12px;justify-content:center}
+#settings-dialog .settings-instructions{margin:20px 0 14px;border-top:1px solid var(--line);padding-top:14px;font-size:12px;overflow-wrap:anywhere}
+#settings-dialog summary{cursor:pointer;color:var(--green)}
+#settings-dialog .settings-instructions p{font-size:12px}
+@media(max-width:640px){.reading-mode-row{font-size:11px;gap:8px;padding-bottom:14px;margin-bottom:20px}.reading-mode-row p{font-size:10px}.api-settings-form input{font-size:16px}#settings-dialog{padding:26px 20px}.api-settings-actions{grid-template-columns:1fr}.api-settings-form .field-help{font-size:11px}}
 @media(max-width:640px){
   .sidebar{grid-template-columns:1fr auto auto;gap:0 12px}
   .sidebar nav{grid-column:1/4}

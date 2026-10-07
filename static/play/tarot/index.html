@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#24483f">
-  <meta name="description" content="月见塔罗免费试玩：78 张卡牌、两种主题与本地牌义解读。无需登录，问题与手记只留在你的浏览器中。">
+  <meta name="description" content="月见塔罗：78 张卡牌、两种主题，免费本地牌义或自带 API 的 AI 解读。无需登录，手记保存在当前浏览器。">
   <title>月见塔罗 · 免费试玩</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324483f'/%3E%3Cpath d='M22 7a10 10 0 1 0 3 16A10 10 0 0 1 22 7' fill='%23eee0b7'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/play/tarot/styles.css">
-  <script type="module" src="/play/tarot/app.js"></script>
+  <link rel="stylesheet" href="/play/tarot/styles.css?v=20261007-api-1">
+  <script type="module" src="/play/tarot/app.js?v=20261007-api-1"></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -21,7 +21,7 @@
       <button class="nav-item" data-page="library"><span>◈</span>塔罗图鉴</button>
     </nav>
     <div class="sidebar-note"><span class="tiny-star">✳</span><p>答案也许不在远方，<br>而在你停下来的一刻。</p><span class="note-line"></span></div>
-    <button class="settings-button" id="open-settings" aria-label="了解本地试玩"><span>ⓘ</span><span>试玩说明<small id="sidebar-mode">免费本地牌义试玩</small></span><span class="status-dot"></span></button>
+    <button class="settings-button" id="open-settings" aria-label="打开 API 设置与试玩说明"><span>⚙</span><span>API 设置<small id="sidebar-mode">免费本地牌义试玩</small></span><span class="status-dot"></span></button>
   </aside>
   <main>
     <header class="topbar"><span id="page-label">占卜空间 <span class="muted">/ 与自己对话</span></span><div class="topbar-actions"><label class="theme-picker"><span>卡面</span><select id="card-theme" aria-label="选择卡面主题"></select></label><button id="mode-badge" class="mode-badge">免费本地牌义试玩</button></div></header>
@@ -33,6 +33,7 @@
         </section>
         <div class="workspace-grid">
           <section class="reading-workspace" id="workspace" aria-label="塔罗占卜">
+            <div class="reading-mode-row"><label for="reading-mode">解读方式 <select id="reading-mode"><option value="offline">免费本地牌义</option><option value="ai">我的 API · AI 解读</option></select></label><p id="reading-mode-note">在浏览器中整理牌义，不上传问题。</p></div>
             <form id="question-form">
               <div class="section-heading"><div><span class="step-number">01</span><h2>此刻，你想问些什么？</h2></div><span class="small muted">从一个真正在意的问题开始</span></div>
               <div id="categories" class="category-tabs" aria-label="占卜主题"></div>
@@ -44,7 +45,7 @@
               <button type="submit" id="start-reading" class="primary-button"><span>静下心，开始抽牌</span><span>✦ →</span></button>
               <p class="form-note">问题没有标准答案，你始终拥有选择的自由。</p>
             </form>
-            <section id="draw-section" hidden aria-labelledby="draw-title"><div class="section-heading"><div><span class="step-number">03</span><h2 id="draw-title">跟随直觉，选择你的牌</h2></div><button id="back-question" class="text-button">修改问题 ↗</button></div><p id="draw-question" class="draw-question"></p><div id="card-slots" class="card-slots"></div><p id="draw-progress" class="draw-progress" aria-live="polite"></p><div id="deck" class="deck" aria-label="待抽取的塔罗牌"></div><button id="interpret" class="primary-button" disabled><span>解读这组牌</span><span>✦ →</span></button><p id="reading-status" role="status" class="form-note"></p><div id="reading-error" class="error-message" role="alert" hidden></div></section>
+            <section id="draw-section" hidden aria-labelledby="draw-title"><div class="section-heading"><div><span class="step-number">03</span><h2 id="draw-title">跟随直觉，选择你的牌</h2></div><button id="back-question" class="text-button">修改问题 ↗</button></div><p id="draw-question" class="draw-question"></p><div id="card-slots" class="card-slots"></div><p id="draw-progress" class="draw-progress" aria-live="polite"></p><div id="deck" class="deck" aria-label="待抽取的塔罗牌"></div><button id="interpret" class="primary-button" disabled><span>解读这组牌</span><span>✦ →</span></button><p id="reading-status" role="status" class="form-note"></p><div id="reading-error" class="error-message" role="alert" hidden></div><div class="reading-recovery"><button id="cancel-reading" class="text-button" hidden>取消等待</button><button id="use-local-reading" class="secondary-button" hidden>用这组牌看本地牌义</button></div></section>
           </section>
           <aside class="daily-panel"><div class="daily-top"><span>DAILY RITUAL</span><span>✷</span></div><h2>今日一牌</h2><p>给今天的自己，一点轻盈的提醒。</p><button id="daily-card" class="daily-card" aria-label="翻开今日一牌"></button><div id="daily-name">今天，会有什么小小的启发？</div><button id="daily-open" class="daily-action">翻开今日的指引 <span>↗</span></button><div class="daily-footer"><span>✧</span> 每天一张，和自己保持连接</div></aside>
         </div>
@@ -56,7 +57,18 @@
     </div>
   </main>
   <dialog id="detail-dialog"><button class="close-dialog" aria-label="关闭">×</button><div id="detail-content"></div></dialog>
-  <dialog id="settings-dialog"><button class="close-dialog" aria-label="关闭">×</button><p class="eyebrow">ABOUT THIS DEMO</p><h2>免费本地牌义试玩</h2><p id="settings-status"></p><div class="settings-instructions"><strong>解读从哪里来？</strong><p>根据预设的正逆位牌义、你选择的主题、问题关键词和牌阵位置，组合成这次的探索提示。同一组牌与问题会得到相同的本地解读。</p><strong>我的内容会存在哪里？</strong><p>问题、抽牌结果和占卜手记不会上传。只有点击「保存到占卜手记」才会把记录留在当前浏览器；删除手记或清除网站数据即可移除。更换设备或浏览器后不会同步。</p></div><p class="small muted">塔罗用于娱乐和自我探索，你始终拥有自己的选择。</p><button id="refresh-status" class="primary-button">继续试玩</button></dialog>
+  <dialog id="settings-dialog" aria-labelledby="api-settings-title"><button class="close-dialog" aria-label="关闭">×</button><p class="eyebrow">YOUR OWN API</p><h2 id="api-settings-title">接上你的 AI</h2><p id="settings-status"></p>
+    <form id="api-settings-form" class="api-settings-form">
+      <label for="api-base-url">接口地址 <input id="api-base-url" type="url" placeholder="https://你的服务地址/v1" maxlength="2048" autocomplete="off" spellcheck="false" required></label>
+      <p class="field-help">填写 OpenAI 兼容接口的 Base URL，或完整的 /chat/completions 地址。</p>
+      <label for="api-model">模型名称 <input id="api-model" type="text" placeholder="填服务商提供的模型 ID" maxlength="200" autocomplete="off" spellcheck="false" required></label>
+      <label for="api-key">API Key <input id="api-key" type="password" placeholder="只留在这次打开的页面里" maxlength="4096" autocomplete="off" spellcheck="false" required></label>
+      <p class="field-help">地址和模型会记在此浏览器；Key 只放在本页内存，刷新或关闭页面后清除。请使用你信任的接口。</p>
+      <p class="api-send-note">点击 AI 解读时，问题和抽到的牌会发给该接口，费用按服务商的规则计算。保存设置不会发起调用。</p>
+      <p id="api-settings-status" class="api-settings-status" role="status" aria-live="polite"></p>
+      <div class="api-settings-actions"><button id="save-api-settings" type="submit" class="primary-button">使用这个 API</button><button id="clear-api-settings" type="button" class="secondary-button">清除 API 设置</button></div>
+    </form>
+    <details class="settings-instructions"><summary>本地牌义和手记说明</summary><p>本地牌义根据正逆位、问题关键词和牌阵位置组合，不上传问题。同一组牌与问题会得到相同的本地解读。</p><p>点击「保存到占卜手记」才会把问题与结果留在当前浏览器；不会保存 API Key，也不会同步到其他设备。删除手记或清除网站数据即可移除。</p><p>接口需要允许此网站的浏览器跨域请求（CORS）。连接失败时，可以用已经抽好的牌继续看本地牌义。</p></details><p class="small muted">塔罗用于娱乐和自我探索，你始终拥有自己的选择。</p><button id="refresh-status" class="text-button">继续试玩 →</button></dialog>
   <div id="toast" class="toast" role="status" hidden></div>
 </body>
 </html>
