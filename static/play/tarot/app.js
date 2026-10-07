@@ -1,9 +1,11 @@
-import { DECK, SPREADS, CATEGORIES } from './modules/deck.js';
-import { generateReading, validateReading } from './modules/reading.js';
-import { normalizeApiConfig, requestApiReading } from './modules/api-client.js';
+import { DECK, SPREADS, CATEGORIES } from './modules/deck.js?v=20261007-spreads-1';
+import { generateReading, validateReading } from './modules/reading.js?v=20261007-spreads-1';
+import { normalizeApiConfig, requestApiReading } from './modules/api-client.js?v=20261007-spreads-1';
 import { cardArt, cardBack } from './modules/card-art.js';
 import { CARD_THEMES, DEFAULT_CARD_THEME, CHARACTERS, SHOWCASE_CARDS, getCardTheme, setCardTheme, getCardCharacters, getCardScene } from './modules/deck-themes.js';
 import { BOTAN_V8_READY } from './modules/botan-v8-ready.js';
+import { SPREAD_GROUPS } from './modules/spreads.js?v=20261007-spreads-1';
+import { renderSpreadDiagram, renderSpreadBoard } from './modules/spread-view.js?v=20261007-spreads-1';
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -13,7 +15,7 @@ const JOURNAL_KEY = 'moonlit.public.journal.v1';
 const DAILY_KEY = 'moonlit.public.daily.v1';
 const THEME_KEY = 'moonlit.public.card-theme.v1';
 const API_PREFERENCES_KEY = 'moonlit.public.api-preferences.v1';
-const state = { page:'reading',category:'general',spread:'three',question:'',deck:[],drawn:[],selected:new Set(),busy:false,controller:null,session:null,readingMode:'offline',apiConfig:null,apiStatus:'unverified',librarySuit:'all',libraryCharacter:'all',libraryScene:'all' };
+const state = { page:'reading',category:'general',spread:'three',spreadGroup:'all',question:'',deck:[],drawn:[],selected:new Set(),busy:false,controller:null,session:null,readingMode:'offline',apiConfig:null,apiStatus:'unverified',librarySuit:'all',libraryCharacter:'all',libraryScene:'all' };
 let toastTimer;
 let libraryImageObserver;
 let journal = loadJournal();
@@ -75,9 +77,15 @@ function renderCategories() {
   $('#categories').innerHTML=CATEGORIES.map(c=>`<button type="button" data-category="${c.id}" class="${c.id===state.category?'active':''}" aria-pressed="${c.id===state.category}"><span>${symbols[c.id]}</span>${labels[c.id]}</button>`).join('');
 }
 function renderSpreads() {
-  const descriptions={single:'一个问题，一点启发',three:'处境 · 关注 · 行动',relationship:'需要 · 互动 · 方向'};
-  const names={single:'单牌指引',three:'三牌探索',relationship:'关系镜像'};
-  $('#spreads').innerHTML=Object.values(SPREADS).map(s=>`<label class="spread-option"><input type="radio" name="spread" value="${s.id}" ${s.id===state.spread?'checked':''}><span class="mini-spread ${s.id}">${s.positions.map(()=>'<i></i>').join('')}</span><strong>${names[s.id]}</strong><small>${descriptions[s.id]}</small></label>`).join('');
+  $('#spread-filters').innerHTML=SPREAD_GROUPS.map(group=>`<button type="button" data-spread-group="${group.id}" class="${state.spreadGroup===group.id?'active':''}" aria-pressed="${state.spreadGroup===group.id}">${escape(group.label)}</button>`).join('');
+  const spreads=Object.values(SPREADS).filter(s=>state.spreadGroup==='all'||s.group===state.spreadGroup);
+  $('#spreads').innerHTML=spreads.map(s=>`<label class="spread-option"><input type="radio" name="spread" value="${s.id}" ${s.id===state.spread?'checked':''}><span class="spread-option-count">${s.positions.length} 张</span>${renderSpreadDiagram(s)}<strong>${escape(s.shortName)}</strong><small>${escape(s.description)}</small></label>`).join('');
+  renderSpreadDetails();
+}
+function renderSpreadDetails() {
+  const s=SPREADS[state.spread];
+  $('#spread-detail').innerHTML=`<div class="spread-detail-heading"><div><span class="small muted">当前选择</span><h3>${escape(s.shortName)} <span>${s.positions.length} 张</span></h3></div>${renderSpreadDiagram(s)}</div><p>${escape(s.description)}</p><ol class="spread-detail-positions">${s.positions.map((position,i)=>`<li><b>${i+1} · ${escape(position)}</b><span>${escape(s.positionNotes[i])}</span></li>`).join('')}</ol><button type="button" class="spread-example" data-spread-example="${escape(s.id)}">试着问：${escape(s.exampleQuestion)} ↗</button>`;
+  $('#start-reading').firstElementChild.textContent=`开始抽牌 · ${s.shortName} ${s.positions.length} 张`;
 }
 function beginDraw(event) {
   event?.preventDefault();
@@ -89,21 +97,26 @@ function beginDraw(event) {
   $('#reading-error').hidden=true;$('#reading-status').textContent='';
   $('#use-local-reading').hidden=true;
   $('#draw-question').textContent=question;
-  $('#draw-title').textContent=`跟随直觉，选择 ${SPREADS[state.spread].positions.length} 张牌`;
+  $('#draw-title').textContent=`${SPREADS[state.spread].shortName} · 选择 ${SPREADS[state.spread].positions.length} 张牌`;
   renderSlots();renderDeck();updateProgress();
   say('慢慢来，选你想停留的那张牌。我会陪你一起看。');
   scrollTo($('#workspace'));
   $('#deck button')?.focus({preventScroll:true});
 }
+function renderBoardView(spread,cards,theme) {
+  const html=renderSpreadBoard(spread,cards,theme),legend=html.indexOf('<ol class="spread-position-list">');
+  const wide=spread.layout.columns>=4;
+  return `${wide?'<p class="spread-scroll-hint">↔ 左右滑动，查看完整牌阵；点击卡牌可放大。</p>':''}<div class="spread-board-scroll${wide?' is-wide':''}"${wide?' tabindex="0" aria-label="完整牌阵，可左右滑动查看"':''}>${html.slice(0,legend)}</div>${html.slice(legend)}`;
+}
 function renderSlots() {
-  $('#card-slots').innerHTML=SPREADS[state.spread].positions.map((position,i)=>{const drawn=state.drawn[i],card=drawn&&CARD_MAP.get(drawn.id);return `<div class="card-slot ${drawn?'selected':''}"><div>${card?cardArt(card,drawn.reversed):'✧'}</div><small>${escape(position)}</small>${card?`<strong>${escape(card.name)}<span class="orientation">${drawn.reversed?'逆位':'正位'}</span></strong>`:''}</div>`;}).join('');
+  $('#card-slots').innerHTML=renderBoardView(SPREADS[state.spread],resolveCards(state.drawn),getCardTheme());
 }
 function renderDeck() {
   $('#deck').innerHTML=state.deck.map((_,i)=>`<button type="button" class="deck-card" data-deck-index="${i}" aria-label="选择第 ${i+1} 张牌">${cardBack()}</button>`).join('');
 }
 function updateProgress() {
   const total=SPREADS[state.spread].positions.length,complete=state.drawn.length===total;
-  $('#draw-progress').textContent=complete?'你的牌已经就位。准备好听听露娜的解读了吗？':`已选择 ${state.drawn.length} / ${total} 张 · 下一张：${SPREADS[state.spread].positions[state.drawn.length]}`;
+  $('#draw-progress').textContent=complete?'你的牌已经就位。准备好听听露娜的解读了吗？':`已选择 ${state.drawn.length} / ${total} 张 · 下一张：${SPREADS[state.spread].positions[state.drawn.length]} — ${SPREADS[state.spread].positionNotes[state.drawn.length]}`;
   $('#interpret').disabled=!complete||state.busy;
   if(!state.busy)$('#interpret').firstElementChild.textContent=state.readingMode==='ai'?'AI 解读这组牌':state.session?.mode==='offline'?'再次解读这组牌':'解读这组牌';
   $$('#deck button').forEach(btn=>{const selected=state.selected.has(Number(btn.dataset.deckIndex));btn.disabled=selected||complete||state.busy;btn.classList.toggle('selected',selected);btn.setAttribute('aria-pressed',String(selected));});
@@ -156,8 +169,13 @@ async function interpret() {
   }
 }
 function renderReading(session,fromJournal) {
-  const reading=session.reading;
-  return `<div class="result-head"><div><span class="result-label">LUNA'S READING · ${escape(SPREADS[session.spread].name)}</span><h2 id="${fromJournal?'saved-result-title':'result-title'}">${escape(reading.title)}</h2></div><span class="result-mode">✧ ${session.mode==='ai'?'AI 解读':'本地牌义解读'}</span></div>${fromJournal?`<p class="draw-question">${escape(session.question)}</p><div class="card-slots">${resolveCards(session.cards).map((c,i)=>`<div class="card-slot selected"><div>${cardArt(c,c.reversed,session.cardTheme||'forest')}</div><small>${escape(SPREADS[session.spread].positions[i])}</small><strong>${escape(c.name)}<span class="orientation">${c.reversed?'逆位':'正位'}</span></strong></div>`).join('')}</div>`:''}<div class="luna-reading"><img src="/play/tarot/assets/luna-companion.webp" class="luna-avatar" alt="露娜"><div><b>露娜 · 给你的解读</b><p>${escape(reading.intro)}</p></div></div><div class="reading-cards ${reading.cards.length===1?'single':''}">${reading.cards.map((c,i)=>`<article class="reading-card"><span class="position">${String(i+1).padStart(2,'0')} / ${escape(SPREADS[session.spread].positions[i])}</span><h3>${escape(c.title)}</h3><p>${escape(c.text)}</p></article>`).join('')}</div><div class="guidance"><h3>✧ 可以从这些小事开始</h3><ul>${reading.guidance.map(item=>`<li>${escape(item)}</li>`).join('')}</ul></div><p class="reflection">${escape(reading.reflection)}</p>${fromJournal?'':`<div class="result-actions"><button class="secondary-button" data-action="new-reading">开始新的占卜 ↗</button><button class="primary-button" data-action="save" ${journal.some(item=>item.id===session.id)?'disabled':''}><span>${journal.some(item=>item.id===session.id)?'已保存到手记':'保存到占卜手记'}</span><span>▤</span></button></div>`}`;
+  const reading=session.reading,spread=SPREADS[session.spread];
+  return `<div class="result-head"><div><span class="result-label">LUNA'S READING · ${escape(spread.name)}</span><h2 id="${fromJournal?'saved-result-title':'result-title'}">${escape(reading.title)}</h2></div><span class="result-mode">${session.mode==='ai'?'✦ AI 解读':'✧ 本地牌义解读'}</span></div>
+    ${fromJournal?`<p class="draw-question">${escape(session.question)}</p><div class="saved-spread">${renderBoardView(spread,resolveCards(session.cards),session.cardTheme||'forest')}</div>`:''}
+    <div class="luna-reading"><img src="/play/tarot/assets/luna-companion.webp" class="luna-avatar" alt="露娜"><div><b>露娜 · 给你的解读</b><p>${escape(reading.intro)}</p></div></div>
+    <div class="reading-cards ${reading.cards.length===1?'single':''}">${reading.cards.map((c,i)=>`<article class="reading-card"><span class="position">${String(i+1).padStart(2,'0')} / ${escape(spread.positions[i])}</span><h3>${escape(c.title)}</h3><p>${escape(c.text)}</p></article>`).join('')}</div>
+    <div class="guidance"><h3>✧ 组合解读与可尝试的步骤</h3><ul>${reading.guidance.map(item=>`<li>${escape(item)}</li>`).join('')}</ul></div><p class="reflection">${escape(reading.reflection)}</p>
+    ${fromJournal?'':`<div class="result-actions"><button class="secondary-button" data-action="new-reading">开始新的占卜 ↗</button><button class="primary-button" data-action="save" ${journal.some(item=>item.id===session.id)?'disabled':''}><span>${journal.some(item=>item.id===session.id)?'已保存到手记':'保存到占卜手记'}</span><span>▤</span></button></div>`}`;
 }
 function resetQuestion() {
   state.controller?.abort();state.controller=null;state.busy=false;state.session=null;
@@ -220,17 +238,19 @@ function renderLibrary() {
   $('#library-grid').innerHTML=cards.length?cards.map(c=>`<button class="library-card" data-card-id="${c.id}" aria-label="查看${escape(c.name)}牌义">${libraryCardArt(c)}<strong>${escape(c.name)}</strong>${botan?`<span class="card-cast">${escape(getCardCharacters(c).map(character=>character.short).join(' · '))}</span>${getCardScene(c).description?`<span class="card-scene">${escape(getCardScene(c).label)}</span>`:''}`:''}<small>${escape(c.keywords.join(' · '))}</small></button>`).join(''):'<div class="empty-state">没有找到这张牌，试试其他名字或关键词。</div>';
   observeLibraryImages();
 }
-function showCard(id,daily=false) {
+function showCard(id,daily=false,options={}) {
   const card=CARD_MAP.get(id);if(!card)return;
-  $('#detail-content').innerHTML=`<p class="eyebrow">${daily?'YOUR DAILY CARD':'TAROT ENCYCLOPEDIA'}</p><div class="detail-layout"><div class="detail-art">${cardArt(card)}</div><div class="detail-copy"><span class="english">${escape(card.english)}</span><h2>${escape(card.name)}</h2><div class="detail-keywords">${escape(card.keywords.join(' · '))}</div><h3>${daily?'露娜的小提醒':'正位 · 看见这一面'}</h3><p>${escape(card.upright)}</p>${daily?'':`<h3>逆位 · 换个角度</h3><p>${escape(card.reversed)}</p>`}<h3>✧ 今天可以尝试</h3><p>${escape(card.advice)}</p></div></div>`;
-  $('#detail-dialog').showModal();
-  const characters=getCardCharacters(card);
+  const theme=options.theme||getCardTheme();
+  $('#detail-content').innerHTML=`<p class="eyebrow">${daily?'YOUR DAILY CARD':'TAROT ENCYCLOPEDIA'}</p><div class="detail-layout"><div class="detail-art">${cardArt(card,options.reversed===true,theme)}</div><div class="detail-copy"><span class="english">${escape(card.english)}</span><h2>${escape(card.name)}${typeof options.reversed==='boolean'?` · ${options.reversed?'逆位':'正位'}`:''}</h2><div class="detail-keywords">${escape(card.keywords.join(' · '))}</div><h3>${daily?'露娜的小提醒':'正位 · 看见这一面'}</h3><p>${escape(card.upright)}</p>${daily?'':`<h3>逆位 · 换个角度</h3><p>${escape(card.reversed)}</p>`}<h3>✧ 今天可以尝试</h3><p>${escape(card.advice)}</p></div></div>`;
+  if(!$('#detail-dialog').open)$('#detail-dialog').showModal();
+  $('#detail-dialog').scrollTop=0;
+  const characters=getCardCharacters(card,theme);
   if(characters.length){const cast=document.createElement('p');cast.className='detail-cast';cast.textContent=`卡面角色 · ${characters.map(character=>character.name).join(' / ')}`;$('.detail-copy h2').after(cast);}
-  const scene=getCardScene(card);
+  const scene=getCardScene(card,theme);
   if(scene?.description){const caption=document.createElement('p');caption.className='detail-scene';caption.textContent=scene.description;$('.detail-keywords').before(caption);}
 }
 function renderJournal() {
-  $('#journal-list').innerHTML=journal.length?journal.map(item=>`<article class="journal-entry"><div class="journal-mini-cards">${resolveCards(item.cards).map(c=>cardArt(c,c.reversed,item.cardTheme||'forest')).join('')}</div><div class="journal-content"><time datetime="${escape(item.date)}">${escape(new Date(item.date).toLocaleString('zh-CN',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</time><h3>${escape(item.question)}</h3><p>${escape(SPREADS[item.spread].name)} · ${item.mode==='ai'?'AI 解读':'本地牌义解读'} · ${item.cards.map(c=>escape(CARD_MAP.get(c.id).name)).join(' / ')}</p></div><div class="journal-actions"><button class="secondary-button" data-entry-id="${escape(item.id)}">回看 ↗</button><button class="remove-entry" data-remove-id="${escape(item.id)}" aria-label="删除这条手记">删除</button></div></article>`).join(''):'<div class="empty-state"><span>☾</span><h2>你的星光，还在等待落笔</h2><p>完成一次占卜后，点击「保存到占卜手记」。<br>这些记录会留在当前浏览器里，陪你回看自己的变化。</p><button class="secondary-button" data-go-reading>开始第一次占卜 ↗</button></div>';
+  $('#journal-list').innerHTML=journal.length?journal.map(item=>`<article class="journal-entry"><div class="journal-mini-cards">${resolveCards(item.cards.slice(0,3)).map(c=>cardArt(c,c.reversed,item.cardTheme||'forest')).join('')}${item.cards.length>3?`<span class="journal-more-cards" aria-label="另外${item.cards.length-3}张，回看完整牌阵">+${item.cards.length-3}</span>`:''}</div><div class="journal-content"><time datetime="${escape(item.date)}">${escape(new Date(item.date).toLocaleString('zh-CN',{month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}))}</time><h3>${escape(item.question)}</h3><p>${escape(SPREADS[item.spread].name)} · ${item.cards.length} 张 · ${item.mode==='ai'?'AI 解读':'本地牌义解读'}</p></div><div class="journal-actions"><button class="secondary-button" data-entry-id="${escape(item.id)}">回看 ↗</button><button class="remove-entry" data-remove-id="${escape(item.id)}" aria-label="删除这条手记">删除</button></div></article>`).join(''):'<div class="empty-state"><span>☾</span><h2>你的星光，还在等待落笔</h2><p>完成一次占卜后，点击「保存到占卜手记」。<br>这些记录会留在当前浏览器里，陪你回看自己的变化。</p><button class="secondary-button" data-go-reading>开始第一次占卜 ↗</button></div>';
 }
 function removeEntry(id) {
   const item=journal.find(i=>i.id===id);if(!item)return;
@@ -328,9 +348,23 @@ $$('.nav-item').forEach(btn=>btn.addEventListener('click',()=>showPage(btn.datas
 $('#question-form').addEventListener('submit',beginDraw);
 $('#question').addEventListener('input',()=>{$('#question-length').textContent=`${$('#question').value.length} / 500`;});
 $('#categories').addEventListener('click',event=>{const btn=event.target.closest('[data-category]');if(!btn)return;state.category=btn.dataset.category;renderCategories();$('#question').placeholder={general:'比如：最近总觉得犹豫，我可以先从哪件小事开始？',love:'比如：在这段关系里，我可以怎样更清楚地表达需要？',career:'比如：面对目前的工作状态，我可以怎样找到新的方向？',growth:'比如：最近容易自我怀疑，我可以怎样照顾自己的感受？'}[state.category]; say({general:'想问什么都可以。我们从你最在意的事开始。',love:'关系中的心情，值得被认真听见。先聊聊你的感受吧。',career:'前方的路，可以一步一步看。哪件事让你犹豫了？',growth:'你不需要立刻成为更好的谁。我们先照顾此刻的你。'}[state.category]);});
-$('#spreads').addEventListener('change',event=>{state.spread=event.target.value;});
+$('#spreads').addEventListener('change',event=>{if(!Object.hasOwn(SPREADS,event.target.value))return;state.spread=event.target.value;renderSpreadDetails();});
+$('#spread-filters').addEventListener('click',event=>{const btn=event.target.closest('[data-spread-group]');if(!btn)return;state.spreadGroup=btn.dataset.spreadGroup;renderSpreads();$(`[data-spread-group="${state.spreadGroup}"]`).focus({preventScroll:true});});
+$('#spread-detail').addEventListener('click',event=>{const btn=event.target.closest('[data-spread-example]');if(!btn)return;$('#question').value=SPREADS[btn.dataset.spreadExample].exampleQuestion;$('#question').dispatchEvent(new Event('input'));$('#question').focus();});
 $$('[data-prompt]').forEach(btn=>btn.addEventListener('click',()=>{$('#question').value=btn.dataset.prompt;$('#question').dispatchEvent(new Event('input'));$('#question').focus();}));
 $('#deck').addEventListener('click',event=>{const btn=event.target.closest('[data-deck-index]');if(btn)pickCard(Number(btn.dataset.deckIndex));});
+function openSpreadCard(event) {
+  const btn=event.target.closest('[data-spread-card]');if(!btn)return;
+  const saved=btn.closest('.saved-spread')?$('#detail-content').innerHTML:null;
+  const savedScroll=$('#detail-dialog').scrollTop;
+  showCard(btn.dataset.spreadCard,false,{reversed:btn.dataset.spreadReversed==='true',theme:btn.dataset.spreadTheme});
+  if(saved){
+    const back=document.createElement('button');back.type='button';back.className='secondary-button';back.textContent='← 返回完整牌阵';
+    back.onclick=()=>{$('#detail-content').innerHTML=saved;$('#detail-dialog').scrollTop=savedScroll;};$('#detail-content').append(back);
+  }
+}
+$('#card-slots').addEventListener('click',openSpreadCard);
+$('#detail-content').addEventListener('click',openSpreadCard);
 $('#back-question').addEventListener('click',resetQuestion);$('#interpret').addEventListener('click',interpret);
 $('#result').addEventListener('click',event=>{const action=event.target.closest('[data-action]')?.dataset.action;if(action==='new-reading')resetQuestion();if(action==='save')saveSession();});
 $('#library-filters').addEventListener('click',event=>{const btn=event.target.closest('[data-suit]');if(btn){state.librarySuit=btn.dataset.suit;renderLibrary();}});

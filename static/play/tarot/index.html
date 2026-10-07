@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#24483f">
-  <meta name="description" content="月见塔罗：78 张卡牌、两种主题，免费本地牌义或自带 API 的 AI 解读。无需登录，手记保存在当前浏览器。">
+  <meta name="description" content="月见塔罗：78 张卡牌、12 种牌阵、两种主题，免费本地牌义或自带 API 的 AI 解读。无需登录，手记保存在当前浏览器。">
   <title>月见塔罗 · 免费试玩</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2324483f'/%3E%3Cpath d='M22 7a10 10 0 1 0 3 16A10 10 0 0 1 22 7' fill='%23eee0b7'/%3E%3C/svg%3E">
-  <link rel="stylesheet" href="/play/tarot/styles.css?v=20261007-api-2">
-  <script type="module" src="/play/tarot/app.js?v=20261007-api-1"></script>
+  <link rel="stylesheet" href="/play/tarot/styles.css?v=20261007-spreads-1">
+  <script type="module" src="/play/tarot/app.js?v=20261007-spreads-1"></script>
 </head>
 <body>
   <aside class="sidebar">
@@ -41,7 +41,9 @@
               <div class="question-box"><textarea id="question" maxlength="500" rows="3" placeholder="比如：面对目前的工作状态，我可以怎样找到新的方向？" required></textarea><span id="question-length">0 / 500</span></div>
               <div class="prompt-row"><span>试着问</span><button type="button" class="prompt-chip" data-prompt="我可以怎样更好地照顾自己的感受？">如何照顾自己的感受？ ↗</button><button type="button" class="prompt-chip" data-prompt="面对目前的工作状态，我可以怎样找到新的方向？">寻找事业的方向 ↗</button></div>
               <div class="section-heading spread-heading"><div><span class="step-number">02</span><h2>选择你的牌阵</h2></div></div>
+              <div id="spread-filters" class="spread-filters" aria-label="按用途浏览牌阵"></div>
               <div class="spread-options" id="spreads" role="radiogroup" aria-label="选择牌阵"></div>
+              <div id="spread-detail" class="spread-detail" aria-label="当前牌阵与牌位说明"></div>
               <button type="submit" id="start-reading" class="primary-button"><span>静下心，开始抽牌</span><span>✦ →</span></button>
               <p class="form-note">问题没有标准答案，你始终拥有选择的自由。</p>
             </form>

@@ -1,4 +1,5 @@
-import { CATEGORIES, DECK, SPREADS } from './deck.js';
+import { CATEGORIES, DECK, SPREADS } from './deck.js?v=20261007-spreads-1';
+import { MAX_SPREAD_CARDS } from './spreads.js?v=20261007-spreads-1';
 
 const deckById = new Map(DECK.map(card => [card.id, card]));
 
@@ -40,7 +41,7 @@ function resolveInput({ question = '', category = 'general', spread = 'single', 
   const categoryId = typeof category === 'string' ? category : category?.id;
   const selectedCategory = CATEGORIES.find(item => item.id === categoryId) ?? CATEGORIES[0];
   const spreadId = typeof spread === 'string' ? spread : spread?.id;
-  const selectedSpread = SPREADS[spreadId] ?? SPREADS.single;
+  const selectedSpread = Object.hasOwn(SPREADS, spreadId ?? '') ? SPREADS[spreadId] : SPREADS.single;
   const selectedCards = Array.isArray(cards) ? cards.slice(0, selectedSpread.positions.length) : [];
   const cleanQuestion = String(question ?? '').trim().slice(0, 800);
   return { question: cleanQuestion, category: selectedCategory, spread: selectedSpread, cards: selectedCards };
@@ -75,6 +76,35 @@ function positionFrame(position) {
     '可以尝试的方向': '在“可以尝试的方向”的位置，让调整落到双方能够讨论的小事：',
   };
   return frames[position] ?? `在“${position}”的位置，留意这样的线索：`;
+}
+
+function positionFocus(spread, index) {
+  const note = spread.positionNotes?.[index];
+  return note ? `这个牌位关注的是：${note}` : '';
+}
+
+function spreadSynthesis(spread, cards) {
+  const ref = index => {
+    const card = cards[index];
+    if (!card) return `“${spread.positions[index]}”`;
+    const keyword = card.keywords?.[0] ?? '需要留意的线索';
+    return `“${spread.positions[index]} · ${card.name ?? '塔罗牌'}${card.reversed === true ? '逆位' : '正位'}”的${keyword}`;
+  };
+  const summaries = {
+    single: () => `从${ref(0)}中，选一条与你今天真实经历相符的提醒，试一个小行动，再看它有没有帮助。`,
+    three: () => `先用${ref(0)}描述眼前的处境，再用${ref(1)}补上容易漏看的线索，让${ref(2)}回应这条线索，形成一次能够检查结果的尝试。`,
+    relationship: () => `把${ref(0)}放进${ref(1)}所对应的真实互动中，用${ref(2)}准备一句具体请求；对方是否愿意回应，要通过实际沟通确认。`,
+    timeline: () => `比较${ref(0)}与${ref(1)}，找出一个延续的模式和一项已经改变的条件，再把${ref(2)}用于近期可调整的行动。它不是已经确定的未来。`,
+    choice: () => `先确认${ref(0)}是否符合自己的优先级。用同一标准比较${ref(1)}和${ref(3)}，再核对${ref(2)}与${ref(4)}对应的真实投入，补齐信息后自己决定。`,
+    'relationship-deep': () => `将${ref(0)}与${ref(1)}放在一起核对，看看${ref(2)}是否对应具体的表达难点；用${ref(3)}限定自己能承担的范围，再让${ref(4)}成为一次双方都能拒绝的交流邀请。`,
+    'career-path': () => `从${ref(0)}对照${ref(1)}，找一个具体差距。用${ref(2)}回应${ref(3)}中的现实条件，再将${ref(4)}缩成一项有完成标准的小实践。`,
+    'study-plan': () => `用${ref(0)}明确想掌握什么，核对${ref(1)}已有的基础与${ref(2)}实际出现的卡点，再试${ref(3)}对应的一种短练习，借${ref(4)}安排自测并调整方法。`,
+    'inner-growth': () => `先看${ref(0)}是否贴近此刻感受，再核实${ref(1)}对应的真实需要；借${ref(2)}找到可用支持，让${ref(3)}成为当前精力能承受的一次温和尝试。`,
+    week: () => `这七张牌可用作连续七天的弹性安排：${cards.map((_, index) => ref(index)).join('；')}。每天只选一项适合实际情况的观察或行动，第 4 天调整、第 6 天恢复、第 7 天回顾，安排随现实反馈改变。`,
+    blockage: () => `从${ref(0)}追到${ref(1)}，用真实例子核对反复的模式；选${ref(2)}中的一项可控变化，借${ref(3)}获得支持，再把${ref(4)}变成一次可检查的小试验。`,
+    'celtic-cross': () => `先合看${ref(0)}与${ref(1)}的核心张力，再对照${ref(2)}与${ref(3)}的目标和根基；比较${ref(4)}、${ref(5)}中的条件变化，将${ref(6)}与${ref(7)}联系自己的回应和可用支持。用${ref(8)}核对期待与事实，再让${ref(9)}汇成一项可调整行动；发展方向仍取决于现实条件。`,
+  };
+  return summaries[spread.id]?.() ?? '先留意牌意中与你实际经历相符的部分，再决定是否采用这条提醒。';
 }
 
 function topicLink(suit, domain) {
@@ -124,13 +154,13 @@ export function generateReading(input = {}) {
     const fallback = '留意这张牌带给你的感受，并用现实中的信息核对它与你的问题有哪些联系。';
     return {
       index: index + 1,
+      id: card.id,
+      reversed,
       title: `${position} · ${card.name ?? '塔罗牌'}${reversed ? '（逆位）' : '（正位）'}`,
-      text: `${positionFrame(position)}${interpretation || fallback} ${topicLink(card.suit, context.domain)} ${card.advice ?? context.action}`,
+      text: `${positionFrame(position)}${interpretation || fallback} ${topicLink(card.suit, context.domain)} ${positionFocus(spread, index)} ${card.advice ?? context.action}`,
     };
   });
-  const synthesis = cards.length > 1
-    ? `把“${spread.positions[0]}”与“${spread.positions[cards.length - 1]}”放在一起看：先辨认${cards[0]?.keywords?.[0] ?? '当前需要'}，再用${cards[cards.length - 1]?.keywords?.[0] ?? '一次小尝试'}的方式寻找反馈。`
-    : '先留意牌意中与你实际经历相符的部分，再决定是否采用这条提醒。';
+  const synthesis = spreadSynthesis(spread, cards);
   return {
     title: question ? `回应你的${category.id === 'love' ? '关系' : category.id === 'career' ? '方向' : '此刻'}提问` : '为此刻留一束光',
     intro: `我是露娜，陪你慢慢看看这次的牌。${questionText}${context.frame} 牌面可以帮助整理想法，答案仍需要结合你的真实处境与判断。`,
@@ -148,8 +178,18 @@ export function validateReading(value, options = {}) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
   const text = item => typeof item === 'string' && item.trim().length > 0 && item.length <= 6000;
   if (!['title', 'intro', 'reflection'].every(key => text(value[key]))) return false;
-  if (!Array.isArray(value.cards) || value.cards.length < 1 || value.cards.length > 3) return false;
-  if (Array.isArray(options.cards) && value.cards.length !== options.cards.length) return false;
+  if (!Array.isArray(value.cards) || value.cards.length < 1 || value.cards.length > MAX_SPREAD_CARDS) return false;
+  if (Object.hasOwn(options, 'cards') && (!Array.isArray(options.cards) || value.cards.length !== options.cards.length)) return false;
+  if (Object.hasOwn(options, 'spread')) {
+    const spreadId = typeof options.spread === 'string' ? options.spread : options.spread?.id;
+    const spread = Object.hasOwn(SPREADS, spreadId ?? '') ? SPREADS[spreadId] : null;
+    if (!spread || value.cards.length !== spread.positions.length) return false;
+  }
   if (!value.cards.every((card, index) => card && card.index === index + 1 && text(card.title) && text(card.text))) return false;
+  // Legacy local journals predate identity fields. API results and new local results
+  // can opt into exact identity validation without discarding those saved readings.
+  if (options.strictCards && (!Array.isArray(options.cards) || !value.cards.every((card, index) =>
+    card.id === options.cards[index]?.id && typeof card.reversed === 'boolean'
+      && card.reversed === options.cards[index]?.reversed))) return false;
   return Array.isArray(value.guidance) && value.guidance.length >= 1 && value.guidance.length <= 5 && value.guidance.every(text);
 }

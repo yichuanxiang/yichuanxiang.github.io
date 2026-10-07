@@ -113,23 +113,7 @@ export const DECK = [
   }))),
 ];
 
-export const SPREADS = {
-  single: {
-    id: 'single', name: '一张牌 · 此刻指引',
-    description: '轻轻停一下，看见此刻最值得留意的事。',
-    positions: ['此刻的提醒'],
-  },
-  three: {
-    id: 'three', name: '三张牌 · 探索方向',
-    description: '从眼前的处境，到值得关注的线索，再到可以迈出的一步。',
-    positions: ['当前处境', '值得关注', '下一步行动'],
-  },
-  relationship: {
-    id: 'relationship', name: '三张牌 · 关系镜像',
-    description: '看见自己的需要与互动方式，为沟通找到温柔的入口。',
-    positions: ['我的需要', '关系中的互动', '可以尝试的方向'],
-  },
-};
+export { SPREADS } from './spreads.js?v=20261007-spreads-1';
 
 export const CATEGORIES = [
   { id: 'general', label: '此刻的指引', prompt: '关注当下处境、个人选择与下一步能做的小行动。' },
