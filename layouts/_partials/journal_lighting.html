@@ -1,0 +1,4 @@
+{{- $engine := resources.Get "vendor/shaders/shaders-4.0.4.js" | fingerprint -}}
+{{- $license := resources.Get "vendor/shaders/THIRD-PARTY-LICENSES.txt" -}}
+{{- $lighting := resources.Get "js/journal-shaders.js" | minify | fingerprint -}}
+<script type="module" src="{{ $lighting.RelPermalink }}" integrity="{{ $lighting.Data.Integrity }}" data-journal-shaders data-engine-src="{{ $engine.RelPermalink }}" data-engine-license="{{ $license.RelPermalink }}"></script>

@@ -1,0 +1,151 @@
+/* Warm light belongs to the illustrations and title paper, clear of reading. */
+html body .journal-shader-surface,
+html body .journal-shader-surface * {
+  pointer-events: none;
+  user-select: none;
+}
+html body .journal-shader-surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  contain: paint;
+}
+html body .journal-shader-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+html body .journal-shader-surface--hero {
+  z-index: 1;
+  mask-image: linear-gradient(90deg, transparent 12%, #000 45%);
+}
+/* Keep the next carousel image below both light and the original dark veil. */
+html body .cappu-home-shell .cappu-feature__art > img {
+  z-index: 0;
+}
+html body .journal-shader-surface--hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: .48;
+  background: radial-gradient(ellipse at 86% 0%, rgba(255, 226, 165, .4), transparent 50%),
+    linear-gradient(125deg, transparent 46%, rgba(255, 240, 207, .15) 57%, transparent 70%);
+  transition: opacity 900ms ease;
+}
+html body .journal-shader-surface--hero[data-shader-state="ready"] .journal-shader-canvas {
+  opacity: .62;
+}
+html body .journal-shader-surface--hero[data-shader-state="ready"]::before {
+  opacity: .2;
+}
+html body .cappu-home-shell {
+  outline: 1px solid rgba(255, 239, 209, .48);
+  outline-offset: -1px;
+}
+html body .cappu-home-shell .cappu-profile__portrait {
+  box-shadow: 0 13px 30px rgba(48, 32, 22, .32), inset 0 0 0 1px rgba(255, 255, 255, .65);
+}
+html body .journal-light-motes {
+  position: absolute;
+  inset: 0;
+}
+html body .journal-light-motes i {
+  --mote-drift: -16px;
+  position: absolute;
+  top: 26%;
+  left: 74%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  color: #ffeac2;
+  background: currentColor;
+  box-shadow: 0 0 9px 2px rgba(255, 229, 176, .48);
+  opacity: 0;
+  animation: journal-warm-mote 8s ease-in-out infinite;
+}
+html body .journal-light-motes i:nth-child(2) { top: 43%; left: 85%; width: 3px; height: 3px; animation-delay: -3.3s; animation-duration: 9.5s; }
+html body .journal-light-motes i:nth-child(3) { top: 58%; left: 67%; animation-delay: -5.8s; animation-duration: 10s; --mote-drift: 12px; }
+html body .journal-light-motes i:nth-child(4) { top: 20%; left: 63%; width: 3px; height: 3px; animation-delay: -2.1s; animation-duration: 8.7s; --mote-drift: 8px; }
+html body .journal-light-motes i:nth-child(5) { top: 72%; left: 90%; width: 3px; height: 3px; animation-delay: -6.4s; animation-duration: 11s; }
+html body .journal-light-motes i:nth-child(6) { top: 34%; left: 94%; animation-delay: -4.2s; animation-duration: 9s; --mote-drift: 14px; }
+html body .journal-shader-surface[data-shader-paused="true"] .journal-light-motes i { animation-play-state: paused; }
+@keyframes journal-warm-mote {
+  0%, 100% { opacity: 0; transform: translate3d(0, 10px, 0); }
+  25% { opacity: .68; }
+  55% { opacity: .45; }
+  85% { opacity: 0; transform: translate3d(var(--mote-drift), -35px, 0); }
+}
+
+/* Negative layers stay inside the isolated header, below its photo and text. */
+html:root body :is(.station-page-header, .page-header, .post-header).journal-lit-header {
+  position: relative;
+  isolation: isolate;
+  border-radius: 1.15rem;
+  background: linear-gradient(110deg, var(--paper-raised) 28%, color-mix(in srgb, var(--wine-soft) 35%, var(--paper-raised)) 68%, color-mix(in srgb, var(--paper-warm) 65%, var(--paper-raised)));
+}
+html:root:has(meta[name="journal-inner-art"]) body :is(.station-page-header, .page-header, .post-header) {
+  background: linear-gradient(110deg, var(--paper-raised) 28%, color-mix(in srgb, var(--wine-soft) 35%, var(--paper-raised)) 68%, color-mix(in srgb, var(--paper-warm) 65%, var(--paper-raised)));
+}
+html body .journal-shader-surface--paper {
+  z-index: -2;
+  background: linear-gradient(115deg, transparent 15%, rgba(246, 220, 192, .18) 60%, rgba(242, 205, 209, .24));
+  mask-image: linear-gradient(90deg, transparent 8%, rgba(0, 0, 0, .45) 36%, #000 65%);
+}
+html body .journal-shader-surface--paper[data-shader-state="ready"] .journal-shader-canvas {
+  opacity: .46;
+}
+html body .post-single > .journal-lit-header {
+  padding: 1.7rem 2rem;
+  border: 1px solid var(--line-soft);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--shadow) 45%, transparent), inset 0 -3px 0 color-mix(in srgb, var(--paper-warm) 65%, transparent);
+}
+
+/* The existing card tilt is complemented by a restrained paper highlight. */
+html body .station-shortcuts.journal-desk > .desk-portal::after {
+  background: radial-gradient(ellipse at var(--glow-x) var(--glow-y), rgba(255, 246, 218, .3), transparent 59%),
+    linear-gradient(115deg, transparent 42%, rgba(255, 243, 218, .12) 50%, transparent 60%);
+}
+html body .station-shortcuts.journal-desk > .desk-portal:focus-visible {
+  outline: 2px solid var(--wine);
+  outline-offset: 5px;
+  box-shadow: 0 0 0 4px var(--paper), 0 9px 24px var(--shadow);
+}
+html body .cappu-home-shell :is(.cappu-action, .home-quick-links a, .cappu-profile__status a):focus-visible {
+  outline: 2px solid #fff1d5;
+  outline-offset: 5px;
+}
+@media (hover: hover) and (pointer: fine) {
+  html body .station-shortcuts.journal-desk > .desk-portal.is-hovered::after {
+    opacity: .85;
+  }
+}
+html[data-theme="dark"] body .journal-shader-surface--hero::before {
+  background: radial-gradient(ellipse at 86% 0%, rgba(225, 176, 200, .22), transparent 50%),
+    linear-gradient(125deg, transparent 46%, rgba(224, 184, 194, .1) 57%, transparent 70%);
+}
+html[data-theme="dark"] body .journal-shader-surface--hero[data-shader-state="ready"] .journal-shader-canvas { opacity: .38; }
+html[data-theme="dark"] body .journal-shader-surface--paper { background: linear-gradient(115deg, transparent 15%, rgba(139, 98, 102, .1) 60%, rgba(83, 107, 92, .14)); }
+html[data-theme="dark"] body .journal-shader-surface--paper[data-shader-state="ready"] .journal-shader-canvas { opacity: .38; }
+html[data-theme="dark"] body .journal-light-motes i { color: #ecc7d5; box-shadow: 0 0 9px 2px rgba(220, 170, 187, .3); }
+html.journal-embedded body .journal-shader-surface--paper { opacity: .5; }
+@media (max-width: 700px) {
+  html body .journal-shader-surface--hero { mask-image: linear-gradient(0deg, transparent 20%, #000 62%); }
+  html body .journal-shader-surface--hero[data-shader-state="ready"] .journal-shader-canvas { opacity: .38; }
+  html body .journal-light-motes i:nth-child(n+4) { display: none; }
+  html body .journal-light-motes i:nth-child(1) { top: 13%; left: 63%; }
+  html body .journal-light-motes i:nth-child(2) { top: 23%; left: 79%; }
+  html body .journal-light-motes i:nth-child(3) { top: 32%; left: 53%; }
+  html body .post-single > .journal-lit-header { padding: 1.35rem 1.15rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html body .journal-shader-canvas { display: none; transition: none; }
+  html body .journal-shader-surface::before { transition: none; }
+  html body .journal-light-motes { display: none; }
+}

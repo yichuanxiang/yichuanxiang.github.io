@@ -4,4 +4,7 @@
 hugo_stats.json
 .DS_Store
 Thumbs.db
+/tools/shaders/node_modules/
+/tools/shaders/shaders-4.0.4.js
+/tools/shaders/bundle-report.json
 
