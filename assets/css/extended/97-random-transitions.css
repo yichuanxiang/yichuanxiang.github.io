@@ -7,6 +7,19 @@ body .journal-transition-layer {
 }
 body .journal-transition-layer::backdrop { background: transparent; pointer-events: none; }
 body .journal-kamui-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
+/* The page itself is pulled into the vanishing point; the canvas supplies only
+   the dark core and moving space folds. Restore every hint after completion. */
+body .journal-kamui-subject { will-change: transform, opacity; backface-visibility: hidden; }
+html[data-journal-kamui] body > :is(.main, .header, .footer),
+html.journal-kamui-ready body > :is(.main, .header, .footer) { animation: none; }
+html[data-journal-kamui="pending"] body > :is(.main, .header, .footer, .music-player, .top-link) { opacity: 0; }
+html[data-journal-kamui="pending"]::after {
+  content: ""; position: fixed; inset: 0; z-index: 9999;
+  background: #0b0810; pointer-events: none;
+}
+html[data-journal-kamui] { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) {
   body .journal-transition-layer { display: none; }
+  html[data-journal-kamui="pending"] body > :is(.main, .header, .footer, .music-player, .top-link) { opacity: 1; }
+  html[data-journal-kamui="pending"]::after { display: none; }
 }

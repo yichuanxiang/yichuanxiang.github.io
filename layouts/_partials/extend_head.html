@@ -22,9 +22,32 @@ if (window.self !== window.top && window.frameElement?.hasAttribute('data-journa
     }
   });
 }
+// Keep the destination covered from its first paint. The footer consumes the
+// marker and opens the page from this same centre once its DOM is ready.
+try {
+  const arrival = JSON.parse(sessionStorage.getItem('journal-petal-arrival'));
+  const navigation = performance.getEntriesByType('navigation')[0]?.type;
+  if (!document.documentElement.classList.contains('journal-embedded') &&
+      arrival?.effect === 'kamui' && arrival.destination === location.pathname + location.search &&
+      Date.now() - arrival.at >= 0 && Date.now() - arrival.at <= 15000 &&
+      navigation !== 'reload' && navigation !== 'back_forward' &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches && !document.hidden) {
+    document.documentElement.dataset.journalKamui = 'pending';
+    setTimeout(function () {
+      if (document.documentElement.dataset.journalKamui === 'pending') delete document.documentElement.dataset.journalKamui;
+    }, 5000);
+  }
+} catch { /* Storage is optional. */ }
+window.addEventListener('pageswap', function (event) {
+  if (document.documentElement.dataset.journalKamui === 'out') event.viewTransition?.skipTransition();
+});
 // Keep the first-visit entrance separate from native page-to-page transitions.
 window.addEventListener('pagereveal', function (event) {
   if (event.viewTransition) {
+    if (document.documentElement.dataset.journalKamui) {
+      event.viewTransition.skipTransition();
+      return;
+    }
     document.documentElement.classList.add('station-page-transition');
     window.journalPageTransition = event.viewTransition.finished;
   }

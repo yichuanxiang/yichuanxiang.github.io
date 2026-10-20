@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="L-R-EM 负载与 LC 滤波 Buck 的连续、断续工况对照，包含实际 Simscape 原生截图、符号波形和模型下载。">
+  <title>两种 Buck · 连续与断续对照 | 仪传祥的个人博客</title>
+  <link rel="stylesheet" href="classroom.css">
+  <script src="classroom.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到对比图</a>
+  <header class="site-bar"><a href="/">仪传祥的个人博客 <span>/ 课堂</span></a><a href="/posts/buck-simulation-comparison/">实验记录 ↗</a></header>
+  <main id="main">
+    <div class="heading"><div><p class="eyebrow">MATLAB / Simscape · 电力电子</p><h1>两种 Buck，放在一起看</h1><p class="lead">先找输出电压的测量点，再看电流归零后发生了什么。</p></div><button type="button" id="fullscreen">全屏演示 ⛶</button></div>
+    <div class="toolbar">
+      <div class="button-group" role="group" aria-label="选择电感电流工况"><button type="button" data-mode="dcm" aria-pressed="true">断续 DCM</button><button type="button" data-mode="ccm" aria-pressed="false">连续 CCM</button></div>
+      <div class="button-group view-switch" role="group" aria-label="选择图片类型"><button type="button" data-view="symbols" aria-pressed="true">符号波形</button><button type="button" data-view="native" aria-pressed="false">电路与原生截图</button></div>
+    </div>
+    <p class="scope-note" id="scope-note">断续工况 · 曲线来自实际传感器数据，幅值按各行独立缩放。</p>
+    <figure class="comparison">
+      <button type="button" class="image-button" id="open-image" aria-label="放大当前对比图"><img id="comparison-image" src="images/dcm-symbols.png" width="3570" height="2520" alt="两种 Buck 的断续符号波形：L-R-EM 断流后 uo≈EM；LC 型由电容继续给负载供电。"></button>
+      <figcaption><span id="figure-caption">左：L-R-EM 串联负载。右：L 后接 C 与 R 并联。</span><a id="original-link" href="images/dcm-symbols.png" target="_blank" rel="noopener">高清原图 ↗</a></figcaption>
+    </figure>
+    <div class="explanations" aria-live="polite">
+      <section><p class="number">01 / L-R-EM</p><h2 id="rle-title">断流后，uo 回到 EM</h2><p id="rle-explanation">电感和负载电流都是 io。归零时 VT、VD 均截止，电阻、电感压降接近零，整个负载两端 uo≈EM，管压 uVT≈Ed−EM。</p></section>
+      <section><p class="number">02 / LC</p><h2 id="lc-title">iL 归零，负载仍有电流</h2><p id="lc-explanation">uo 测输出电容两端。归零区间 iL≈0，而 iR>0、iC≈−iR，电容继续向电阻供电；us≈uo，管压 uVT≈Ed−uo。</p></section>
+    </div>
+    <details class="circuits"><summary>单独看两张原生电路图</summary><div class="circuit-grid"><figure><a href="images/rle-circuit.png" target="_blank" rel="noopener"><img src="images/rle-circuit.png" loading="lazy" alt="L-R-EM 串联负载原生 Simulink 电路；uo 跨整个负载。"></a><figcaption>L-R-EM：uo 跨整个负载，io 就是电感电流。</figcaption></figure><figure><a href="images/lc-circuit.png" target="_blank" rel="noopener"><img src="images/lc-circuit.png" loading="lazy" alt="LC 滤波原生 Simulink 电路；uo 跨输出电容，iL 分为 iR 与 iC。"></a><figcaption>LC：uo 跨 C 与 R，电感电流 iL=iR+iC。</figcaption></figure></div></details>
+    <details class="parameters"><summary>参数与读图说明</summary><div class="table-scroll"><table><caption>本次自选示例参数</caption><thead><tr><th>参数</th><th>L-R-EM 连续 / 断续</th><th>LC 连续 / 断续</th></tr></thead><tbody><tr><td>Ed；T；d</td><td>100 V；1 ms；1/2</td><td>100 V；1 ms；1/2</td></tr><tr><td>L</td><td>10 mH / 1 mH</td><td>10 mH / 10 mH</td></tr><tr><td>R</td><td>5 Ω / 5 Ω</td><td>10 Ω / 100 Ω</td></tr><tr><td>EM；C</td><td>30 V；无 C</td><td>无 EM；1000 μF</td></tr></tbody></table></div><p>两类电路的参数各自选取，不是同参数单变量实验。两图的 uo 测量点不同，幅值也独立归一化。原生 Scope 中的 LC 输出纹波经过放大显示；符号图保留原始传感器曲线。</p><p>四种工况均已实际运行。此页展示保存结果，重新仿真需要 MATLAB R2024b、Simulink、Simscape 及相应电气库。模型不含实物反向恢复、开关速度和杂散参数。</p></details>
+    <footer><a class="download" href="/downloads/buck-comparison.zip" download>下载四个模型、原始数据与高清图 <span>ZIP · 约 20 MB ↓</span></a><p><a href="/posts/buck-simulation-comparison/">读实验记录</a> <span>·</span> <a href="/classroom/thyristor-alpha90/">三相桥课堂演示</a></p><p class="status" id="status" role="status">点击对比图放大；Esc 关闭图片。</p></footer>
+    <noscript><p>浏览器关闭了脚本，也可以直接查看：<a href="images/dcm-symbols.png">断续符号图</a>、<a href="images/ccm-symbols.png">连续符号图</a>、<a href="images/dcm-native.png">断续原生截图</a>、<a href="images/ccm-native.png">连续原生截图</a>。</p></noscript>
+  </main>
+  <dialog id="image-dialog" aria-label="高清对比图"><div class="dialog-toolbar"><span id="dialog-title">断续工况 · 符号波形</span><a id="download-image" href="images/dcm-symbols.png" download>下载原图 ↓</a><form method="dialog"><button aria-label="关闭高清图">关闭 ×</button></form></div><div class="dialog-image"><img id="zoom-image" src="images/dcm-symbols.png" alt="放大的断续对比图"></div></dialog>
+</body>
+</html>
