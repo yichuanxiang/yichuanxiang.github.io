@@ -30,6 +30,7 @@
   let pageHidden = false;
   let pointerFrame = 0;
   let pointerPoint;
+  const firstPaintAt = performance.now() + 900;
   const dark = () => root.dataset.theme === 'dark';
   const fallback = reason => {
     surface.dataset.shaderState = 'fallback';
@@ -81,6 +82,7 @@
   };
   async function start() {
     if (disposed || starting || renderer) return;
+    if (performance.now() < firstPaintAt) { setTimeout(start, firstPaintAt - performance.now()); return; }
     // Shader compilation can block the arrival animation. Let its first paint
     // and the portal finish before starting optional background lighting.
     if (root.dataset.journalKamui) { setTimeout(start, 180); return; }
@@ -102,6 +104,7 @@
       if (engineURL.origin !== location.origin) throw new Error('Local shader bundle required');
       const { createShader } = await import(engineURL.href);
       if (token !== generation || disposed) return;
+      if (root.dataset.journalKamui) { setTimeout(start, 180); return; }
       const instance = await createShader(canvas, preset(), {
         disableTelemetry: true, observeElement: false,
         onReady() {
