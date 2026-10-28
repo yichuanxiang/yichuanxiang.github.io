@@ -90,6 +90,7 @@
     });
     sceneTargets = [];
     delete document.documentElement.dataset.journalKamui;
+    document.dispatchEvent(new CustomEvent('journal:transition-motion'));
     activePanel?.removeEventListener('close', clearRain);
     activePanel = null;
     if (activeRain?.hasAttribute('popover') && activeRain.matches(':popover-open')) activeRain.hidePopover();
@@ -212,7 +213,8 @@
     const mobile = innerWidth <= 700;
     const direction = options.direction === -1 ? -1 : options.direction === 1 ? 1 : Math.random() < .5 ? -1 : 1;
     const focus = options.focus || { x: .52, y: .46 };
-    const duration = mode === 'out' ? 640 : mode === 'in' ? 780 : 1380;
+    const timings = { out: 520, in: 600, local: 1120 };
+    const duration = timings[mode];
     const layer = createLayer('kamui');
     layer.dataset.phase = mode;
     const canvas = document.createElement('canvas');
@@ -220,7 +222,7 @@
     layer.append(canvas);
     const context = canvas.getContext('2d', { alpha: true });
     if (!context) { options.onFinish?.(); return; }
-    let width, height, ratio;
+    let width, height, ratio, reach, folds;
     const resizeCanvas = () => {
       const box = layer.getBoundingClientRect();
       width = box.width;
@@ -228,12 +230,30 @@
       ratio = Math.min(devicePixelRatio || 1, mobile ? 1.25 : 1.5);
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
+      reach = Math.hypot(width, height) * .84;
+      // Compile the folds only when the viewport changes, not on every frame.
+      folds = Array.from({ length: 6 }, (_, arm) => {
+        const path = new Path2D();
+        const edge = (t, side) => {
+          const r = 12 + reach * Math.pow(t, 1.58);
+          const a = arm * Math.PI / 3 + direction * (1 - t) * 6 + side * Math.sin(t * Math.PI) * .085;
+          return [Math.cos(a) * r, Math.sin(a) * r * .92];
+        };
+        for (let i = 0; i <= 64; i++) {
+          const point = edge(i / 64, 1);
+          if (!i) path.moveTo(...point); else path.lineTo(...point);
+        }
+        for (let i = 64; i >= 0; i--) path.lineTo(...edge(i / 64, -1));
+        path.closePath();
+        return path;
+      });
     };
     // Hold the collapsed frame while the browser starts the real navigation,
     // so a slower response cannot flash the departing page back into view.
     mountLayer(layer, panel, mode === 'out' ? 8000 : duration);
     document.documentElement.classList.add('journal-kamui-ready');
     document.documentElement.dataset.journalKamui = mode;
+    document.dispatchEvent(new CustomEvent('journal:transition-motion'));
     resizeCanvas();
     if (typeof ResizeObserver === 'function') {
       rainResizeObserver = new ResizeObserver(resizeCanvas);
@@ -242,23 +262,17 @@
     // Animate the real DOM, including its text and art. A spiral painted over a
     // stationary page cannot give the impression that space is being pulled in.
     const targets = panel ? [panel] : [...document.querySelectorAll('body > .header, body > .main, body > .footer, body > .music-player, body > .top-link')];
-    const outgoing = [
-      { transform: 'rotate(0deg) scale(1)', opacity: 1, offset: 0 },
-      { transform: `rotate(${direction * 2}deg) scale(.975)`, opacity: 1, offset: .22 },
-      { transform: `rotate(${direction * 12}deg) scale(.78)`, opacity: 1, offset: .53 },
-      { transform: `rotate(${direction * 40}deg) scale(.34)`, opacity: .92, offset: .8 },
-      { transform: `rotate(${direction * 92}deg) scale(.015)`, opacity: 0, offset: 1 }
-    ];
-    const incoming = [
-      { transform: `rotate(${direction * -78}deg) scale(.025)`, opacity: 0, offset: 0 },
-      { transform: `rotate(${direction * -42}deg) scale(.2)`, opacity: .72, offset: .22 },
-      { transform: `rotate(${direction * -9}deg) scale(.82)`, opacity: 1, offset: .6 },
-      { transform: 'rotate(0deg) scale(1)', opacity: 1, offset: 1 }
-    ];
-    const keyframes = mode === 'out' ? outgoing : mode === 'in' ? incoming : [
-      ...outgoing.map(frame => ({ ...frame, offset: frame.offset * .46 })),
-      ...incoming.slice(1).map(frame => ({ ...frame, offset: .46 + frame.offset * .54 }))
-    ];
+    const closeFraction = timings.out / timings.local;
+    const smooth = value => value * value * (3 - 2 * value);
+    // Dense samples of one continuous curve avoid velocity changes at keyframes.
+    const keyframes = Array.from({ length: 61 }, (_, i) => {
+      const progress = i / 60;
+      const opening = mode === 'in' || (mode === 'local' && progress > closeFraction);
+      const t = mode === 'local' ? opening ? (progress - closeFraction) / (1 - closeFraction) : progress / closeFraction : progress;
+      const scale = opening ? .015 + .985 * (1 - Math.pow(1 - t, 3)) : 1 - .985 * Math.pow(t, 2.3);
+      const turn = opening ? -92 * Math.pow(1 - t, 3) : 92 * Math.pow(t, 2.3);
+      return { transform: `rotate(${direction * turn}deg) scale(${scale})`, opacity: opening ? smooth(Math.min(1, t * 3)) : 1 - smooth(Math.max(0, (t - .72) / .28)), offset: progress };
+    });
     targets.forEach(target => {
       if (typeof target.animate !== 'function') return;
       const box = target.getBoundingClientRect();
@@ -269,7 +283,7 @@
     });
     // Radial threads move down a tightening spiral, accelerating as they reach
     // the same vanishing point as the page. No circles rotating in place.
-    const threads = Array.from({ length: mobile ? 36 : 62 }, (_, index) => ({
+    const threads = Array.from({ length: mobile ? 22 : 36 }, (_, index) => ({
       phase: index * 2.399963 + Math.random() * .25,
       start: Math.random(),
       speed: .65 + Math.random() * .7,
@@ -289,15 +303,15 @@
         options.onFinish?.();
         return;
       }
-      const opening = mode === 'in' || (mode === 'local' && progress > .46);
-      const phase = mode === 'local' ? opening ? (progress - .46) / .54 : progress / .46 : progress;
+      const opening = mode === 'in' || (mode === 'local' && progress > closeFraction);
+      const phase = mode === 'local' ? opening ? (progress - closeFraction) / (1 - closeFraction) : progress / closeFraction : progress;
       const grip = opening ? Math.pow(1 - phase, 1.15) : Math.pow(phase, 1.7);
       const pulse = opening ? Math.min(1, (1 - phase) * 3) : Math.min(1, phase * 5);
       const cover = opening ? Math.pow(Math.max(0, 1 - phase * 2.2), 2) : Math.pow(Math.max(0, (phase - .58) / .42), 2);
       const cx = width * focus.x, cy = height * focus.y;
-      const reach = Math.hypot(width, height) * .84;
       const core = (mobile ? 12 : 18) + grip * (mobile ? 24 : 35);
-      const rotation = direction * ((now - started) / 1000 * 2.1 + grip * 2.7);
+      const spinTime = (now - started + (mode === 'in' ? timings.out : 0)) / 1000;
+      const rotation = direction * (spinTime * 3.8);
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
       context.clearRect(0, 0, width, height);
       context.fillStyle = `rgba(11,8,16,${cover})`;
@@ -317,30 +331,24 @@
       };
       // Broad folds thicken near the black core, leaving the contracting page
       // visible between them until the final instant of the outgoing phase.
-      for (let arm = 0; arm < 6; arm++) {
-        const angle = arm * Math.PI / 3;
-        context.beginPath();
-        for (let step = 0; step <= 90; step++) {
-          const t = step / 90;
-          const p = point(t, angle, .015 + Math.sin(t * Math.PI) * (.04 + grip * .11));
-          if (step === 0) context.moveTo(...p); else context.lineTo(...p);
-        }
-        for (let step = 90; step >= 0; step--) context.lineTo(...point(step / 90, angle, -.012));
-        context.closePath();
+      context.save();
+      context.rotate(rotation);
+      for (const path of folds) {
         const fold = context.createRadialGradient(0, 0, core * .4, 0, 0, reach);
         fold.addColorStop(0, 'rgba(10,7,16,.95)');
         fold.addColorStop(.3, 'rgba(39,29,48,.64)');
         fold.addColorStop(1, 'rgba(67,49,78,0)');
         context.globalAlpha = pulse * .8;
         context.fillStyle = fold;
-        context.fill();
+        context.fill(path);
       }
+      context.restore();
       for (const thread of threads) {
         const travel = ((thread.start + (now - started) / 1000 * thread.speed * (.6 + grip * 1.2)) % 1);
         const distance = 1 - travel;
         context.beginPath();
-        for (let step = 0; step <= 12; step++) {
-          const t = Math.max(0, Math.min(1, distance + step / 12 * (.035 + grip * .08)));
+        for (let step = 0; step <= 6; step++) {
+          const t = Math.max(0, Math.min(1, distance + step / 6 * (.035 + grip * .08)));
           const p = point(t, thread.phase);
           if (step === 0) context.moveTo(...p); else context.lineTo(...p);
         }
@@ -426,6 +434,19 @@
     });
   });
   const removeArrival = () => { try { sessionStorage.removeItem(arrivalKey); } catch { /* Storage is optional. */ } };
+  const warmed = new Set();
+  const warmDestination = link => {
+    if (!link || link.hasAttribute('download') || link.hasAttribute('data-desk-panel') || link.target || navigator.connection?.saveData) return;
+    const destination = new URL(link.href, location.href);
+    if (destination.origin !== location.origin || destination.pathname === location.pathname || destination.search || !destination.pathname.endsWith('/') || warmed.has(destination.href) || warmed.size >= 8) return;
+    warmed.add(destination.href);
+    const hint = document.createElement('link');
+    hint.rel = 'prefetch'; hint.as = 'document'; hint.href = destination.href;
+    document.head.append(hint);
+  };
+  document.addEventListener('pointerover', event => warmDestination(event.target.closest('a[href]')), { passive: true });
+  document.addEventListener('focusin', event => warmDestination(event.target.closest('a[href]')));
+  document.addEventListener('touchstart', event => warmDestination(event.target.closest('a[href]')), { passive: true });
   const finishNavigation = () => {
     if (!pendingNavigation) return;
     const { href, timer } = pendingNavigation;
@@ -446,7 +467,8 @@
     try { sessionStorage.setItem(arrivalKey, JSON.stringify({ ...selected, destination: destination.pathname + destination.search, at: Date.now() })); } catch { /* Navigation still works when storage is unavailable. */ }
     if (effect !== 'kamui' || typeof document.querySelector('.main')?.animate !== 'function') return;
     event.preventDefault();
-    pendingNavigation = { href: destination.href, timer: setTimeout(finishNavigation, 840) };
+    warmDestination(link);
+    pendingNavigation = { href: destination.href, timer: setTimeout(finishNavigation, 720) };
     try { transition(null, { ...selected, mode: 'out', onFinish: finishNavigation }); }
     catch { clearRain(); finishNavigation(); }
   });

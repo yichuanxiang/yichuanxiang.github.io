@@ -10,6 +10,7 @@
     <a href="{{ printf "%s/" .path | relURL }}" {{ if eq $corner .path }}aria-current="page"{{ end }}>{{ .label }}</a>
     {{ end }}
     <a href="{{ "posts/" | relURL }}">翻翻手记 ↗</a>
+    <a href="{{ "gallery/" | relURL }}">逛逛图库 ↗</a>
   </nav>
   {{ if eq $corner "interests" }}
   <div class="explore-toolbar" role="group" aria-label="作品类型">

@@ -8,12 +8,23 @@
   (dict "hero" "saber-73zrk9" "portrait" "tsuki-official-36" "alt" "夏日和室里的阿尔托利亚" "portraitAlt" "小仓朝日与朋友们" "position" "50% 0%" "portraitPosition" "50% 35%")
 -}}
 {{- $covers := slice -}}
+{{- range $i, $id := hugo.Data.cover_art -}}
+  {{- $heroEntry := index hugo.Data.article_art $id -}}
+  {{- $portraitID := index hugo.Data.cover_art (mod (add $i 9) (len hugo.Data.cover_art)) -}}
+  {{- $portraitEntry := index hugo.Data.article_art $portraitID -}}
+  {{- $presets = $presets | append (dict "heroAsset" $heroEntry.asset "portraitAsset" $portraitEntry.asset "alt" $heroEntry.title "portraitAlt" $portraitEntry.title "position" $heroEntry.focal "portraitPosition" $portraitEntry.focal) -}}
+{{- end -}}
 {{- range $presets -}}
   {{- $heroURL := "" -}}
   {{- $portraitURL := "" -}}
   {{- if .heroURL -}}
     {{- $heroURL = .heroURL | relURL -}}
     {{- $portraitURL = .portraitURL | relURL -}}
+  {{- else if .heroAsset -}}
+    {{- $hero := (resources.Get .heroAsset).Fit "1920x1200 webp q85" -}}
+    {{- $portrait := (resources.Get .portraitAsset).Fit "960x640 webp q85" -}}
+    {{- $heroURL = $hero.RelPermalink -}}
+    {{- $portraitURL = $portrait.RelPermalink -}}
   {{- else -}}
     {{- $hero := (resources.GetMatch (printf "characters/*/%s.*" .hero)).Fit "1920x1200 webp q85" -}}
     {{- $portrait := (resources.GetMatch (printf "characters/*/%s.*" .portrait)).Fit "960x640 webp q85" -}}
@@ -22,9 +33,14 @@
   {{- end -}}
   {{- $covers = $covers | append (dict "hero" $heroURL "portrait" $portraitURL "alt" .alt "portraitAlt" .portraitAlt "position" .position "mobilePosition" (.mobilePosition | default .position) "portraitPosition" .portraitPosition) -}}
 {{- end -}}
-<script>
+<script data-journal-cover-count="{{ len $covers }}">
 (() => {
   const covers = {{ $covers | jsonify | safeJS }};
+  // Keep Botan as the opening, then mix the expanded shelf on every visit.
+  for (let i = covers.length - 1; i > 1; i--) {
+    const j = 1 + Math.floor(Math.random() * i);
+    [covers[i], covers[j]] = [covers[j], covers[i]];
+  }
   const hero = document.getElementById('cappu-cover');
   const portrait = document.getElementById('cappu-portrait');
   const scene = document.getElementById('journal-scene-cover');

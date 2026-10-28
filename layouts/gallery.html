@@ -1,0 +1,26 @@
+{{ define "main" }}
+<section class="station-page art-gallery" data-art-gallery>
+  <header class="station-page-header">
+    <span class="cappu-eyebrow">小站图库 · {{ len hugo.Data.article_art }} 张</span>
+    <h1>{{ .Title }}</h1><p>{{ .Description }}</p>
+  </header>
+  <nav class="station-page-nav" aria-label="图库导航"><a href="{{ "interests/" | relURL }}">喜欢的作品</a><a href="{{ "posts/" | relURL }}">翻翻手记 ↗</a></nav>
+  <div class="art-gallery__grid">
+  {{ range $id, $entry := hugo.Data.article_art }}
+    {{ $image := resources.Get $entry.asset }}
+    {{ $thumb := $image.Fit "600x600 webp q80" }}
+    <a class="art-gallery__item" href="{{ $image.RelPermalink }}" data-art-id="{{ $id }}" data-title="{{ $entry.title }}" data-series="{{ $entry.series }}" data-source="{{ $entry.source_page }}" data-creator="{{ $entry.creator_source }}" aria-label="放大：{{ $entry.title }}" style="--art-ratio:{{ $thumb.Width }} / {{ $thumb.Height }}">
+      <img src="{{ $thumb.RelPermalink }}" alt="{{ $entry.title }}" width="{{ $thumb.Width }}" height="{{ $thumb.Height }}" loading="lazy" decoding="async">
+    </a>
+  {{ end }}
+  </div>
+  <p class="art-gallery__more"><button type="button" class="corner-button" data-art-more hidden>再翻一些 ↓</button><span data-art-count role="status"></span></p>
+  <dialog class="art-viewer" aria-label="查看插画">
+    <div class="art-viewer__bar"><span data-art-position></span><button type="button" data-art-close aria-label="关闭图片">关闭 ×</button></div>
+    <div class="art-viewer__stage"><button type="button" data-art-previous aria-label="上一张">←</button><img data-art-full alt=""><button type="button" data-art-next aria-label="下一张">→</button></div>
+    <footer class="art-viewer__caption"><div><strong data-art-title></strong><span data-art-series></span></div><nav aria-label="图片链接"><a data-art-original target="_blank" rel="noopener">原图 ↗</a><a data-art-source target="_blank" rel="noopener">来源 ↗</a></nav><p data-art-status role="status"></p></footer>
+  </dialog>
+</section>
+{{ $script := resources.Get "js/art-gallery.js" | minify | fingerprint }}
+<script defer src="{{ $script.RelPermalink }}" integrity="{{ $script.Data.Integrity }}"></script>
+{{ end }}

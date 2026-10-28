@@ -58,7 +58,7 @@
   };
   const reconcile = () => {
     if (!renderer) return;
-    const paused = disposed || pageHidden || document.hidden || !inView || reduce.matches;
+    const paused = disposed || pageHidden || document.hidden || !inView || reduce.matches || !!root.dataset.journalKamui;
     paused ? renderer.pause() : renderer.resume();
     surface.dataset.shaderPaused = String(paused);
   };
@@ -81,6 +81,9 @@
   };
   async function start() {
     if (disposed || starting || renderer) return;
+    // Shader compilation can block the arrival animation. Let its first paint
+    // and the portal finish before starting optional background lighting.
+    if (root.dataset.journalKamui) { setTimeout(start, 180); return; }
     if (embedded) { fallback('embedded'); return; }
     if (reduce.matches) { fallback('reduced-motion'); return; }
     if (navigator.connection?.saveData) { fallback('save-data'); return; }
@@ -130,6 +133,7 @@
   const themeObserver = new MutationObserver(palette);
   themeObserver.observe(root, { attributes: true, attributeFilter: ['data-theme'] });
   document.addEventListener('visibilitychange', reconcile);
+  document.addEventListener('journal:transition-motion', reconcile);
   reduce.addEventListener('change', () => {
     if (reduce.matches) {
       ++generation; starting = false;

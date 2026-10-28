@@ -921,5 +921,651 @@
     "asset": "article-art/botan-ep12-4.webp",
     "width": 1200,
     "height": 675
+  },
+  "botan-extra-botan-ep01-4": {
+    "title": "把双手张开的午后",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=1",
+    "creator_source": "",
+    "sha256": "6742e4d8476fd920e1e0eb886e73e2910e39ec5988eaac359b20258e65f37f78",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep01-4.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "botan-extra-botan-ep02-4": {
+    "title": "走廊里探出头",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=2",
+    "creator_source": "",
+    "sha256": "68ccceda9f245ed81cae5d32bfae34fd9d72ea128856832db85231b83263a657",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep02-4.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "botan-extra-botan-ep03-2": {
+    "title": "旅途中一起翻照片",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=3",
+    "creator_source": "",
+    "sha256": "e46776f37a66086f6f3354fcd4778af442786f20918daa772c36949ffbe82e5d",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep03-2.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "botan-extra-botan-ep04-3": {
+    "title": "夜色里的回望",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=4",
+    "creator_source": "",
+    "sha256": "ccc88f4a026c4491fff19b5e0556039bb0ed6932b6a0845a65ff453ec8ee43a3",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep04-3.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "botan-extra-botan-ep06-4": {
+    "title": "围坐在木桌旁",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=6",
+    "creator_source": "",
+    "sha256": "6c096a7962d3e6eb586ba46d4dcb6134785e2522602f9019b6fa9cbcc34c2571",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep06-4.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "botan-extra-botan-ep07-1": {
+    "title": "夏天的树荫",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=7",
+    "creator_source": "",
+    "sha256": "02b14a62467b7f75711eef940f27314c6d989130d98edb8d39bfa5a0286297a0",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep07-1.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "botan-extra-botan-ep09-2": {
+    "title": "列车上的午餐",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=9",
+    "creator_source": "",
+    "sha256": "9d3db5561badbe673944c21ca381a7b2bc6e09fb1beb7742814697c4cf4badbb",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep09-2.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "botan-extra-botan-ep12-3": {
+    "title": "林间伸个懒腰",
+    "series": "上伊那牡丹，醉姿如百合",
+    "moods": [
+      "温柔日常",
+      "相伴"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://kamiina-botan.com/episode/?id=12",
+    "creator_source": "",
+    "sha256": "4d4724e00a493ef030bd4d8ff4afd6733825e87336529717a932630837a07878",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/botan-extra-botan-ep12-3.webp",
+    "width": 1200,
+    "height": 675
+  },
+  "yagakimi-extra-14": {
+    "title": "春日树影里的两人",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/",
+    "creator_source": "",
+    "sha256": "17237a0e2b469195d4d7ad27207776bd47351f0cc2611e218c61bfca1d0dc535",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-14.webp",
+    "width": 800,
+    "height": 1134
+  },
+  "yagakimi-extra-16": {
+    "title": "暖灯下的约定",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/",
+    "creator_source": "",
+    "sha256": "f18b5227d328e1010d7fe2249ab6024f94069bf6c66e569c16001f480ba08387",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-16.webp",
+    "width": 800,
+    "height": 1134
+  },
+  "yagakimi-extra-55": {
+    "title": "昏黄灯光里的灯子",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "d75b6fac9e9019624ecc4507b40c7938c3d6b77f0ff2e180298625e1192d8070",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-55.webp",
+    "width": 640,
+    "height": 360
+  },
+  "yagakimi-extra-56": {
+    "title": "夕阳照亮的侧脸",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "6dc26d33dcff14637865a8f74a5ec603dfa5d929d4bebd5c03acc177fb7a2788",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-56.webp",
+    "width": 640,
+    "height": 360
+  },
+  "yagakimi-extra-61": {
+    "title": "球场上伸出的手",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "cc7f8ca19affc0aec71447d14c5f4ac0f2986bb622c4e96cec9844b58e618db3",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-61.webp",
+    "width": 640,
+    "height": 360
+  },
+  "yagakimi-extra-62": {
+    "title": "花叶间的小糸侑",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "ba1647fea2e1afb3537dc411d162c448e97199383c01d657d2154098b83c2377",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-62.webp",
+    "width": 640,
+    "height": 360
+  },
+  "yagakimi-extra-67": {
+    "title": "校园里的交谈",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "c6bee6bafc2acdbbc774e02e6ee8ed2b0a31d4fae0864ad3809600f78a588876",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-67.webp",
+    "width": 640,
+    "height": 360
+  },
+  "yagakimi-extra-74": {
+    "title": "窗边的笑容",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "c9bd9e128372a315c88d8a3b012b30c20447d6e76773cf0065f6955c58e2ba2d",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-74.webp",
+    "width": 640,
+    "height": 360
+  },
+  "yagakimi-extra-82": {
+    "title": "夏日庭院里的回头",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "c81f8bcda4ac5f7674f1dc184b901057166455f63ac67aac5d2e19b1f38f8467",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-82.webp",
+    "width": 640,
+    "height": 360
+  },
+  "yagakimi-extra-88": {
+    "title": "并肩走过的校园",
+    "series": "终将成为你",
+    "moods": [
+      "校园",
+      "温柔日常"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://yagakimi.com/story/",
+    "creator_source": "",
+    "sha256": "ecc12b74db9c6b5a41a4f908f4f9d69401284a038dfe78696603b3977e5843d2",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/yagakimi-extra-88.webp",
+    "width": 800,
+    "height": 450
+  },
+  "megumin-extra-98": {
+    "title": "听到名字时的笑容",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "温柔日常",
+      "奇幻"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://konosuba.com/bakuen/story/",
+    "creator_source": "",
+    "sha256": "bbee027b8b089081b9b4e6da237fdeda411fb3dded73c3da5301074b3ce4c8c7",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-extra-98.webp",
+    "width": 700,
+    "height": 394
+  },
+  "megumin-extra-101": {
+    "title": "红魔村的同学们",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "温柔日常",
+      "奇幻"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://konosuba.com/bakuen/story/",
+    "creator_source": "",
+    "sha256": "9c316d11fa78748cd97bebcd3fabee5ce19dc346b499d26a5b70069888c15fb6",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-extra-101.webp",
+    "width": 700,
+    "height": 394
+  },
+  "megumin-extra-103": {
+    "title": "爆裂魔法的七彩光芒",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "温柔日常",
+      "奇幻"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://konosuba.com/bakuen/story/",
+    "creator_source": "",
+    "sha256": "a70f672953de5186e4bcf13c3f90a23594ea0b31e3a089b50ffd48187786907d",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-extra-103.webp",
+    "width": 700,
+    "height": 394
+  },
+  "megumin-extra-105": {
+    "title": "村庄里轻快的脚步",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "温柔日常",
+      "奇幻"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://konosuba.com/bakuen/story/?mode=story6",
+    "creator_source": "",
+    "sha256": "946dff9e90ba2758802055175ce610219a86f6c42e6144b3736d637db74136e1",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-extra-105.webp",
+    "width": 700,
+    "height": 394
+  },
+  "megumin-extra-106": {
+    "title": "魔法光柱下的两个身影",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "温柔日常",
+      "奇幻"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://konosuba.com/bakuen/story/?mode=story6",
+    "creator_source": "",
+    "sha256": "a77dc8383f920426e68d24dad6afd8782701ee9e41bd14b240e2e2f50d208d42",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-extra-106.webp",
+    "width": 700,
+    "height": 394
+  },
+  "megumin-extra-108": {
+    "title": "举杯的日常",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "温柔日常",
+      "奇幻"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://konosuba.com/bakuen/story/?mode=story6",
+    "creator_source": "",
+    "sha256": "3a5bc59725dbae75a08557ea0ad58d30871ecf79a6f7861ddeffe49872f1d3bb",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-extra-108.webp",
+    "width": 700,
+    "height": 394
+  },
+  "megumin-extra-109": {
+    "title": "课堂上的小伙伴",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "温柔日常",
+      "奇幻"
+    ],
+    "kind": "动画画面",
+    "source_page": "https://konosuba.com/bakuen/story/?mode=story6",
+    "creator_source": "",
+    "sha256": "54e118511a3aa970a22a18cbcf25d0990cd73e9548cce2fee922a91228d693c2",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-extra-109.webp",
+    "width": 700,
+    "height": 394
+  },
+  "megumin-w8p6lr": {
+    "title": "原野上的魔法师",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "季节风景",
+      "明亮留白"
+    ],
+    "kind": "插画",
+    "source_page": "https://wallhaven.cc/w/w8p6lr",
+    "creator_source": "",
+    "sha256": "9221b5b2979be16c6b43fef604422ce8851b2d733311eabf1ae5ef78cb7db2c8",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-w8p6lr.webp",
+    "width": 1600,
+    "height": 1143
+  },
+  "megumin-3kjwo3": {
+    "title": "云海前的爆裂魔法",
+    "series": "为美好的世界献上祝福！",
+    "moods": [
+      "奇幻",
+      "季节风景"
+    ],
+    "kind": "插画",
+    "source_page": "https://wallhaven.cc/w/3kjwo3",
+    "creator_source": "",
+    "sha256": "869093d2d2fca0a866d8082630d41b70cbb42cb252c192d8f6efcb55929c136d",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/megumin-3kjwo3.webp",
+    "width": 1600,
+    "height": 900
+  },
+  "saber-5w6gp8": {
+    "title": "骑士与誓约之剑",
+    "series": "Fate / 阿尔托利亚",
+    "moods": [
+      "奇幻",
+      "冷色"
+    ],
+    "kind": "插画",
+    "source_page": "https://wallhaven.cc/w/5w6gp8",
+    "creator_source": "",
+    "sha256": "e6e7862737702ca3fe2ee94d3308a5cfe8af8f2e62c3c9c7618363e9240eaf7a",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/saber-5w6gp8.webp",
+    "width": 1600,
+    "height": 1131
+  },
+  "saber-9mewvx": {
+    "title": "蓝色铠甲上的星光",
+    "series": "Fate / 阿尔托利亚",
+    "moods": [
+      "奇幻",
+      "冷色"
+    ],
+    "kind": "插画",
+    "source_page": "https://wallhaven.cc/w/9mewvx",
+    "creator_source": "https://www.pixiv.net/artworks/64281974",
+    "sha256": "98086ba8e1309667c881ce8bea87bc158255146e101c9d219f30c25051e9815b",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/saber-9mewvx.webp",
+    "width": 1070,
+    "height": 1506
+  },
+  "saber-dp2zjg": {
+    "title": "金色剑光划过夜空",
+    "series": "Fate / 阿尔托利亚",
+    "moods": [
+      "奇幻",
+      "夜晚"
+    ],
+    "kind": "插画",
+    "source_page": "https://wallhaven.cc/w/dp2zjg",
+    "creator_source": "https://www.pixiv.net/artworks/75924675",
+    "sha256": "39d5471932e001a9bf014ec328b509c19c9ca2ae5a918021c6a0863934f3cca7",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/saber-dp2zjg.webp",
+    "width": 1140,
+    "height": 1600
+  },
+  "saber-r2eo71": {
+    "title": "蓝铠与夜风",
+    "series": "Fate / 阿尔托利亚",
+    "moods": [
+      "奇幻",
+      "夜晚"
+    ],
+    "kind": "插画",
+    "source_page": "https://wallhaven.cc/w/r2eo71",
+    "creator_source": "https://www.pixiv.net/en/artworks/77374615",
+    "sha256": "a9b8fe857477efe7dc5c1705e7eeb0a683756ca9f1e7477e6d1a47824f3f02c9",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/saber-r2eo71.webp",
+    "width": 1028,
+    "height": 1600
+  },
+  "saber-pkee5p": {
+    "title": "春风中的小魔术师",
+    "series": "Fate / 阿尔托利亚",
+    "moods": [
+      "季节风景",
+      "明亮留白"
+    ],
+    "kind": "插画",
+    "source_page": "https://wallhaven.cc/w/pkee5p",
+    "creator_source": "",
+    "sha256": "6dbf8adc598e90812ac586ffcc1fc25881e73a923bce46e9580e218592ca9e14",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/saber-pkee5p.webp",
+    "width": 1600,
+    "height": 1143
+  },
+  "tsuki-stage-02": {
+    "title": "阳光照进的卧室",
+    "series": "近月少女的礼仪",
+    "moods": [
+      "季节风景",
+      "安静片刻"
+    ],
+    "kind": "游戏背景",
+    "source_page": "https://project-navel.com/tsukiniyorisou/stage.html",
+    "creator_source": "",
+    "sha256": "c1a4f04fb24947380212bb4e1dd3f9cd63ad535bd1bbad557ac110a5cb5d9def",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/tsuki-stage-02.webp",
+    "width": 640,
+    "height": 360
+  },
+  "tsuki-stage-04": {
+    "title": "红色帷幔下的卧室",
+    "series": "近月少女的礼仪",
+    "moods": [
+      "季节风景",
+      "安静片刻"
+    ],
+    "kind": "游戏背景",
+    "source_page": "https://project-navel.com/tsukiniyorisou/stage.html",
+    "creator_source": "",
+    "sha256": "e7efc602c7736a26353dc6f0e9bebdc183a51a2f1c44b28604ea17decaa1695a",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/tsuki-stage-04.webp",
+    "width": 640,
+    "height": 360
+  },
+  "tsuki-stage-06": {
+    "title": "绿色沙发旁的午后",
+    "series": "近月少女的礼仪",
+    "moods": [
+      "季节风景",
+      "安静片刻"
+    ],
+    "kind": "游戏背景",
+    "source_page": "https://project-navel.com/tsukiniyorisou/stage.html",
+    "creator_source": "",
+    "sha256": "1ef9a5e781cec35d65fb314a2ebc85013c8c0b24e53b118fa77999d393641e0c",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/tsuki-stage-06.webp",
+    "width": 640,
+    "height": 360
+  },
+  "tsuki-stage-08": {
+    "title": "蓝天下的服装学院",
+    "series": "近月少女的礼仪",
+    "moods": [
+      "季节风景",
+      "安静片刻"
+    ],
+    "kind": "游戏背景",
+    "source_page": "https://project-navel.com/tsukiniyorisou/stage.html",
+    "creator_source": "",
+    "sha256": "b04e678d02e63c3f3e97fe23375ad600346397afe9c30ccda58b62a03d1664a4",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/tsuki-stage-08.webp",
+    "width": 640,
+    "height": 720
+  },
+  "tsuki-stage-10": {
+    "title": "水晶灯下的大厅",
+    "series": "近月少女的礼仪",
+    "moods": [
+      "季节风景",
+      "安静片刻"
+    ],
+    "kind": "游戏背景",
+    "source_page": "https://project-navel.com/tsukiniyorisou/stage.html",
+    "creator_source": "",
+    "sha256": "bc561fcff961fc1e4b3b196264084f9adbb427439746b1e369cc24c3899674b0",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/tsuki-stage-10.webp",
+    "width": 640,
+    "height": 360
+  },
+  "tsuki-stage-11": {
+    "title": "花纹墙纸的会客厅",
+    "series": "近月少女的礼仪",
+    "moods": [
+      "季节风景",
+      "安静片刻"
+    ],
+    "kind": "游戏背景",
+    "source_page": "https://project-navel.com/tsukiniyorisou/stage.html",
+    "creator_source": "",
+    "sha256": "bc7bddae8665e2b994ffb5f6fefa65ba382147496a2bac10b184ff5241e4be25",
+    "date_saved": "2026-10-29",
+    "focal": "50% 40%",
+    "asset": "article-art/tsuki-stage-11.webp",
+    "width": 640,
+    "height": 360
   }
 }
