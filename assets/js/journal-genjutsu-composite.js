@@ -3,7 +3,7 @@
   const root = document.documentElement;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const ns = 'http://www.w3.org/2000/svg';
-  const duration = 2450;
+  const duration = 2050;
   let active;
   const clamp = value => Math.max(0, Math.min(1, value));
   const ease = value => 1 - Math.pow(1 - clamp(value), 3);
@@ -42,7 +42,7 @@
     filter.append(svgNode('feColorMatrix', { type: 'saturate', values: 0 }));
     const transfer = svgNode('feComponentTransfer');
     const dark = root.dataset.theme === 'dark' || root.classList.contains('dark');
-    const values = tone === 'ink' && !dark ? '1 .82 .58 .32 .12 .035' : '0 .06 .25 .52 .8 1';
+    const values = dark ? '0 .06 .25 .52 .8 1' : tone === 'ink' ? '.025 .12 .28 .52 .78 .98' : '.04 .18 .4 .64 .84 1';
     for (const channel of ['R', 'G', 'B']) transfer.append(svgNode(`feFunc${channel}`, { type: 'discrete', tableValues: values }));
     filter.append(transfer); defs.append(filter); svg.append(defs); root.append(svg);
     return svg;
@@ -80,41 +80,49 @@
     for (const dialog of document.querySelectorAll('dialog[open]')) scene.append(copyElement(dialog));
     return scene;
   };
+  const captureStyles = () => [...document.styleSheets].map(sheet => {
+    try { return [...sheet.cssRules].map(rule => rule.cssText).join('\n'); }
+    catch { return ''; }
+  }).join('\n');
+  const mountCapture = (host, scene, css) => {
+    // Keep mirrored lists and IDs outside the live document's observers and
+    // event delegation. Otherwise filters count the six copies as real posts.
+    const shadow = host.attachShadow({ mode: 'open' });
+    const page = document.createElement('html');
+    for (const attr of root.attributes) if (attr.name !== 'id') page.setAttribute(attr.name, attr.value);
+    const head = document.createElement('head');
+    document.head.querySelectorAll('meta[name="journal-inner-art"]').forEach(meta => head.append(meta.cloneNode(true)));
+    const style = document.createElement('style');
+    style.textContent = css.replace(/html:root\b/g, 'html').replace(/:root\b/g, 'html') + '\n* { animation: none !important; transition: none !important; } body { margin: 0 !important; }';
+    const body = document.createElement('body'); body.className = document.body.className;
+    body.classList.add('journal-genjutsu-capture'); body.style.cssText = scene.style.cssText;
+    body.style.minHeight = `${document.body.scrollHeight}px`;
+    head.append(style); body.append(...scene.childNodes); page.append(head, body); shadow.append(page);
+  };
   const geometry = (width, height) => {
     let seed = 8137;
     const random = () => { seed = seed * 16807 % 2147483647; return (seed - 1) / 2147483646; };
-    const groups = [], leaves = [], faults = [];
-    const vectors = [[-.033, -.025], [.028, .018], [.024, -.037], [-.037, .029], [-.02, .04], [.036, -.024]];
-    let top = 0;
-    [.29, .36, .35].forEach((fraction, row) => {
-      const split = width * [.43, .57, .48][row];
-      for (let column = 0; column < 2; column++) {
-        const group = { x: column ? split : 0, y: top, width: column ? width - split : split, height: height * fraction, index: groups.length, leaves: [] };
-        [group.vx, group.vy] = vectors[group.index]; groups.push(group);
-        const divide = (rect, depth) => {
-          const horizontal = rect.width / rect.height < .8 ? true : rect.width / rect.height > 2.4 ? false : random() > .58;
-          const length = horizontal ? rect.height : rect.width;
-          if (depth < 7 && rect.width * rect.height > width * height / 155 && length > (width < 700 ? 22 : 34)) {
-            const amount = length * (.24 + random() * .52);
-            if (horizontal) {
-              if (depth < 3 || random() < .12) faults.push({ x1: rect.x, y1: rect.y + amount, x2: rect.x + rect.width, y2: rect.y + amount, fine: depth > 1 });
-              divide({ ...rect, height: amount }, depth + 1);
-              divide({ ...rect, y: rect.y + amount, height: rect.height - amount }, depth + 1);
-            } else {
-              if (depth < 3 || random() < .12) faults.push({ x1: rect.x + amount, y1: rect.y, x2: rect.x + amount, y2: rect.y + rect.height, fine: depth > 1 });
-              divide({ ...rect, width: amount }, depth + 1);
-              divide({ ...rect, x: rect.x + amount, width: rect.width - amount }, depth + 1);
-            }
-          } else {
-            const distance = Math.hypot((rect.x + rect.width * .5) / width - .52, (rect.y + rect.height * .5) / height - .48);
-            const leaf = { ...rect, reveal: .29 + distance * .32 + random() * .22, life: .13 + random() * .17, vertical: random() < .3, reverse: random() < .5 };
-            group.leaves.push(leaf); leaves.push(leaf);
-          }
-        };
-        divide({ x: group.x, y: group.y, width: group.width, height: group.height }, 0);
+    // Interleave small stepped strips across six shared pictures. No moving
+    // picture exposes a large rectangular plate at its boundary.
+    const vectors = [[-.065, -.018], [.06, .02], [.055, -.04], [-.05, .035], [-.025, .055], [.07, -.025]];
+    const groups = vectors.map(([vx, vy], index) => ({ x: 0, y: 0, width, height, vx, vy, index, leaves: [] }));
+    // Bound the number of fragments on large displays while keeping the strips
+    // small enough for the reference's uneven, stair-stepped silhouette.
+    const scale = Math.max(1, Math.sqrt(width * height / 1500000));
+    const leaves = [], faults = [];
+    for (let y = 0; y < height;) {
+      const band = Math.min(height - y, (18 + random() * 18) * scale);
+      for (let x = 0; x < width;) {
+        const span = Math.min(width - x, (width < 700 ? 18 + random() * 42 : 30 + random() * 66) * scale);
+        const distance = Math.hypot((x + span / 2) / width - .52, (y + band / 2) / height - .48);
+        const leaf = { x, y, width: span, height: band, reveal: .17 + distance * .24 + random() * .22, life: .16 + random() * .2, vertical: random() < .18, reverse: random() < .5 };
+        groups[Math.floor(random() * groups.length)].leaves.push(leaf); leaves.push(leaf);
+        if (random() < .32) faults.push({ x1: x, y1: y, x2: x + span, y2: y, fine: true });
+        if (random() < .22) faults.push({ x1: x, y1: y, x2: x, y2: y + band, fine: true });
+        x += span;
       }
-      top += height * fraction;
-    });
+      y += band;
+    }
     return { groups, leaves, faults };
   };
   const crackImage = (faults, width, height) => {
@@ -126,41 +134,45 @@
     return 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="${ns}" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><g fill="none" stroke="#fff">${lines}</g></svg>`);
   };
   const paintMask = (group, progress) => {
-    const { canvas, brush } = group, sx = canvas.width / group.width, sy = canvas.height / group.height;
-    brush.clearRect(0, 0, canvas.width, canvas.height); brush.fillStyle = '#fff';
-    if (progress < .22) brush.fillRect(0, 0, canvas.width, canvas.height);
-    else if (progress < .995) for (const leaf of group.leaves) {
+    // Shared SVG paths avoid repeatedly encoding PNG masks. Each small strip
+    // erases on its own axis and schedule, as in the reference footage.
+    const gap = ease((progress - .025) / .15) * .55;
+    const paths = [];
+    if (progress < .995) for (const leaf of group.leaves) {
       const loss = ease((progress - leaf.reveal) / leaf.life);
-      let x = leaf.x - group.x, y = leaf.y - group.y, width = leaf.width, height = leaf.height;
+      if (loss >= .995) continue;
+      let { x, y, width, height } = leaf;
       if (leaf.vertical) { height *= 1 - loss; if (leaf.reverse) y += leaf.height - height; }
       else { width *= 1 - loss; if (leaf.reverse) x += leaf.width - width; }
-      const left = Math.round(x * sx), top = Math.round(y * sy);
-      brush.fillRect(left, top, Math.round((x + width) * sx) - left, Math.round((y + height) * sy) - top);
+      const inset = progress < .025 ? -.2 : gap;
+      x += inset; y += inset; width -= inset * 2; height -= inset * 2;
+      if (width > 0 && height > 0) paths.push(`M${x.toFixed(2)},${y.toFixed(2)}h${width.toFixed(2)}v${height.toFixed(2)}h${(-width).toFixed(2)}Z`);
     }
-    const mask = `url("${canvas.toDataURL()}")`;
-    group.node.style.maskImage = mask; group.node.style.webkitMaskImage = mask;
+    group.path.setAttribute('d', paths.join(''));
+    group.node.style.visibility = paths.length ? 'visible' : 'hidden';
   };
   const begin = run => {
     if (active !== run || reduce.matches || document.hidden) return;
     clearTimeout(run.preparation);
     root.dataset.journalGenjutsu = 'breaking';
     run.overlay.dataset.realityReady = 'true';
-    const start = performance.now(); let lastMask = -Infinity;
+    let start, lastMask = -Infinity;
     const draw = now => {
       if (active !== run) return;
+      start ??= now;
       const progress = clamp((now - start) / duration);
       run.overlay.dataset.progress = progress.toFixed(3);
       const crackOpacity = ease((progress - .07) / .22) * (1 - ease((progress - .79) / .18));
       for (const group of run.groups) {
-        const separation = ease((progress - .12 - group.index * .009) / .26);
+        const separation = ease((progress - .1 - group.index * .009) / .55);
         const drift = ease((progress - .43) / .54);
         const dx = group.vx * run.width * separation * (1 + drift * .72);
         const dy = group.vy * run.height * separation * (1 + drift * .82);
         group.node.style.transform = `translate3d(${dx}px,${dy}px,0)`;
         group.veins.style.opacity = crackOpacity;
-        if (now - lastMask >= 40 || progress === 1) paintMask(group, progress);
+        if (now - lastMask >= 32 || progress === 1) paintMask(group, progress);
       }
-      if (now - lastMask >= 40) lastMask = now;
+      if (now - lastMask >= 32) lastMask = now;
       if (progress < 1) run.frame = requestAnimationFrame(draw);
       else {
         run.overlay.dataset.progress = '1';
@@ -174,7 +186,7 @@
     stop();
     if (reduce.matches || document.hidden) return Promise.resolve();
     const width = innerWidth, height = innerHeight, tone = toneForPage();
-    const source = capture(), mesh = geometry(width, height), defs = makeTone(tone);
+    const source = capture(), css = captureStyles(), mesh = geometry(width, height), defs = makeTone(tone);
     const overlay = document.createElement('div'); overlay.className = 'journal-genjutsu-composite';
     overlay.setAttribute('aria-hidden', 'true'); overlay.inert = true;
     overlay.dataset.fragmentCount = mesh.leaves.length;
@@ -249,15 +261,16 @@
       const picture = document.createElement('div'); picture.className = 'journal-genjutsu-picture';
       const mirror = document.createElement('div'); mirror.className = 'journal-genjutsu-view';
       mirror.style.cssText = `left:${-group.x}px;top:${-group.y}px;width:${width}px;height:${height}px;`;
-      const copy = source.cloneNode(true); copyCanvases(source, copy); mirror.append(copy); picture.append(mirror);
+      const copy = source.cloneNode(true); copyCanvases(source, copy); mountCapture(mirror, copy, css); picture.append(mirror);
       const cracks = document.createElement('div'); cracks.className = 'journal-genjutsu-cracks';
       cracks.style.cssText = `left:${-group.x}px;top:${-group.y}px;width:${width}px;height:${height}px;background-image:url("${veins}");`;
       plate.append(picture, cracks); overlay.append(plate);
       group.node = plate; group.veins = cracks;
-      group.canvas = document.createElement('canvas');
-      const scale = Math.min(1, 300 / Math.max(group.width, group.height));
-      group.canvas.width = Math.max(1, Math.round(group.width * scale)); group.canvas.height = Math.max(1, Math.round(group.height * scale));
-      group.brush = group.canvas.getContext('2d'); paintMask(group, 0);
+      const clip = svgNode('clipPath', { id: `journal-genjutsu-shards-${group.index}`, clipPathUnits: 'userSpaceOnUse' });
+      group.path = svgNode('path'); clip.append(group.path); defs.querySelector('defs').append(clip);
+      plate.style.clipPath = `url(#journal-genjutsu-shards-${group.index})`;
+      plate.style.webkitClipPath = `url(#journal-genjutsu-shards-${group.index})`;
+      paintMask(group, 0);
     }
     (hostPanel || document.body).append(overlay);
     hostPanel?.addEventListener('close', stop, { once: true });

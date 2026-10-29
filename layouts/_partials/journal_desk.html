@@ -22,7 +22,7 @@
   </a>
   <a class="desk-portal desk-portal--guestbook" data-desk-panel="留个招呼" href="{{ "guestbook/" | relURL }}">
     <img class="desk-portal__art" src="{{ $yagakimi.RelPermalink }}" alt="" aria-hidden="true" width="{{ $yagakimi.Width }}" height="{{ $yagakimi.Height }}" loading="lazy">
-    <div class="desk-object desk-envelope" aria-hidden="true"><span>致路过的你</span><b>✿</b></div>
+    <div class="desk-object desk-envelope" aria-hidden="true"><span>致路过的你</span><b>{{ partial "station_icon.html" "flower" }}</b></div>
     {{ partial "station_icon.html" "message" }}<span><strong>留个招呼</strong><small>聊作品，聊有趣的事</small></span><i aria-hidden="true">↗</i>
   </a>
   <a class="desk-portal desk-portal--focus" data-desk-panel="专注角" href="{{ "focus/" | relURL }}">

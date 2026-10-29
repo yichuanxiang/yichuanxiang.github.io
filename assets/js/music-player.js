@@ -115,6 +115,7 @@
   });
 
   function setExpanded(expanded) {
+    if (!expanded && detail.contains(document.activeElement)) expandButton.focus();
     player.dataset.expanded = String(expanded);
     detail.hidden = !expanded;
     expandButton.setAttribute('aria-expanded', String(expanded));
@@ -124,6 +125,15 @@
     }
   }
   expandButton.addEventListener('click', () => setExpanded(player.dataset.expanded !== 'true'));
+  document.addEventListener('pointerdown', event => {
+    if (player.dataset.expanded === 'true' && !player.contains(event.target)) setExpanded(false);
+  });
+  document.addEventListener('focusin', event => {
+    if (player.dataset.expanded === 'true' && !player.contains(event.target)) setExpanded(false);
+  });
+  window.addEventListener('scroll', () => {
+    if (player.dataset.expanded === 'true') setExpanded(false);
+  }, { passive: true });
   player.addEventListener('keydown', event => {
     if (event.key === 'Escape' && player.dataset.expanded === 'true') {
       event.preventDefault();

@@ -62,6 +62,7 @@ body .desk-envelope { width: 10rem; height: 6.3rem; top: 2.2rem; background: var
 body .desk-envelope::before { content: ''; position: absolute; inset: 0; background: var(--paper-raised); clip-path: polygon(0 0, 100% 0, 50% 60%); filter: drop-shadow(0 1px 0 var(--line)); }
 body .desk-envelope span { position: absolute; left: .8rem; bottom: .7rem; font: .7rem var(--font-display); color: var(--ink-soft); }
 body .desk-envelope b { position: absolute; left: 44%; top: 42%; color: var(--wine); font-size: 1.1rem; }
+body .desk-envelope b svg { display: block; width: 1.15rem; height: 1.15rem; }
 body .desk-clock { width: 6.8rem; height: 6.8rem; top: 1.7rem; right: 2.2rem; border: 5px solid var(--line); border-radius: 50%; background: var(--paper); box-shadow: 4px 8px 12px var(--shadow); transform: rotate(10deg) translateZ(24px); }
 body .desk-clock::before, body .desk-clock::after { content: ''; position: absolute; left: 49%; top: 49%; height: 2px; background: var(--ink-soft); transform-origin: left center; }
 body .desk-clock::before { width: 1.9rem; transform: rotate(-90deg); }
