@@ -1,5 +1,5 @@
 (() => {
-  if (document.documentElement.classList.contains('journal-embedded')) return;
+  if (window.journalTransitionPreview || document.documentElement.classList.contains('journal-embedded')) return;
   const isHome = document.currentScript?.dataset.journalHome === 'true';
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const arrivalKey = 'journal-petal-arrival';
@@ -472,9 +472,13 @@
     try { sessionStorage.setItem(arrivalKey, JSON.stringify({ ...selected, destination: destination.pathname + destination.search, at: Date.now() })); } catch { /* Navigation still works when storage is unavailable. */ }
     if (effect === 'genjutsu' && window.JournalGenjutsu) {
       event.preventDefault(); warmDestination(link);
-      const preparation = window.JournalGenjutsu.intro();
-      const navigation = pendingNavigation = { href: destination.href, timer: setTimeout(finishNavigation, preparation?.then ? 4000 : 140) };
-      if (preparation?.then) preparation.then(() => { if (pendingNavigation === navigation) finishNavigation(); });
+      const preparation = window.JournalGenjutsu.intro(destination);
+      const navigation = pendingNavigation = { href: destination.href, timer: setTimeout(finishNavigation, preparation?.then ? 6000 : 140) };
+      if (preparation?.then) preparation.then(() => { if (pendingNavigation === navigation) finishNavigation(); }, () => {
+        setTimeout(() => {
+          if (pendingNavigation === navigation) { clearTimeout(navigation.timer); pendingNavigation = null; removeArrival(); }
+        }, 0);
+      });
       return;
     }
     if (effect !== 'kamui' || typeof document.querySelector('.main')?.animate !== 'function') return;

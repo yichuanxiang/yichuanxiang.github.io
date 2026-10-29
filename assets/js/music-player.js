@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const player = document.querySelector('[data-music-player]');
+  if (window.journalTransitionPreview) { if (player) player.hidden = false; return; }
   if (!player || player.dataset.musicReady || document.documentElement.classList.contains('journal-embedded')) return;
   let tracks;
   try { tracks = JSON.parse(player.querySelector('[data-music-tracks]').textContent); } catch { return; }

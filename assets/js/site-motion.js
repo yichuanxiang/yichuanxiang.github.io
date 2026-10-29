@@ -3,6 +3,7 @@
   const timing = { fast: 240, enter: 360, stagger: 35, easing: 'cubic-bezier(.22,1,.36,1)' };
   const playing = new WeakMap();
   const animate = (node, frames, options) => {
+    if (window.journalTransitionPreview || document.documentElement.classList.contains('journal-genjutsu-arrived')) return;
     if (!node || reduce.matches || !node.animate) return;
     playing.get(node)?.cancel();
     const animation = node.animate(frames, { duration: timing.fast, easing: timing.easing, ...options });

@@ -30,3 +30,13 @@ html[data-journal-genjutsu="breaking"]::view-transition { pointer-events: none; 
   html[data-journal-genjutsu] body { filter: none; }
   .journal-genjutsu-fallback { display: none; }
 }
+.journal-genjutsu-composite { position: fixed; inset: 0; width: 100vw; height: 100dvh; overflow: hidden; z-index: 10001; pointer-events: none; background: transparent; }
+.journal-genjutsu-reality { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--theme); pointer-events: none; }
+.journal-genjutsu-plate { position: absolute; overflow: hidden; will-change: transform; mask-size: 100% 100%; -webkit-mask-size: 100% 100%; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; }
+.journal-genjutsu-picture { position: absolute; inset: 0; overflow: hidden; filter: url(#journal-genjutsu-tone); }
+.journal-genjutsu-view { position: absolute; overflow: hidden; contain: layout; background: var(--theme); }
+.journal-genjutsu-capture { position: absolute; left: 0; }
+.journal-genjutsu-cracks { position: absolute; background-size: 100% 100%; opacity: 0; }
+.journal-genjutsu-capture *,
+html.journal-transition-preview *,
+html.journal-genjutsu-arrived * { animation: none !important; transition: none !important; }

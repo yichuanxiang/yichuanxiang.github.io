@@ -1,5 +1,12 @@
 {{ partial "inner_page_art.html" . }}
-{{- $genjutsu := resources.Get "js/journal-genjutsu.js" | minify | fingerprint -}}
+<script>
+if (window.frameElement?.hasAttribute('data-journal-transition-preview')) {
+  window.journalTransitionPreview = true;
+  document.documentElement.classList.add('journal-transition-preview');
+  document.documentElement.inert = true;
+}
+</script>
+{{- $genjutsu := resources.Get "js/journal-genjutsu-composite.js" | minify | fingerprint -}}
 <script src="{{ $genjutsu.RelPermalink }}" integrity="{{ $genjutsu.Data.Integrity }}"></script>
 <script>
 // Only this site's own desk windows use the compact reading layout.
@@ -29,7 +36,7 @@ if (window.self !== window.top && window.frameElement?.hasAttribute('data-journa
 try {
   const arrival = JSON.parse(sessionStorage.getItem('journal-petal-arrival'));
   const navigation = performance.getEntriesByType('navigation')[0]?.type;
-  if (!document.documentElement.classList.contains('journal-embedded') &&
+  if (!window.journalTransitionPreview && !document.documentElement.classList.contains('journal-embedded') &&
       arrival?.effect === 'kamui' && arrival.destination === location.pathname + location.search &&
       Date.now() - arrival.at >= 0 && Date.now() - arrival.at <= 15000 &&
       navigation !== 'reload' && navigation !== 'back_forward' &&
@@ -39,12 +46,16 @@ try {
       if (document.documentElement.dataset.journalKamui === 'pending') delete document.documentElement.dataset.journalKamui;
     }, 5000);
   }
-  if (!document.documentElement.classList.contains('journal-embedded') &&
+  if (!window.journalTransitionPreview && !document.documentElement.classList.contains('journal-embedded') &&
       window.JournalGenjutsu && arrival?.effect === 'genjutsu' && arrival.destination === location.pathname + location.search &&
       Date.now() - arrival.at >= 0 && Date.now() - arrival.at <= 15000 &&
       navigation !== 'reload' && navigation !== 'back_forward' &&
       !matchMedia('(prefers-reduced-motion: reduce)').matches && !document.hidden) {
-    if (arrival.compatCompleted) window.journalGenjutsuHandled = true;
+    if (arrival.compatCompleted) {
+      window.journalGenjutsuHandled = true;
+      document.documentElement.classList.add('journal-genjutsu-arrived', 'journal-genjutsu-ready');
+      setTimeout(function () { document.documentElement.classList.remove('journal-genjutsu-arrived'); }, 600);
+    }
     else {
       document.documentElement.dataset.journalGenjutsuTone = arrival.tone === 'cel' ? 'cel' : 'ink';
       document.documentElement.dataset.journalGenjutsu = 'pending';
@@ -52,7 +63,7 @@ try {
   }
 } catch { /* Storage is optional. */ }
 window.addEventListener('pageswap', function (event) {
-  if (document.documentElement.dataset.journalKamui === 'out' && event.viewTransition) {
+  if ((document.documentElement.dataset.journalKamui === 'out' || window.JournalGenjutsu?.active) && event.viewTransition) {
     event.viewTransition.ready.catch(function () {});
     event.viewTransition.finished.catch(function () {});
     event.viewTransition.skipTransition();
@@ -64,6 +75,7 @@ window.addEventListener('pagereveal', function (event) {
     event.viewTransition.ready.catch(function () {});
     event.viewTransition.finished.catch(function () {});
     event.viewTransition.updateCallbackDone?.catch(function () {});
+    if (window.journalTransitionPreview || window.journalGenjutsuHandled) { event.viewTransition.skipTransition(); return; }
     if (window.JournalGenjutsu?.reveal(event)) return;
     if (document.documentElement.dataset.journalKamui) {
       event.viewTransition.ready.catch(function () {});

@@ -1,4 +1,5 @@
 (() => {
+  const pageAddress = new URL(window.journalPreviewDestination || location.href);
   const catalogue = JSON.parse(document.getElementById('station-posts').textContent);
   const byPath = new Map(catalogue.map(post => [post.path, post]));
   const searchInput = document.getElementById('searchInput');
@@ -43,14 +44,14 @@
     button.classList.add('station-card-save');
     card.appendChild(button);
   });
-  if (byPath.has(location.pathname)) {
+  if (byPath.has(pageAddress.pathname)) {
     const header = document.querySelector('.post-header');
     if (header) {
       const toolbar = document.createElement('div');
       toolbar.className = 'station-article-actions';
-      toolbar.appendChild(makeSave(location.pathname));
+      toolbar.appendChild(makeSave(pageAddress.pathname));
       const link = document.createElement('a');
-      link.href = new URL('reading/', new URL('../..', location.href)).href;
+      link.href = new URL('reading/', new URL('../..', pageAddress)).href;
       link.textContent = '查看阅读清单 →';
       toolbar.appendChild(link);
       header.appendChild(toolbar);

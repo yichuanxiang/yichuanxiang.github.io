@@ -1,5 +1,6 @@
 // One local Shaders composition per page; original art and CSS remain below it.
 (() => {
+  if (window.journalTransitionPreview) return;
   const script = document.querySelector('script[data-journal-shaders]');
   const root = document.documentElement;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
