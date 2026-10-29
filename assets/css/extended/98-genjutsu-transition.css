@@ -19,7 +19,8 @@ html[data-journal-genjutsu="breaking"]::view-transition { pointer-events: none; 
 .journal-genjutsu-compat[data-hold="false"] { animation: journal-compat-reality 1900ms linear both; }
 @keyframes journal-compat-reality { 0%, 62% { background-color: #000; } 100% { background-color: transparent; } }
 .journal-genjutsu-band { position: absolute; left: 0; width: 100%; overflow: hidden; will-change: transform; }
-.journal-genjutsu-mirror { position: absolute; left: 0; width: 100%; overflow: hidden; background: var(--theme); filter: url(#journal-genjutsu-etch); }
+.journal-genjutsu-pane { position: absolute; inset: 0; overflow: hidden; filter: url(#journal-genjutsu-etch); }
+.journal-genjutsu-mirror { position: absolute; left: 0; width: 100%; overflow: hidden; background: var(--theme); contain: layout; }
 .journal-genjutsu-veins { position: absolute; left: 0; width: 100%; background-size: 100% 100%; animation: journal-genjutsu-veins 360ms linear both; }
 @keyframes journal-genjutsu-veins { 0%, 30% { opacity: 0; } 100% { opacity: 1; } }
 .journal-genjutsu-mirror :is(.main, .header, .footer) { animation: none !important; }

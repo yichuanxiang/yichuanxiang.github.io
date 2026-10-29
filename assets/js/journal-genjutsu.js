@@ -65,20 +65,20 @@
     const weight = Math.max(1, Math.min(width / 640, height / 360));
     return `<g fill="none" stroke="#f5f5f1" stroke-width="${weight * 1.25}" stroke-linejoin="miter">${lines(paths)}</g><g fill="none" stroke="#f5f5f1" stroke-width="${weight * .55}">${lines(hairlines)}${lines(splinters)}</g>`;
   };
-  const buildFilter = () => {
+  const buildFilter = (coarse = false) => {
     const width = innerWidth, height = innerHeight;
     const svg = element('svg', { width: 0, height: 0, 'aria-hidden': 'true', class: 'journal-genjutsu-defs' });
     const defs = element('defs');
     // Fragments leaving the viewport need no off-screen filter buffer.
     const filter = element('filter', { id: 'journal-genjutsu-fracture', filterUnits: 'userSpaceOnUse', x: 0, y: 0, width, height, 'color-interpolation-filters': 'sRGB' });
-    // Broad horizontal fragments must remain readable while sliding apart.
+    // Unequal independent pieces dislocate, then separate in several directions.
     let seed = 4721;
     const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
     const cells = [];
     let bandY = 0;
     [.12, .19, .15, .22, .17, .15].forEach((fraction, group) => {
       const bandHeight = height * fraction;
-      const rows = 2 + Math.floor(random() * 2);
+      const rows = 1 + Math.floor(random() * 2);
       const weights = Array.from({ length: rows }, () => .6 + random());
       const sum = weights.reduce((total, value) => total + value, 0);
       let y = bandY;
@@ -86,7 +86,8 @@
         const rowHeight = bandHeight * weight / sum;
         let x = 0;
         while (x < width) {
-          let span = width * (width < 700 ? .38 + random() * .42 : .18 + random() * .3);
+          const spanRatio = width < 700 ? .18 + random() * .28 : coarse ? .2 + random() * .3 : .11 + random() * .23;
+          let span = width * spanRatio;
           if (width - x - span < width * .035) span = width - x;
           cells.push({ x, y, width: Math.min(span, width - x), height: rowHeight, group });
           x += span;
@@ -101,12 +102,18 @@
     mapCanvas.width = Math.round(width * mapScale); mapCanvas.height = Math.round(height * mapScale);
     const brush = mapCanvas.getContext('2d');
     const offsets = cells.map(cell => {
-      const direction = cell.group % 2 ? 1 : -1;
+      const cx = (cell.x + cell.width * .5) / width - .5;
+      const cy = (cell.y + cell.height * .5) / height - .5;
+      const angle = Math.atan2(cy, cx) + (random() - .5) * 1.6;
+      const vx = Math.cos(angle), vy = Math.sin(angle);
+      const tx = vx > 0 ? (width - cell.x + width * .06) / (vx * width) : (cell.x + cell.width + width * .06) / (-vx * width);
+      const ty = vy > 0 ? (height - cell.y + height * .06) / (vy * height) : (cell.y + cell.height + height * .06) / (-vy * height);
+      const distance = Math.min(tx, ty);
+      const nudge = .025 + random() * .035;
       return { ...cell,
-        cutX: direction * width * (.045 + random() * .035),
-        exitX: direction > 0 ? width - cell.x + width * .06 : -cell.x - cell.width - width * .06,
-        driftY: (random() - .5) * height * .14,
-        delay: cell.group * .012 + random() * .1
+        cutX: vx * width * nudge, cutY: vy * height * nudge,
+        exitX: vx * width * distance, exitY: vy * height * distance,
+        delay: random() * .22
       };
     });
     const paintMap = (travel, magnitude) => {
@@ -140,7 +147,7 @@
     filter.append(etched); displacement.setAttribute('in', 'etched'); filter.append(displacement);
     filter.append(element('feComposite', { in: 'shifted', in2: 'map', operator: 'in' }));
     defs.append(filter); svg.append(defs); root.append(svg);
-    const magnitude = Math.max(...offsets.map(piece => Math.abs(piece.exitX)), height * .14) * 2.04;
+    const magnitude = Math.max(...offsets.flatMap(piece => [Math.abs(piece.exitX), Math.abs(piece.exitY)])) * 2.04;
     return { svg, offsets, crackAlpha, displacement, paintMap, magnitude };
   };
   const moveFragment = (piece, progress) => {
@@ -149,9 +156,11 @@
     const start = .34 + piece.delay;
     const slide = Math.max(0, Math.min(1, (progress - start) / (.96 - start)));
     const drift = Math.pow(slide, 1.65);
-    return { piece, dx: piece.cutX * cut + (piece.exitX - piece.cutX) * drift, dy: piece.driftY * drift };
+    return { piece, dx: piece.cutX * cut + (piece.exitX - piece.cutX) * drift,
+      dy: piece.cutY * cut + (piece.exitY - piece.cutY) * drift };
   };
   const animateSnapshot = transition => {
+    transition.updateCallbackDone?.catch(() => {});
     const pieces = buildFilter();
     const run = active = { ...pieces, transition };
     root.dataset.journalGenjutsu = 'breaking';
@@ -189,7 +198,7 @@
     timer = setTimeout(stop, 760);
   };
   const compatible = (target, hold = false) => {
-    // Six clipped bands use ordinary transforms, including on older WebKit.
+    // Clipped picture pieces use ordinary transforms, including on older WebKit.
     const overlay = document.createElement('div');
     overlay.className = 'journal-genjutsu-compat';
     overlay.dataset.hold = String(hold);
@@ -214,26 +223,25 @@
       contents.append(copy);
     }
     try {
-      const pieces = buildFilter();
+      const pieces = buildFilter(true);
       const etch = pieces.svg.querySelector('filter').cloneNode(true);
       etch.id = 'journal-genjutsu-etch';
+      etch.setAttribute('filterUnits', 'objectBoundingBox');
+      for (const [name, value] of Object.entries({ x: 0, y: 0, width: 1, height: 1 })) etch.setAttribute(name, value);
       etch.querySelectorAll('feImage, feComponentTransfer[in="cracks"], feMerge, feDisplacementMap, feComposite').forEach(node => node.remove());
       pieces.svg.querySelector('defs').append(etch);
-      const bands = [];
+      const fragments = [];
       const veinsImage = svgImage(cracks(innerWidth, innerHeight));
-      let top = 0;
-      [.12, .19, .15, .22, .17, .15].forEach((fraction, group) => {
-        const height = innerHeight * fraction;
+      pieces.offsets.forEach(piece => {
         const band = document.createElement('div'); band.className = 'journal-genjutsu-band';
-        band.style.cssText = `top:${top}px;height:${height + 1}px;`;
+        band.style.cssText = `left:${piece.x}px;top:${piece.y}px;width:${piece.width + .5}px;height:${piece.height + .5}px;`;
         const mirror = document.createElement('div'); mirror.className = 'journal-genjutsu-mirror';
-        mirror.style.cssText = `top:${-top}px;height:${innerHeight}px;`;
+        mirror.style.cssText = `left:${-piece.x}px;top:${-piece.y}px;width:${innerWidth}px;height:${innerHeight}px;`;
+        const picture = document.createElement('div'); picture.className = 'journal-genjutsu-pane';
         const veins = document.createElement('div'); veins.className = 'journal-genjutsu-veins';
-        veins.style.cssText = `top:${-top}px;height:${innerHeight}px;background-image:url("${veinsImage}");`;
-        mirror.append(contents.cloneNode(true)); band.append(mirror, veins); overlay.append(band);
-        const template = pieces.offsets.find(piece => piece.group === group);
-        bands.push({ band, piece: { ...template, exitX: (group % 2 ? 1 : -1) * innerWidth * 1.08 } });
-        top += height;
+        veins.style.cssText = `left:${-piece.x}px;top:${-piece.y}px;width:${innerWidth}px;height:${innerHeight}px;background-image:url("${veinsImage}");`;
+        mirror.append(contents.cloneNode(true)); picture.append(mirror); band.append(picture, veins); overlay.append(band);
+        fragments.push({ band, piece });
       });
       (target || document.body).append(overlay);
       let resolve;
@@ -247,7 +255,7 @@
       const draw = now => {
         if (active !== run) return;
         const progress = Math.max(0, Math.min(1, (now - start) / 1800));
-        for (const { band, piece } of bands) {
+        for (const { band, piece } of fragments) {
           const { dx, dy } = moveFragment(piece, progress);
           band.style.transform = `translate3d(${dx}px,${dy}px,0)`;
         }
@@ -301,9 +309,14 @@
       if (!document.startViewTransition) { compatible(target); return; }
       root.dataset.journalGenjutsu = 'intro';
       timer = setTimeout(() => {
-        const transition = document.startViewTransition(() => { root.dataset.journalGenjutsu = 'breaking'; });
-        try { animateSnapshot(transition); }
-        catch { transition.ready.catch(() => {}); transition.skipTransition(); fallback(target); }
+        let transition;
+        try {
+          transition = document.startViewTransition(() => { root.dataset.journalGenjutsu = 'breaking'; });
+          animateSnapshot(transition);
+        } catch {
+          transition?.ready.catch(() => {}); transition?.updateCallbackDone?.catch(() => {});
+          transition?.skipTransition(); fallback(target);
+        }
       }, 120);
     },
     stop
