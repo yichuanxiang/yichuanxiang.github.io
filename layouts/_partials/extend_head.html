@@ -44,7 +44,11 @@ try {
       Date.now() - arrival.at >= 0 && Date.now() - arrival.at <= 15000 &&
       navigation !== 'reload' && navigation !== 'back_forward' &&
       !matchMedia('(prefers-reduced-motion: reduce)').matches && !document.hidden) {
-    document.documentElement.dataset.journalGenjutsu = 'pending';
+    if (arrival.compatCompleted) window.journalGenjutsuHandled = true;
+    else {
+      document.documentElement.dataset.journalGenjutsuTone = arrival.tone === 'cel' ? 'cel' : 'ink';
+      document.documentElement.dataset.journalGenjutsu = 'pending';
+    }
   }
 } catch { /* Storage is optional. */ }
 window.addEventListener('pageswap', function (event) {

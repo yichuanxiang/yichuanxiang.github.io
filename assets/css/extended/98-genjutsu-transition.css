@@ -2,7 +2,7 @@ html[data-journal-genjutsu] body :is(.main, .header, .footer),
 html.journal-genjutsu-ready body > :is(.main, .header, .footer) { animation: none; }
 html[data-journal-genjutsu] :is(.main, .header, .footer, .music-player, .top-link) { view-transition-name: none !important; }
 html[data-journal-genjutsu="out"] body,
-html[data-journal-genjutsu="intro"] body { filter: grayscale(1) invert(1) contrast(1.8); }
+html[data-journal-genjutsu="intro"] body { filter: grayscale(1); }
 html[data-journal-genjutsu="breaking"]::view-transition-group(root) { animation: none; }
 html[data-journal-genjutsu="breaking"]::view-transition-image-pair(root) { isolation: normal; }
 html[data-journal-genjutsu="breaking"]::view-transition-old(root) {
@@ -12,9 +12,12 @@ html[data-journal-genjutsu="breaking"]::view-transition-old(root) {
 }
 html[data-journal-genjutsu="breaking"]::view-transition-new(root) { z-index: 1; animation: journal-illusion-reality 1900ms linear both; mix-blend-mode: normal; }
 html[data-journal-genjutsu="breaking"]::view-transition { pointer-events: none; }
-@keyframes journal-illusion-break { 0%, 94% { opacity: 1; } 100% { opacity: 0; } }
-@keyframes journal-illusion-reality { 0%, 58% { filter: brightness(0); } 82%, 100% { filter: brightness(1); } }
+@keyframes journal-illusion-break { from, to { opacity: 1; } }
+@keyframes journal-illusion-reality { 0%, 62% { filter: brightness(0); } 84% { filter: brightness(.25); } 100% { filter: brightness(1); } }
 .journal-genjutsu-defs { position: fixed; width: 0; height: 0; pointer-events: none; }
+.journal-genjutsu-compat { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 10001; background: #000; pointer-events: none; overflow: hidden; }
+.journal-genjutsu-mirror { position: absolute; inset: 0; overflow: hidden; background: var(--theme); filter: url(#journal-genjutsu-fracture); }
+.journal-genjutsu-mirror :is(.main, .header, .footer) { animation: none !important; }
 .journal-genjutsu-fallback { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 10000; pointer-events: none; animation: journal-glass-fallback 760ms ease-out both; }
 @keyframes journal-glass-fallback { 0% { opacity: 0; } 30% { opacity: .9; } 100% { opacity: 0; transform: scale(1.18); } }
 @media (prefers-reduced-motion: reduce) {

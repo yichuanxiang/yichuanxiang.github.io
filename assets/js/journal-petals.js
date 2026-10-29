@@ -472,8 +472,9 @@
     try { sessionStorage.setItem(arrivalKey, JSON.stringify({ ...selected, destination: destination.pathname + destination.search, at: Date.now() })); } catch { /* Navigation still works when storage is unavailable. */ }
     if (effect === 'genjutsu' && window.JournalGenjutsu) {
       event.preventDefault(); warmDestination(link);
-      window.JournalGenjutsu.intro();
-      pendingNavigation = { href: destination.href, timer: setTimeout(finishNavigation, 140) };
+      const preparation = window.JournalGenjutsu.intro();
+      const navigation = pendingNavigation = { href: destination.href, timer: setTimeout(finishNavigation, preparation?.then ? 4000 : 140) };
+      if (preparation?.then) preparation.then(() => { if (pendingNavigation === navigation) finishNavigation(); });
       return;
     }
     if (effect !== 'kamui' || typeof document.querySelector('.main')?.animate !== 'function') return;
