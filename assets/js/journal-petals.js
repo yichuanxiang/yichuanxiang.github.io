@@ -485,6 +485,9 @@
   });
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape') return;
+    pendingArrival = false;
+    ++arrivalGeneration;
+    cancelAnimationFrame(arrivalFrame); arrivalFrame = 0;
     cancelAnimationFrame(panelFrame); panelFrame = 0;
     if (pendingNavigation) {
       clearTimeout(pendingNavigation.timer);

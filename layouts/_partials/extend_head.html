@@ -56,6 +56,7 @@ window.addEventListener('pageswap', function (event) {
 // Keep the first-visit entrance separate from native page-to-page transitions.
 window.addEventListener('pagereveal', function (event) {
   if (event.viewTransition) {
+    event.viewTransition.ready.catch(function () {});
     if (window.JournalGenjutsu?.reveal(event)) return;
     if (document.documentElement.dataset.journalKamui) {
       event.viewTransition.ready.catch(function () {});
