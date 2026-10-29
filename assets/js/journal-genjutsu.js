@@ -194,6 +194,7 @@
     // Never duplicate the page per fragment or copy executable elements.
     const overlay = document.createElement('div');
     overlay.className = 'journal-genjutsu-compat';
+    overlay.dataset.hold = String(hold);
     overlay.setAttribute('aria-hidden', 'true'); overlay.inert = true;
     const mirror = document.createElement('div');
     mirror.className = 'journal-genjutsu-mirror';
@@ -206,13 +207,17 @@
       for (const node of [copy, ...copy.querySelectorAll('*')]) {
         for (const attr of [...node.attributes]) if (/^on/i.test(attr.name)) node.removeAttribute(attr.name);
         if (node.matches('input[type="password"]')) node.value = '';
-        if (node.matches('dialog')) { node.removeAttribute('open'); node.style.display = 'block'; }
+        if (node.matches('dialog')) node.style.display = 'block';
         // Avoid nested native snapshot names inside this single bitmap surface.
         node.style.viewTransitionName = 'none';
       }
+      if (child.matches('dialog[open]')) {
+        const box = child.getBoundingClientRect();
+        Object.assign(copy.style, { position: 'fixed', left: `${box.left}px`, top: `${box.top}px`, width: `${box.width}px`, height: `${box.height}px`, margin: '0' });
+      }
       contents.append(copy);
     }
-    mirror.append(contents); overlay.append(mirror); document.body.append(overlay);
+    mirror.append(contents); overlay.append(mirror); (target || document.body).append(overlay);
     try {
       const transition = { ready: Promise.resolve(), finished: new Promise(resolve => setTimeout(resolve, 1900)), skipTransition() {} };
       animateSnapshot(transition);

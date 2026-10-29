@@ -16,6 +16,8 @@ html[data-journal-genjutsu="breaking"]::view-transition { pointer-events: none; 
 @keyframes journal-illusion-reality { 0%, 62% { filter: brightness(0); } 84% { filter: brightness(.25); } 100% { filter: brightness(1); } }
 .journal-genjutsu-defs { position: fixed; width: 0; height: 0; pointer-events: none; }
 .journal-genjutsu-compat { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 10001; background: #000; pointer-events: none; overflow: hidden; }
+.journal-genjutsu-compat[data-hold="false"] { animation: journal-compat-reality 1900ms linear both; }
+@keyframes journal-compat-reality { 0%, 62% { background-color: #000; } 100% { background-color: transparent; } }
 .journal-genjutsu-mirror { position: absolute; inset: 0; overflow: hidden; background: var(--theme); filter: url(#journal-genjutsu-fracture); }
 .journal-genjutsu-mirror :is(.main, .header, .footer) { animation: none !important; }
 .journal-genjutsu-fallback { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 10000; pointer-events: none; animation: journal-glass-fallback 760ms ease-out both; }
