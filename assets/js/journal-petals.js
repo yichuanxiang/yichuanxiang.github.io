@@ -4,7 +4,7 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const arrivalKey = 'journal-petal-arrival';
   const historyKey = 'journal-transition-history';
-  const effects = ['sakura', 'kamui'];
+  const effects = ['sakura', 'kamui', 'genjutsu'];
   let effectHistory;
   try {
     const saved = JSON.parse(sessionStorage.getItem(historyKey));
@@ -13,7 +13,10 @@
   const chooseEffect = () => {
     let effect = effects[Math.floor(Math.random() * effects.length)];
     // Keep it random, while avoiding a long run of the same effect.
-    if (effectHistory?.effect === effect && effectHistory.count >= 2) effect = effects.find(value => value !== effect);
+    if (effectHistory?.effect === effect && effectHistory.count >= 2) {
+      const alternatives = effects.filter(value => value !== effect);
+      effect = alternatives[Math.floor(Math.random() * alternatives.length)];
+    }
     effectHistory = { effect, count: effectHistory?.effect === effect ? effectHistory.count + 1 : 1 };
     try { sessionStorage.setItem(historyKey, JSON.stringify(effectHistory)); } catch { /* Keep this page's history in memory. */ }
     return effect;
@@ -376,6 +379,7 @@
     if (reduce.matches || document.hidden) return;
     const effect = selected?.effect || chooseEffect();
     if (effect === 'kamui') kamui(panel, { ...selected, mode: selected?.mode || 'local' });
+    else if (effect === 'genjutsu' && window.JournalGenjutsu) window.JournalGenjutsu.local(panel);
     else rain(panel);
   };
   const readArrival = () => {
@@ -404,6 +408,7 @@
     cancelAnimationFrame(arrivalFrame);
     const generation = ++arrivalGeneration;
     if (!pendingArrival || document.hidden) return;
+    if (markedArrival?.effect === 'genjutsu' && window.journalGenjutsuHandled) { pendingArrival = false; return; }
     if (reduce.matches) { pendingArrival = false; delete document.documentElement.dataset.journalKamui; return; }
     // Start on the new page after its transition, rather than spending the burst on a snapshot.
     arrivalFrame = requestAnimationFrame(() => {
@@ -460,11 +465,17 @@
     if (!link || link.hasAttribute('download') || link.hasAttribute('data-desk-panel') || (link.target && link.target !== '_self')) return;
     const destination = new URL(link.href, location.href);
     if (!['http:', 'https:'].includes(destination.protocol) || destination.origin !== location.origin || destination.pathname === location.pathname) return;
-    if (pendingNavigation) { event.preventDefault(); return; }
+    if (pendingNavigation || window.JournalGenjutsu?.active) { event.preventDefault(); return; }
     const effect = chooseEffect();
     const selected = { effect, direction: Math.random() < .5 ? -1 : 1, focus: { x: .52, y: .46 } };
     // Select exactly once. The arrival reads this choice without another draw.
     try { sessionStorage.setItem(arrivalKey, JSON.stringify({ ...selected, destination: destination.pathname + destination.search, at: Date.now() })); } catch { /* Navigation still works when storage is unavailable. */ }
+    if (effect === 'genjutsu' && window.JournalGenjutsu) {
+      event.preventDefault(); warmDestination(link);
+      window.JournalGenjutsu.intro();
+      pendingNavigation = { href: destination.href, timer: setTimeout(finishNavigation, 140) };
+      return;
+    }
     if (effect !== 'kamui' || typeof document.querySelector('.main')?.animate !== 'function') return;
     event.preventDefault();
     warmDestination(link);

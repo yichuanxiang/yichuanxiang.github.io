@@ -1,4 +1,6 @@
 {{ partial "inner_page_art.html" . }}
+{{- $genjutsu := resources.Get "js/journal-genjutsu.js" | minify | fingerprint -}}
+<script src="{{ $genjutsu.RelPermalink }}" integrity="{{ $genjutsu.Data.Integrity }}"></script>
 <script>
 // Only this site's own desk windows use the compact reading layout.
 if (window.self !== window.top && window.frameElement?.hasAttribute('data-journal-frame')) {
@@ -37,6 +39,13 @@ try {
       if (document.documentElement.dataset.journalKamui === 'pending') delete document.documentElement.dataset.journalKamui;
     }, 5000);
   }
+  if (!document.documentElement.classList.contains('journal-embedded') &&
+      window.JournalGenjutsu && arrival?.effect === 'genjutsu' && arrival.destination === location.pathname + location.search &&
+      Date.now() - arrival.at >= 0 && Date.now() - arrival.at <= 15000 &&
+      navigation !== 'reload' && navigation !== 'back_forward' &&
+      !matchMedia('(prefers-reduced-motion: reduce)').matches && !document.hidden) {
+    document.documentElement.dataset.journalGenjutsu = 'pending';
+  }
 } catch { /* Storage is optional. */ }
 window.addEventListener('pageswap', function (event) {
   if (document.documentElement.dataset.journalKamui === 'out' && event.viewTransition) {
@@ -47,6 +56,7 @@ window.addEventListener('pageswap', function (event) {
 // Keep the first-visit entrance separate from native page-to-page transitions.
 window.addEventListener('pagereveal', function (event) {
   if (event.viewTransition) {
+    if (window.JournalGenjutsu?.reveal(event)) return;
     if (document.documentElement.dataset.journalKamui) {
       event.viewTransition.ready.catch(function () {});
       event.viewTransition.skipTransition();

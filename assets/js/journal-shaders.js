@@ -59,7 +59,7 @@
   };
   const reconcile = () => {
     if (!renderer) return;
-    const paused = disposed || pageHidden || document.hidden || !inView || reduce.matches || !!root.dataset.journalKamui;
+    const paused = disposed || pageHidden || document.hidden || !inView || reduce.matches || !!root.dataset.journalKamui || !!root.dataset.journalGenjutsu;
     paused ? renderer.pause() : renderer.resume();
     surface.dataset.shaderPaused = String(paused);
   };
@@ -85,7 +85,7 @@
     if (performance.now() < firstPaintAt) { setTimeout(start, firstPaintAt - performance.now()); return; }
     // Shader compilation can block the arrival animation. Let its first paint
     // and the portal finish before starting optional background lighting.
-    if (root.dataset.journalKamui) { setTimeout(start, 180); return; }
+    if (root.dataset.journalKamui || root.dataset.journalGenjutsu) { setTimeout(start, 180); return; }
     if (embedded) { fallback('embedded'); return; }
     if (reduce.matches) { fallback('reduced-motion'); return; }
     if (navigator.connection?.saveData) { fallback('save-data'); return; }
@@ -104,7 +104,7 @@
       if (engineURL.origin !== location.origin) throw new Error('Local shader bundle required');
       const { createShader } = await import(engineURL.href);
       if (token !== generation || disposed) return;
-      if (root.dataset.journalKamui) { setTimeout(start, 180); return; }
+      if (root.dataset.journalKamui || root.dataset.journalGenjutsu) { setTimeout(start, 180); return; }
       const instance = await createShader(canvas, preset(), {
         disableTelemetry: true, observeElement: false,
         onReady() {
