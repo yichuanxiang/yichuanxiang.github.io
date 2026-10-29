@@ -19,22 +19,36 @@
     document.dispatchEvent(new CustomEvent('journal:transition-motion'));
   };
   const cracks = (width, height) => {
-    const cx = width * .57, cy = height * .43;
-    let paths = '';
-    for (let i = 0; i < 9; i++) {
-      const angle = i * Math.PI * 2 / 9 + .17;
-      const reach = Math.hypot(width, height) * .8;
-      const points = [[cx, cy]];
-      for (let j = 1; j <= 5; j++) {
-        const distance = reach * j / 5;
-        const bend = Math.sin(i * 8 + j * 3) * 15;
-        points.push([cx + Math.cos(angle) * distance + bend, cy + Math.sin(angle) * distance - bend]);
+    // Fractures enter from different edges; there is no single impact centre.
+    let seed = 9347;
+    const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    const starts = [[-.01, .18], [.24, -.01], [1.01, .28], [.79, 1.01], [-.01, .83], [1.01, .79]];
+    const paths = [], hairlines = [];
+    starts.forEach(([sx, sy], index) => {
+      let x = sx * width, y = sy * height;
+      const targetX = width * (.35 + random() * .3), targetY = height * (.3 + random() * .35);
+      const angle = Math.atan2(targetY - y, targetX - x);
+      const length = Math.hypot(targetX - x, targetY - y) * (.8 + random() * .5);
+      const points = [[x, y]];
+      for (let j = 0; j < 7; j++) {
+        const heading = angle + (random() - .5) * .75;
+        x += Math.cos(heading) * length / 7; y += Math.sin(heading) * length / 7;
+        points.push([x, y]);
+        if (j === 2 || j === 4) {
+          let bx = x, by = y;
+          const fork = [[bx, by]], direction = angle + (index % 2 ? 1 : -1) * (.6 + random() * .5);
+          for (let k = 0; k < 3; k++) {
+            const h = direction + (random() - .5) * .7;
+            bx += Math.cos(h) * length * .07; by += Math.sin(h) * length * .07; fork.push([bx, by]);
+          }
+          paths.push(fork);
+        }
       }
-      paths += `<path d="M${points.map(point => point.join(',')).join('L')}"/>`;
-      const [x, y] = points[1];
-      paths += `<path d="M${x},${y}l${Math.cos(angle + .7) * reach * .17},${Math.sin(angle + .7) * reach * .17}"/>`;
-    }
-    return `<g fill="none" stroke="#08090c" stroke-width="2.8" stroke-linejoin="bevel">${paths}</g><g fill="none" stroke="#f8f9fb" stroke-width=".85">${paths}</g>`;
+      paths.push(points);
+      hairlines.push(points.slice(0, 4).map(([px, py], j) => [px + j * 2.3, py + j * 1.4]));
+    });
+    const lines = list => list.map(points => `<path d="M${points.map(point => point.join(',')).join('L')}"/>`).join('');
+    return `<g fill="none" stroke="#f6f6f5" stroke-width="1.05" stroke-linejoin="miter">${lines(paths)}</g><g fill="none" stroke="#d6d6d4" stroke-width=".45" opacity=".6">${lines(hairlines)}</g>`;
   };
   const buildFilter = () => {
     const width = innerWidth, height = innerHeight;
@@ -42,20 +56,42 @@
     const defs = element('defs');
     // Fragments leaving the viewport need no off-screen filter buffer.
     const filter = element('filter', { id: 'journal-genjutsu-fracture', filterUnits: 'userSpaceOnUse', x: 0, y: 0, width, height, 'color-interpolation-filters': 'sRGB' });
-    // A small coordinate map moves twelve panes of the real native page bitmap.
-    const xs = [0, .22, .49, .77, 1], ys = [0, .32, .7, 1];
-    const points = ys.map((y, row) => xs.map((x, col) => [width * x + (row && row < 3 && col && col < 4 ? Math.sin(row * 8 + col) * width * .025 : 0), height * y + (row && row < 3 && col && col < 4 ? Math.cos(row + col * 6) * height * .025 : 0)]));
-    const offsets = [];
+    // Unequal flat fragments, like the displaced cels in the reference.
+    let seed = 4721;
+    const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+    let cells = [{ x: 0, y: 0, width, height }];
+    const count = width < 700 ? 46 : 58;
+    while (cells.length < count) {
+      let largest = 0;
+      cells.forEach((cell, i) => { if (cell.width * cell.height > cells[largest].width * cells[largest].height) largest = i; });
+      const cell = cells.splice(largest, 1)[0];
+      const ratio = .28 + random() * .44;
+      if (cell.width / width > cell.height / height * (random() > .35 ? 1 : .5)) {
+        const cut = Math.round(cell.width * ratio);
+        cells.push({ ...cell, width: cut }, { ...cell, x: cell.x + cut, width: cell.width - cut });
+      } else {
+        const cut = Math.round(cell.height * ratio);
+        cells.push({ ...cell, height: cut }, { ...cell, y: cell.y + cut, height: cell.height - cut });
+      }
+    }
     const map = element('feImage', { x: 0, y: 0, width, height, preserveAspectRatio: 'none', result: 'map' });
     const mapCanvas = document.createElement('canvas');
-    mapCanvas.width = Math.min(320, width); mapCanvas.height = Math.round(mapCanvas.width * height / width);
+    const mapScale = Math.min(1, 360 / Math.max(width, height));
+    mapCanvas.width = Math.round(width * mapScale); mapCanvas.height = Math.round(height * mapScale);
     const brush = mapCanvas.getContext('2d');
-    for (let row = 0; row < 3; row++) for (let col = 0; col < 4; col++) {
-      const index = row * 4 + col;
-      const polygon = [points[row][col], points[row][col + 1], points[row + 1][col + 1], points[row + 1][col]];
-      const cx = (col + .5) / 4, cy = (row + .5) / 3;
-      offsets.push({ path: new Path2D(`M${polygon.map(point => point.join(',')).join('L')}Z`), x: (cx - .5) * width * 2.4, y: (cy - .5) * height * 2.3, sign: index % 2 ? 1 : -1, delay: (index % 4) * .018 });
-    }
+    const offsets = cells.map((cell, index) => {
+      const cx = (cell.x + cell.width / 2) / width, cy = (cell.y + cell.height / 2) / height;
+      const group = Math.min(3, Math.floor(cx * 4));
+      const horizontal = index % 4 !== 0;
+      const sign = (horizontal ? cx : cy) < .5 ? -1 : 1;
+      return { ...cell, path: new Path2D(`M${cell.x},${cell.y}h${cell.width}v${cell.height}h${-cell.width}Z`),
+        cutX: [1, -1, 1, -1][group] * width * (.032 + group * .009),
+        cutY: [1, -1, -1, 1][group] * height * .024,
+        x: horizontal ? sign * width * (1.1 + random() * .7) : (random() - .5) * width * .25,
+        y: horizontal ? (random() - .5) * height * .32 : sign * height * (1.1 + random() * .65),
+        delay: random() * .18, speed: .8 + random() * .35
+      };
+    });
     const paintMap = (travel, magnitude) => {
       brush.setTransform(mapCanvas.width / width, 0, 0, mapCanvas.height / height, 0, 0);
       brush.clearRect(0, 0, width, height);
@@ -69,13 +105,17 @@
     paintMap(offsets.map(piece => ({ piece, dx: 0, dy: 0 })), 1);
     filter.append(map);
     const displacement = element('feDisplacementMap', { in: 'SourceGraphic', in2: 'map', scale: 0, xChannelSelector: 'R', yChannelSelector: 'G', result: 'shifted' });
-    filter.append(displacement);
-    filter.append(element('feComposite', { in: 'shifted', in2: 'map', operator: 'in', result: 'panes' }));
+    const poster = element('feComponentTransfer', { in: 'SourceGraphic', result: 'poster' });
+    for (const channel of ['R', 'G', 'B']) poster.append(element(`feFunc${channel}`, { type: 'discrete', tableValues: '0 .12 .5 .76 1' }));
+    filter.append(poster);
     filter.append(element('feImage', { href: svgImage(cracks(width, height)), x: 0, y: 0, width, height, result: 'cracks' }));
     const transfer = element('feComponentTransfer', { in: 'cracks', result: 'visible-cracks' });
     const crackAlpha = element('feFuncA', { type: 'linear', slope: 0 }); transfer.append(crackAlpha); filter.append(transfer);
-    const result = element('feMerge'); result.append(element('feMergeNode', { in: 'panes' }), element('feMergeNode', { in: 'visible-cracks' }));
-    filter.append(result); defs.append(filter); svg.append(defs); root.append(svg);
+    const etched = element('feMerge', { result: 'etched' });
+    etched.append(element('feMergeNode', { in: 'poster' }), element('feMergeNode', { in: 'visible-cracks' }));
+    filter.append(etched); displacement.setAttribute('in', 'etched'); filter.append(displacement);
+    filter.append(element('feComposite', { in: 'shifted', in2: 'map', operator: 'in' }));
+    defs.append(filter); svg.append(defs); root.append(svg);
     return { svg, offsets, crackAlpha, displacement, paintMap };
   };
   const animateSnapshot = transition => {
@@ -90,12 +130,15 @@
       const start = performance.now();
       const draw = now => {
         if (active !== run) return;
-        const progress = Math.max(0, Math.min(1, (now - start) / 1250));
-        run.crackAlpha.setAttribute('slope', Math.min(1, Math.max(0, (progress - .1) / .16)) * (1 - Math.max(0, (progress - .55) / .45)));
+        const progress = Math.max(0, Math.min(1, (now - start) / 1800));
+        run.crackAlpha.setAttribute('slope', Math.min(1, Math.max(0, (progress - .13) / .12)));
         const travel = run.offsets.map(piece => {
-          const cut = Math.max(0, Math.min(1, (progress - .19 - piece.delay) / .18));
-          const burst = Math.pow(Math.max(0, (progress - .4 - piece.delay) / .53), 2.2);
-          return { piece, dx: piece.sign * cut * innerWidth * .025 + piece.x * burst, dy: -piece.sign * cut * innerHeight * .018 + piece.y * burst };
+          const cut = Math.max(0, Math.min(1, (progress - .23) / .15));
+          const hold = cut * cut * (3 - 2 * cut);
+          const scatter = Math.max(0, Math.min(1, (progress - .46 - piece.delay) / (.33 * piece.speed)));
+          const burst = Math.pow(scatter, 2.05);
+          return { piece, dx: piece.cutX * hold + piece.x * burst, dy: piece.cutY * hold + piece.y * burst };
+
         });
         const magnitude = Math.max(1, ...travel.flatMap(item => [Math.abs(item.dx), Math.abs(item.dy)])) * 2.04;
         run.displacement.setAttribute('scale', magnitude);
@@ -105,7 +148,7 @@
       frame = requestAnimationFrame(draw);
     }).catch(() => { if (active === run) stop(); });
     transition.finished.then(() => { if (active === run) stop(); }).catch(() => { if (active === run) stop(); });
-    timer = setTimeout(stop, 1800);
+    timer = setTimeout(stop, 2400);
     return true;
   };
   const fallback = target => {

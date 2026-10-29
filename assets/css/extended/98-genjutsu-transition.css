@@ -2,17 +2,18 @@ html[data-journal-genjutsu] body :is(.main, .header, .footer),
 html.journal-genjutsu-ready body > :is(.main, .header, .footer) { animation: none; }
 html[data-journal-genjutsu] :is(.main, .header, .footer, .music-player, .top-link) { view-transition-name: none !important; }
 html[data-journal-genjutsu="out"] body,
-html[data-journal-genjutsu="intro"] body { filter: grayscale(1) contrast(1.7); }
+html[data-journal-genjutsu="intro"] body { filter: grayscale(1) invert(1) contrast(1.8); }
 html[data-journal-genjutsu="breaking"]::view-transition-group(root) { animation: none; }
 html[data-journal-genjutsu="breaking"]::view-transition-image-pair(root) { isolation: normal; }
 html[data-journal-genjutsu="breaking"]::view-transition-old(root) {
   z-index: 2; mix-blend-mode: normal; overflow: visible;
   filter: url(#journal-genjutsu-fracture) grayscale(1);
-  animation: journal-illusion-break 1350ms linear both;
+  animation: journal-illusion-break 1900ms linear both;
 }
-html[data-journal-genjutsu="breaking"]::view-transition-new(root) { z-index: 1; animation: none; mix-blend-mode: normal; }
+html[data-journal-genjutsu="breaking"]::view-transition-new(root) { z-index: 1; animation: journal-illusion-reality 1900ms linear both; mix-blend-mode: normal; }
 html[data-journal-genjutsu="breaking"]::view-transition { pointer-events: none; }
-@keyframes journal-illusion-break { 0%, 62% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes journal-illusion-break { 0%, 94% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes journal-illusion-reality { 0%, 58% { filter: brightness(0); } 82%, 100% { filter: brightness(1); } }
 .journal-genjutsu-defs { position: fixed; width: 0; height: 0; pointer-events: none; }
 .journal-genjutsu-fallback { position: fixed; inset: 0; width: 100vw; height: 100dvh; z-index: 10000; pointer-events: none; animation: journal-glass-fallback 760ms ease-out both; }
 @keyframes journal-glass-fallback { 0% { opacity: 0; } 30% { opacity: .9; } 100% { opacity: 0; transform: scale(1.18); } }
