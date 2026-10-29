@@ -54,6 +54,7 @@ try {
 window.addEventListener('pageswap', function (event) {
   if (document.documentElement.dataset.journalKamui === 'out' && event.viewTransition) {
     event.viewTransition.ready.catch(function () {});
+    event.viewTransition.finished.catch(function () {});
     event.viewTransition.skipTransition();
   }
 });
@@ -61,6 +62,8 @@ window.addEventListener('pageswap', function (event) {
 window.addEventListener('pagereveal', function (event) {
   if (event.viewTransition) {
     event.viewTransition.ready.catch(function () {});
+    event.viewTransition.finished.catch(function () {});
+    event.viewTransition.updateCallbackDone?.catch(function () {});
     if (window.JournalGenjutsu?.reveal(event)) return;
     if (document.documentElement.dataset.journalKamui) {
       event.viewTransition.ready.catch(function () {});

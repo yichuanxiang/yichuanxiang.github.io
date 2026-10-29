@@ -71,14 +71,14 @@
     const defs = element('defs');
     // Fragments leaving the viewport need no off-screen filter buffer.
     const filter = element('filter', { id: 'journal-genjutsu-fracture', filterUnits: 'userSpaceOnUse', x: 0, y: 0, width, height, 'color-interpolation-filters': 'sRGB' });
-    // The reference opens short horizontal slits while the picture stays local.
+    // Broad horizontal fragments must remain readable while sliding apart.
     let seed = 4721;
     const random = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
     const cells = [];
     let bandY = 0;
     [.12, .19, .15, .22, .17, .15].forEach((fraction, group) => {
       const bandHeight = height * fraction;
-      const rows = 3 + Math.floor(random() * 3);
+      const rows = 2 + Math.floor(random() * 2);
       const weights = Array.from({ length: rows }, () => .6 + random());
       const sum = weights.reduce((total, value) => total + value, 0);
       let y = bandY;
@@ -86,7 +86,7 @@
         const rowHeight = bandHeight * weight / sum;
         let x = 0;
         while (x < width) {
-          let span = width * (width < 700 ? .16 + random() * .3 : .035 + random() * .17);
+          let span = width * (width < 700 ? .38 + random() * .42 : .18 + random() * .3);
           if (width - x - span < width * .035) span = width - x;
           cells.push({ x, y, width: Math.min(span, width - x), height: rowHeight, group });
           x += span;
@@ -101,24 +101,23 @@
     mapCanvas.width = Math.round(width * mapScale); mapCanvas.height = Math.round(height * mapScale);
     const brush = mapCanvas.getContext('2d');
     const offsets = cells.map(cell => {
+      const direction = cell.group % 2 ? 1 : -1;
       return { ...cell,
-        cutX: [.012, -.019, .007, -.015, .024, -.009][cell.group] * width,
-        driftX: random() < .45 ? 0 : (random() < .5 ? -1 : 1) * width * (.025 + random() * .085),
-        driftY: (random() - .5) * height * .035,
-        slit: random() < .28,
-        anchorX: random() < .5 ? 0 : 1, anchorY: random() < .5 ? 0 : 1,
-        delay: random() * .27, life: .16 + random() * .15
+        cutX: direction * width * (.045 + random() * .035),
+        exitX: direction > 0 ? width - cell.x + width * .06 : -cell.x - cell.width - width * .06,
+        driftY: (random() - .5) * height * .14,
+        delay: cell.group * .012 + random() * .1
       };
     });
     const paintMap = (travel, magnitude) => {
       const sx = mapCanvas.width / width, sy = mapCanvas.height / height;
       brush.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
-      travel.forEach(({ piece, dx, dy, remainingX = 1, remainingY = 1 }) => {
+      travel.forEach(({ piece, dx, dy }) => {
         dx = Math.round(dx * sx) / sx; dy = Math.round(dy * sy) / sy;
-        const left = Math.round((piece.x + dx + piece.width * (1 - remainingX) * piece.anchorX) * sx);
-        const top = Math.round((piece.y + dy + piece.height * (1 - remainingY) * piece.anchorY) * sy);
-        const right = Math.round((piece.x + dx + piece.width * (1 - remainingX) * piece.anchorX + piece.width * remainingX) * sx);
-        const bottom = Math.round((piece.y + dy + piece.height * (1 - remainingY) * piece.anchorY + piece.height * remainingY) * sy);
+        const left = Math.round((piece.x + dx) * sx);
+        const top = Math.round((piece.y + dy) * sy);
+        const right = Math.round((piece.x + dx + piece.width) * sx);
+        const bottom = Math.round((piece.y + dy + piece.height) * sy);
         brush.fillStyle = `rgb(${(0.5 - dx / magnitude) * 100}% ${(0.5 - dy / magnitude) * 100}% 0%)`;
         brush.fillRect(left, top, right - left, bottom - top);
       });
@@ -141,8 +140,16 @@
     filter.append(etched); displacement.setAttribute('in', 'etched'); filter.append(displacement);
     filter.append(element('feComposite', { in: 'shifted', in2: 'map', operator: 'in' }));
     defs.append(filter); svg.append(defs); root.append(svg);
-    const magnitude = Math.max(...offsets.map(piece => Math.abs(piece.cutX) + Math.abs(piece.driftX)), height * .04) * 2.04;
+    const magnitude = Math.max(...offsets.map(piece => Math.abs(piece.exitX)), height * .14) * 2.04;
     return { svg, offsets, crackAlpha, displacement, paintMap, magnitude };
+  };
+  const moveFragment = (piece, progress) => {
+    const separation = Math.max(0, Math.min(1, (progress - .18 - piece.delay * .3) / .19));
+    const cut = 1 - Math.pow(1 - separation, 3);
+    const start = .34 + piece.delay;
+    const slide = Math.max(0, Math.min(1, (progress - start) / (.96 - start)));
+    const drift = Math.pow(slide, 1.65);
+    return { piece, dx: piece.cutX * cut + (piece.exitX - piece.cutX) * drift, dy: piece.driftY * drift };
   };
   const animateSnapshot = transition => {
     const pieces = buildFilter();
@@ -158,17 +165,9 @@
         if (active !== run) return;
         const progress = Math.max(0, Math.min(1, (now - start) / 1800));
         run.crackAlpha.setAttribute('slope', Math.min(1, Math.max(0, (progress - .06) / .12)));
-        const travel = run.offsets.map(piece => {
-          const cut = Math.max(0, progress - piece.group * .009);
-          const step = cut < .27 ? 0 : cut < .34 ? .35 : cut < .41 ? .7 : 1;
-          const scatter = Math.max(0, Math.min(1, (progress - .44 - piece.delay) / piece.life));
-          const drift = scatter * scatter;
-          const collapse = Math.max(0, (scatter - .65) / .35);
-          return { piece, dx: piece.cutX * step + piece.driftX * drift, dy: piece.driftY * drift,
-            remainingX: 1 - (piece.slit ? scatter * scatter : collapse),
-            remainingY: 1 - (piece.slit ? Math.pow(scatter, .7) : collapse) };
-        });
-        const magnitude = progress < .27 ? 0 : run.magnitude;
+        // Keep size and opacity intact: fragments exit through the screen edge.
+        const travel = run.offsets.map(piece => moveFragment(piece, progress));
+        const magnitude = progress < .18 ? 0 : run.magnitude;
         run.displacement.setAttribute('scale', magnitude);
         run.paintMap(travel, Math.max(1, magnitude));
         if (progress < 1) frame = requestAnimationFrame(draw);
@@ -190,14 +189,11 @@
     timer = setTimeout(stop, 760);
   };
   const compatible = (target, hold = false) => {
-    // One inert viewport copy lets older WebKit fracture the page itself.
-    // Never duplicate the page per fragment or copy executable elements.
+    // Six clipped bands use ordinary transforms, including on older WebKit.
     const overlay = document.createElement('div');
     overlay.className = 'journal-genjutsu-compat';
     overlay.dataset.hold = String(hold);
     overlay.setAttribute('aria-hidden', 'true'); overlay.inert = true;
-    const mirror = document.createElement('div');
-    mirror.className = 'journal-genjutsu-mirror';
     const contents = document.createElement('div');
     contents.style.cssText = `position:absolute;left:0;top:${-scrollY}px;width:${innerWidth}px;`;
     for (const child of [...document.body.children]) {
@@ -217,14 +213,50 @@
       }
       contents.append(copy);
     }
-    mirror.append(contents); overlay.append(mirror); (target || document.body).append(overlay);
     try {
-      const transition = { ready: Promise.resolve(), finished: new Promise(resolve => setTimeout(resolve, 1900)), skipTransition() {} };
-      animateSnapshot(transition);
-      active.overlay = overlay; active.hold = hold;
+      const pieces = buildFilter();
+      const etch = pieces.svg.querySelector('filter').cloneNode(true);
+      etch.id = 'journal-genjutsu-etch';
+      etch.querySelectorAll('feImage, feComponentTransfer[in="cracks"], feMerge, feDisplacementMap, feComposite').forEach(node => node.remove());
+      pieces.svg.querySelector('defs').append(etch);
+      const bands = [];
+      const veinsImage = svgImage(cracks(innerWidth, innerHeight));
+      let top = 0;
+      [.12, .19, .15, .22, .17, .15].forEach((fraction, group) => {
+        const height = innerHeight * fraction;
+        const band = document.createElement('div'); band.className = 'journal-genjutsu-band';
+        band.style.cssText = `top:${top}px;height:${height + 1}px;`;
+        const mirror = document.createElement('div'); mirror.className = 'journal-genjutsu-mirror';
+        mirror.style.cssText = `top:${-top}px;height:${innerHeight}px;`;
+        const veins = document.createElement('div'); veins.className = 'journal-genjutsu-veins';
+        veins.style.cssText = `top:${-top}px;height:${innerHeight}px;background-image:url("${veinsImage}");`;
+        mirror.append(contents.cloneNode(true)); band.append(mirror, veins); overlay.append(band);
+        const template = pieces.offsets.find(piece => piece.group === group);
+        bands.push({ band, piece: { ...template, exitX: (group % 2 ? 1 : -1) * innerWidth * 1.08 } });
+        top += height;
+      });
+      (target || document.body).append(overlay);
+      let resolve;
+      const finished = new Promise(done => { resolve = done; });
+      const run = active = { svg: pieces.svg, overlay, hold };
+      root.dataset.journalGenjutsu = 'breaking'; root.classList.add('journal-genjutsu-ready');
+      window.journalGenjutsuHandled = true;
+      document.dispatchEvent(new CustomEvent('journal:transition-motion'));
       if (target) { panel = target; panel.addEventListener('close', stop, { once: true }); }
-      if (hold) { clearTimeout(timer); timer = setTimeout(stop, 10000); }
-      return transition.finished;
+      const start = performance.now();
+      const draw = now => {
+        if (active !== run) return;
+        const progress = Math.max(0, Math.min(1, (now - start) / 1800));
+        for (const { band, piece } of bands) {
+          const { dx, dy } = moveFragment(piece, progress);
+          band.style.transform = `translate3d(${dx}px,${dy}px,0)`;
+        }
+        if (progress < 1) frame = requestAnimationFrame(draw);
+        else { resolve(); if (!hold) stop(); }
+      };
+      frame = requestAnimationFrame(draw);
+      timer = setTimeout(stop, hold ? 10000 : 2400);
+      return finished;
     } catch {
       overlay.remove(); fallback(target); return Promise.resolve();
     }
