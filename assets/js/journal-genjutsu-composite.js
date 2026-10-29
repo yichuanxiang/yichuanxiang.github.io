@@ -199,6 +199,7 @@
         } catch { /* The bounded preparation path handles inaccessible destinations. */ }
       };
       preview.addEventListener('load', ready);
+      preview.addEventListener('journal:preview-ready', ready);
       run.controller = new AbortController();
       fetch(destination.href, { signal: run.controller.signal, credentials: 'same-origin' }).then(response => {
         if (!response.ok) throw new Error('Destination unavailable');
@@ -231,7 +232,7 @@
         const bootstrap = page.createElement('script');
         const address = JSON.stringify(destination.href).replace(/</g, '\\u003c');
         const theme = JSON.stringify(root.dataset.theme || '').replace(/</g, '\\u003c');
-        bootstrap.textContent = `window.journalTransitionPreview=true;window.journalPreviewDestination=${address};document.documentElement.classList.add('journal-transition-preview');document.documentElement.inert=true;document.documentElement.dataset.theme=${theme};document.addEventListener('DOMContentLoaded',function(){var p=document.querySelector('[data-music-player]');if(p)p.hidden=false;});`;
+        bootstrap.textContent = `window.journalTransitionPreview=true;window.journalPreviewDestination=${address};document.documentElement.classList.add('journal-transition-preview');document.documentElement.inert=true;document.documentElement.dataset.theme=${theme};document.addEventListener('DOMContentLoaded',function(){var p=document.querySelector('[data-music-player]');if(p)p.hidden=false;window.frameElement?.dispatchEvent(new Event('journal:preview-ready'));});`;
         page.head.prepend(base, bootstrap);
         preview.srcdoc = '<!doctype html>' + page.documentElement.outerHTML;
       }).catch(error => {
