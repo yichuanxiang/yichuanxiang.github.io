@@ -2,8 +2,7 @@
 {{- $yagakimi := (resources.GetMatch "characters/*/yagakimi-ymvkdk.*").Fit "800x600 webp q85" -}}
 {{- $saber := (resources.GetMatch "characters/*/saber-1q3k63.*").Fit "1000x700 webp q85" -}}
 <header class="journal-desk-heading" id="explore-desk">
-  <div><span class="cappu-eyebrow">On my desk</span><h2>在这里，坐一会儿</h2></div>
-  <p>点开一处小角落，看看里面有什么。</p>
+  <div><h2>逛逛小站</h2></div>
 </header>
 <nav class="station-shortcuts journal-desk" aria-label="探索小站">
   <a class="desk-portal desk-portal--notes" data-desk-panel="翻翻手记" href="{{ "posts/" | relURL }}">
@@ -41,8 +40,7 @@
       <img id="journal-scene-cover" src="{{ "images/banner-collage.jpg" | relURL }}" alt="《上伊那牡丹》的角色们与温泉旅店的拼贴插画" width="1600" height="450" loading="lazy">
       <div class="journal-scene__veil" aria-hidden="true"></div>
       <figcaption class="journal-scene__caption">
-        <span>Between the pages</span>
-        <h2>翻到喜欢的那一页</h2>
+        <h2>喜欢的作品</h2>
         <a data-desk-panel="兴趣角落" href="{{ "interests/" | relURL }}">打开兴趣角落 <span aria-hidden="true">↗</span></a>
       </figcaption>
     </figure>

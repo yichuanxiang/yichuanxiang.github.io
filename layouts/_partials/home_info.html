@@ -6,9 +6,8 @@
       <figcaption>把喜欢留在这里</figcaption>
     </figure>
     <div class="cappu-profile__body">
-      <span class="cappu-eyebrow">欢迎来到我的小世界</span>
       <h1 id="cappu-home-title">{{ .Site.Params.homeInfoParams.Title | markdownify }}</h1>
-      <p>生活、作品和折腾，都记在这里。<br>慢慢写成自己的世界。</p>
+      <p>记录生活、学习和折腾过的项目。</p>
       <div class="cappu-profile__actions">
         <a class="cappu-action cappu-action--primary" data-desk-panel="翻翻手记" href="{{ "posts/" | relURL }}">阅读手记</a>
         <a class="cappu-action" data-desk-panel="认识这里" href="{{ "about/" | relURL }}">认识这里 <span aria-hidden="true">→</span></a>
@@ -61,7 +60,6 @@
 
 <header class="cappu-stream-heading">
   <div>
-    <span class="cappu-eyebrow">Recent notes</span>
     <h2>最近手记</h2>
   </div>
   <a href="{{ "archives/" | relURL }}">查看全部归档 <span aria-hidden="true">→</span></a>

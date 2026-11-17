@@ -2,7 +2,6 @@
 {{ $corner := .Params.corner }}
 <section class="station-page explore-page" data-corner="{{ $corner }}">
   <header class="station-page-header">
-    <span class="cappu-eyebrow"><span class="inner-eyebrow-en" aria-hidden="true">Small corners · </span>小站角落</span>
     <h1>{{ .Title }}</h1><p>{{ .Description }}</p>
   </header>
   <nav class="station-page-nav" aria-label="逛逛小站">
@@ -20,9 +19,9 @@
     <span data-corner-count role="status">5 部作品</span>
   </div>
   <div class="interest-shelf">
-    {{ range $i, $work := hugo.Data.interests }}
+    {{ range hugo.Data.interests }}
     <details class="interest-entry" data-corner-item="{{ .kind }}">
-      <summary><span class="interest-number" aria-hidden="true">{{ printf "%02d" (add $i 1) }}</span><span><small>{{ .type }}</small><strong>{{ .title }}</strong><em>{{ .people }}</em></span><span class="interest-toggle" aria-hidden="true">+</span></summary>
+      <summary><span><small>{{ .type }}</small><strong>{{ .title }}</strong><em>{{ .people }}</em></span><span class="interest-toggle" aria-hidden="true">+</span></summary>
       <div class="interest-detail"><p>{{ .detail }}</p><a href="{{ .url }}" target="_blank" rel="noopener noreferrer">去作品官网看看 ↗</a></div>
     </details>
     {{ end }}
@@ -40,12 +39,11 @@
     <article data-corner-item="update"><time datetime="{{ .date }}">{{ .date }}</time><span class="update-type">小站更新</span><h2>{{ .title }}</h2><p>{{ .text }}</p><a href="{{ .path | relURL }}">{{ .action }} →</a></article>
     {{ end }}
     {{ range (where site.RegularPages "Section" "posts").ByDate.Reverse }}
-    <article data-corner-item="post"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time><span class="update-type">新手记</span><h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2><p>{{ .Description | default (.Summary | plainify | truncate 100) }}</p><a href="{{ .RelPermalink }}">打开这篇手记 →</a></article>
+    <article data-corner-item="post"><time datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time><span class="update-type">新手记</span><h2><a href="{{ .RelPermalink }}">{{ .Title }}</a></h2><p>{{ .Description | default (.Summary | plainify | truncate 100) }}</p></article>
     {{ end }}
   </div>
   {{ else if eq $corner "guestbook" }}
   <div class="guestbook-welcome">
-    <p class="guestbook-greeting">见字如面。</p>
     <p>一句问候、一个想法，或者最近喜欢的作品，都可以留在这里。</p>
     <a class="corner-button corner-button--primary" href="https://github.com/yichuanxiang/yichuanxiang.github.io/issues/new?template=guestbook.yml" target="_blank" rel="noopener noreferrer">用 GitHub 留言 ↗</a>
     <p class="corner-hint">需要登录 GitHub。留言公开可见，提交后可以在同一条留言里继续回复。</p>
@@ -63,12 +61,12 @@
       <label class="focus-custom">自定 <input type="number" min="1" max="180" value="25" id="focus-minutes" aria-label="自定专注分钟数"> 分钟</label>
       <button type="button" data-focus-custom>应用</button>
     </div>
-    <div class="focus-clock" role="timer" aria-label="剩余专注时间"><span data-focus-clock>25:00</span><span class="focus-clock-caption">留一点时间给自己</span></div>
+    <div class="focus-clock" role="timer" aria-label="剩余专注时间"><span data-focus-clock>25:00</span></div>
     <progress data-focus-progress max="1" value="0" aria-label="本段专注进度"></progress>
     <div class="focus-actions"><button type="button" class="corner-button corner-button--primary" data-focus-start>开始专注</button><button type="button" class="corner-button" data-focus-reset>重新计时</button></div>
     <p data-focus-status role="status" class="corner-hint">准备好了，就开始吧。</p>
     <div class="focus-sound">
-      <h2>桌边的声音</h2><p class="corner-hint">点一下才会播放，离开页面就会停止。</p>
+      <h2>环境声</h2><p class="corner-hint">点一下才会播放，离开页面就会停止。</p>
       <div class="explore-toolbar" role="group" aria-label="环境声">
         <button type="button" data-sound="off" aria-pressed="true">安静</button>
         <button type="button" data-sound="rain" aria-pressed="false">雨声</button>

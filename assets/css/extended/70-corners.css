@@ -17,7 +17,6 @@ body .header .menu a { line-height: 2rem; }
 .interest-entry { border-bottom: 1px solid var(--line-soft); }
 .interest-entry summary { display: flex; gap: 1.4rem; align-items: center; padding: 1.6rem .4rem; cursor: pointer; list-style: none; }
 .interest-entry summary::-webkit-details-marker { display: none; }
-.interest-number { color: var(--wine); font: 1.1rem var(--font-mono); opacity: .7; }
 .interest-entry small { display: block; color: var(--muted); font-size: .7rem; }
 .interest-entry strong { display: block; margin: .55rem 0; font: 600 1.35rem/1.6 var(--font-display); }
 .interest-entry em { color: var(--ink-soft); font-size: .8rem; font-style: normal; }
@@ -34,7 +33,6 @@ body .header .menu a { line-height: 2rem; }
 .update-timeline h2 { margin: .7rem 0; font: 600 1.25rem/1.6 var(--font-display); }
 .update-timeline p { color: var(--ink-soft); font-size: .86rem; line-height: 1.9; }
 .guestbook-welcome { padding: 2.5rem 0; border-bottom: 1px solid var(--line-soft); }
-.guestbook-greeting { color: var(--wine); font: 1.8rem var(--font-display); }
 .guestbook-welcome > p { margin-bottom: 1rem; line-height: 1.9; }
 .guestbook-welcome .corner-button { margin-block: .5rem; }
 .corner-hint { color: var(--muted); font-size: .76rem; line-height: 1.8; }
@@ -49,7 +47,6 @@ body .header .menu a { line-height: 2rem; }
 .focus-custom input { width: 4rem; padding: .6rem .4rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--paper-raised); color: var(--ink); text-align: center; font: inherit; }
 .focus-clock { margin: 2rem 0 1.5rem; }
 .focus-clock > [data-focus-clock] { display: block; font: clamp(3.8rem, 13vw, 6rem)/1.1 var(--font-display); font-variant-numeric: tabular-nums; color: var(--wine); }
-.focus-clock-caption { display: block; margin-top: 1rem; font-size: .8rem; letter-spacing: .15em; color: var(--muted); }
 .focus-desk progress { display: block; width: 72%; height: 4px; margin: 1.7rem auto; border: 0; border-radius: 4px; overflow: hidden; background: var(--line); accent-color: var(--wine); }
 .focus-desk progress::-webkit-progress-bar { background: var(--line); }
 .focus-desk progress::-webkit-progress-value { background: var(--wine); }

@@ -1,6 +1,6 @@
 ---
 title: "兴趣角落"
-description: "把喜欢的作品放在这里，像翻一张小小的书桌。"
+description: "喜欢的动画、漫画和视觉小说。"
 layout: "explore"
 corner: "interests"
 ---
